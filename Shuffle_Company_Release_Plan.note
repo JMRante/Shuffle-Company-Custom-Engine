@@ -1,0 +1,127 @@
+######################################
+# +                                + #
+# | Shuffle Company - Release Plan | #
+# +                                + #
+######################################
+
+Pre-Release
+-------
+* Get editor renderer working
+* Get editor behavior working
+* Get game behavior working
+
+v 0.1.0   The Basic Release
+-------
+* Menu/Settings/Level Select
+* Player
+* Walls
+* Wood Crates
+* Slots
+* Sokoban Mode
+* Ladders
+
+v 0.2.0   The Essentials Release
+-------
+* Steel Crates
+* Boulders
+* Button Cubes
+* Hold Buttons
+* Switch Buttons
+* Permanent Buttons
+* Coin Mode
+* Teleporters
+* Collapsing Cubes
+* Conveyors
+* Button Types
+* Keys
+* Key Cubes
+
+v 0.3.0   The Liquid Release
+-------
+* Water
+* Lava
+* Slime
+* Pumps
+* Drains
+* Flow Fans
+* Ice Floors
+* Ice Corners
+* Ice Cubes
+* Gate Mode
+
+v 0.4.0   The Electronics Release
+-------
+* Circuit Cubes
+* Circuit Switches
+* Weak Lasers
+* Strong Lasers
+* Laser Buttons
+* Mirrors
+* Prisms
+* Moving Cubes
+* Goal Mode
+
+v 0.5.0   The Enemy Release
+-------
+* Follow Robots
+* Path Robots
+* Turn Robots
+* Hunt Robots
+* Pressure Robots
+* Heavy Robots
+* Mirror Robots
+* Shooter Robots
+* Invincibility Cube
+* Pac Mode
+
+v 0.6.0   The Friend Release
+-------
+* Two player characters
+* Character creator
+* Local multiplayer
+* Meet Up Mode
+
+v 0.7.0   The Toy Release
+-------
+* Trampolines
+* Rotators
+* Sync Crates
+* Sync Boulders
+* Inflatable Balls
+* Push Lasers
+* Cage Traps
+* Electric Floors
+* Robot generator
+* Reversing Conveyors
+
+v 0.8.0   The Sharing Release
+-------
+* Ability to package levels in nested groups
+* Applying unlock requirements to said groups
+* Able to upload levels or level packs to server
+* Easy download and install into game
+* Signs and static NPCs
+
+v 0.9.0   The Asethetic Release
+-------
+* Add a plethora of new tilesets and decorative items
+* Add alternate looks to many items already added
+* Add more complicated control of lighting
+
+v 1.0.0   The Big Release
+-------
+* Pushables
+* Stone Cubes
+* TNT
+* Wood Barrels
+* Steel Barrels
+* Flames
+* Fire Clothing
+* Spike Shoes
+* Scuba Gear
+* Timed Stages
+* Timer Buttons
+* Transporter Cubes
+* Low Friction Crates
+* Slopes
+* Stairs
