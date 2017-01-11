@@ -13,4 +13,9 @@ development becomes fast and easy and the community has a easier time contributi
 
 The dream is to keep the genre and community around these types of games alive and fresh.
 
---
+-Implementation Philosophy-
+
+The engine needs to be as small and efficient as possible. Keep things clean. Gameplay logic and engine logic need to be seperated; beyond general
+purpose built-in gameplay functionality all gameplay will be scripted externally.
+
+The more that things can be dynamically defined via data, the better. Hardcoding must be avoided at all costs.

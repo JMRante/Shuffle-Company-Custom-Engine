@@ -1,0 +1,18 @@
+Shuffle Company Performance Ideas
+
+Textures in Memory
+------------------
+Simple Tile, 256x256, high information, diffuse ~= 700kB
+Auto Tile, 13 128x128 sub-tiles, high information, diffuse ~= 8mB
+
+Reasonable max:
+30 Simple Tiles 21mB
+10 Auto Tiles 80mB
+
+Plus 4 Additional Pixel Shader Maps:
+30 Simple Tiles x 4 = 84mB
+10 Auto Tiles x 4 = 320mB
+
+~0.5gB of high-res textures alone in worse case scenario.
+
+When x4 original Wonderland tile texture size of 64x64.
