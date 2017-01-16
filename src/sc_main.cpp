@@ -10,15 +10,23 @@
 
 */
 
+//Outside Headers
 #include <iostream>
+#include <cmath>
 
-#include <SDL2\SDL.h>
+#include <SDL.h>
+#include <SDL_image.h>
 
-#include <GL\glew.h>
-#include <SDL2\SDL_opengl.h>
-#include <GL\glu.h>
+#include <GL/glew.h>
+#include <SDL_opengl.h>
+#include <GL/glu.h>
+
+//Shuffle Company Headers
+#include "sc_shader.h"
 
 #define MS_PER_UPDATE 15
+
+#define PI 3.14159265
 
 //Structs
 struct vec3
@@ -30,29 +38,15 @@ struct vec3
 
 //Meshes
 GLfloat vertices[] = {
-	-0.5f, -0.5f, 0.0f,
-	 0.5f, -0.5f, 0.0f,
-	 0.0f,  0.5f, 0.0f
+	-0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,
+	 0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,
+	 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f
 };
 
 GLuint VAO;
 
 //Shaders
-const GLchar* vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 position;\n"
-    "void main()\n"
-    "{\n"
-    "gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
-    "}\0";
-
-const GLchar* fragmentShaderSource = "#version 330 core\n"
-    "out vec4 color;\n"
-    "void main()\n"
-    "{\n"
-    "color = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n\0";
-
-GLuint shaderProgram;
+Shader testShader;
 
 //Function Foward Declarations
 bool initiate();
@@ -62,8 +56,8 @@ void closeout();
 void render();
 
 //Global Variable Declarations
-SDL_Window *window = nullptr;
-SDL_GLContext glContext = nullptr;
+SDL_Window *window = NULL;
+SDL_GLContext glContext = NULL;
 
 bool initiate()
 {
@@ -77,7 +71,7 @@ bool initiate()
 	//Initiate Window
 	window = SDL_CreateWindow("Shuffle Company", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_OPENGL);
 
-	if (window == nullptr)
+	if (window == NULL)
 	{
 		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
 		return false;
@@ -91,7 +85,7 @@ bool initiate()
 	//Initiate SDL OpenGL context
 	glContext = SDL_GL_CreateContext(window);
 
-	if (glContext == nullptr)
+	if (glContext == NULL)
 	{
 		std::cout << "SDL_GL_CreateContext Error: " << SDL_GetError() << std::endl;
 		return false;
@@ -112,17 +106,16 @@ bool initiate()
 
 void closeout()
 {
+	testShader.remove();
+
 	SDL_DestroyWindow(window);
-	window = nullptr;
+	window = NULL;
 
 	SDL_Quit();	
 }
 
 bool loadDataToGPU()
 {
-	GLint success;
-	GLchar infoLog[512];
-
 	//Load mesh
 	//Generate Vertex Buffer Object
 	GLuint VBO;
@@ -135,68 +128,32 @@ bool loadDataToGPU()
 	glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+		//Position Attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
 		glEnableVertexAttribArray(0);
+
+		//Color Attribute
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
 	glBindVertexArray(0);
 
-	//Load Shader
-	//Pass-through, Screen Space Vertex
-	GLuint vertexShader;
+	return testShader.build("Shaders/sc_shader_testVertex.glsl", "Shaders/sc_shader_testFragment.glsl");
+}
 
-	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
+void update()
+{
+	GLfloat currentTimeMS = (float)SDL_GetTicks();
+	GLfloat greenValue = (sin((currentTimeMS * 2.0 * PI) / 1000.0) / 2.0) + 0.5;
+	GLint vertexColorLocation = glGetUniformLocation(testShader.programID, "ourColor");
 
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "Vertex Shader Compile Error: " << infoLog << std::endl;
-		return false;
-	}
-
-	//Basic Fragment
-	GLuint fragmentShader;
-
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "Fragment Shader Compile Error: " << infoLog << std::endl;
-		return false;
-	}
-
-	//Link shaders into program
-	shaderProgram = glCreateProgram();
-
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-
-	if (!success)
-	{
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		std::cout << "Shader Program Linking Error: " << infoLog << std::endl;
-		return false;		
-	}
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	return true;
+	testShader.use();
+	glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 }
 
 void render()
 {
-	glUseProgram(shaderProgram);
+	testShader.use();
 	glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 	glBindVertexArray(0);
@@ -234,6 +191,7 @@ int main(int argc, char **argv)
 			//Update
 			while (lagTimeMS >= MS_PER_UPDATE)
 			{
+				//update();
 				lagTimeMS -= MS_PER_UPDATE;
 			}
 

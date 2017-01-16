@@ -1,7 +1,7 @@
 COMPILER = g++
 
-SDL_LIB = -LX:\Base\Dev\MinGWDevLib\i686-w64-mingw32\lib -lSDL2main -lSDL2
-SDL_INCLUDE = -IX:\Base\Dev\MinGWDevLib\i686-w64-mingw32\include
+SDL_LIB = -LX:\Base\Dev\MinGWDevLib\i686-w64-mingw32\lib -lSDL2main -lSDL2 -lSDL2_image
+SDL_INCLUDE = -IX:\Base\Dev\MinGWDevLib\i686-w64-mingw32\include\SDL2
 
 FREEGLUT_LIB = -LX:\Base\Dev\MinGWDevLib\freeglut\lib -lopengl32 -lglu32
 FREEGLUT_INCLUDE = -IX:\Base\Dev\MinGWDevLib\freeglut\include
@@ -15,11 +15,17 @@ EXE = ShuffleCompany.exe
 
 all: $(EXE)
 
-$(EXE): sc_main.o
-		$(COMPILER) $< $(LD_FLAGS) -o $@
+$(EXE): sc_main.o sc_utility.o sc_shader.o
+		$(COMPILER) $^ $(LD_FLAGS) -o $@
 
 sc_main.o: sc_main.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@
+
+sc_utility.o: sc_utility.cpp
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@
+
+sc_shader.o: sc_shader.cpp
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@	
 
 clean:
 		del *.o && del $(EXE)
