@@ -32,7 +32,7 @@ bool Shader::build(const GLchar* vertexShaderFilePath, const GLchar* fragmentSha
 	GLchar infoLog[512];
 
 	//Load shader files
-	const GLchar* vertexShaderSource = file_read(vertexShaderFilePath);
+	const GLchar* vertexShaderSource = sc_file_read(vertexShaderFilePath);
 
 	if (vertexShaderSource == NULL)
 	{
@@ -40,7 +40,7 @@ bool Shader::build(const GLchar* vertexShaderFilePath, const GLchar* fragmentSha
 		return false;
 	}
 
-	const GLchar* fragmentShaderSource = file_read(fragmentShaderFilePath);
+	const GLchar* fragmentShaderSource = sc_file_read(fragmentShaderFilePath);
 
 	if (fragmentShaderSource == NULL)
 	{

@@ -13,7 +13,7 @@
 #include "sc_utility.h"
 
 //Stolen shamelessly from the SDL Wiki article on SDL_RWread
-char* file_read(const char* filename)
+char* sc_file_read(const char* filename)
 {
     SDL_RWops *rw = SDL_RWFromFile(filename, "rb");
     if (rw == NULL) 
@@ -28,16 +28,16 @@ char* file_read(const char* filename)
     char* buf = res;
     while (nb_read_total < res_size && nb_read != 0) 
     {
-            nb_read = SDL_RWread(rw, buf, 1, (res_size - nb_read_total));
-            nb_read_total += nb_read;
-            buf += nb_read;
+        nb_read = SDL_RWread(rw, buf, 1, (res_size - nb_read_total));
+        nb_read_total += nb_read;
+        buf += nb_read;
     }
 
     SDL_RWclose(rw);
     if (nb_read_total != res_size) 
     {
-            free(res);
-            return NULL;
+        free(res);
+        return NULL;
     }
 
     res[nb_read_total] = '\0';

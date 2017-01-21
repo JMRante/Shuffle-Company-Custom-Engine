@@ -16,6 +16,6 @@
 #include <SDL.h>
 #include <cstdlib>
 
-char* file_read(const char* filename);
+char* sc_file_read(const char* filename);
 
 #endif

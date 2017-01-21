@@ -14,16 +14,19 @@ SOIL_INCLUDE = -IX:\Base\Dev\MinGWDevLib\SOIL\src
 
 GLM_INCLUDE = -IX:\Base\Dev\MinGWDevLib\glm
 
-COMPILER_FLAGS = -Wall -c -std=c++11 $(SDL_INCLUDE) $(SOIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE)
-LD_FLAGS = -lmingw32 $(SDL_LIB) $(SOIL_LIB) $(FREEGLUT_LIB) $(GLEW_LIB)
+COMPILER_FLAGS = -g -std=c++11 -Wall -c $(SDL_INCLUDE) $(SOIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE)
+LD_FLAGS = -mwindows -lmingw32 $(SDL_LIB) $(SOIL_LIB) $(FREEGLUT_LIB) $(GLEW_LIB)
 EXE = ShuffleCompany.exe
 
 all: $(EXE)
 
-$(EXE): sc_main.o sc_utility.o sc_shader.o
+$(EXE): sc_main.o sc_config.o sc_utility.o sc_shader.o
 		$(COMPILER) $^ $(LD_FLAGS) -o $@
 
 sc_main.o: sc_main.cpp
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@
+
+sc_config.o: sc_config.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@
 
 sc_utility.o: sc_utility.cpp
