@@ -1,4 +1,5 @@
 COMPILER = g++
+VERSION = -std=c++11
 
 SDL_LIB = -LX:\Base\Dev\MinGWDevLib\i686-w64-mingw32\lib -lSDL2main -lSDL2
 SDL_INCLUDE = -IX:\Base\Dev\MinGWDevLib\i686-w64-mingw32\include\SDL2
@@ -14,26 +15,29 @@ SOIL_INCLUDE = -IX:\Base\Dev\MinGWDevLib\SOIL\src
 
 GLM_INCLUDE = -IX:\Base\Dev\MinGWDevLib\glm
 
-COMPILER_FLAGS = -g -std=c++11 -Wall -c $(SDL_INCLUDE) $(SOIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE)
+COMPILER_FLAGS = -g -Wall -c $(SDL_INCLUDE) $(SOIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE)
 LD_FLAGS = -mwindows -lmingw32 $(SDL_LIB) $(SOIL_LIB) $(FREEGLUT_LIB) $(GLEW_LIB)
 EXE = ShuffleCompany.exe
 
 all: $(EXE)
 
-$(EXE): sc_main.o sc_config.o sc_utility.o sc_shader.o
-		$(COMPILER) $^ $(LD_FLAGS) -o $@
+$(EXE): sc_main.o sc_config.o sc_log.o sc_utility.o sc_shader.o
+		$(COMPILER) $^ $(LD_FLAGS) -o $@ $(VERSION)
 
 sc_main.o: sc_main.cpp
-		$(COMPILER) $(COMPILER_FLAGS) $< -o $@
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
 sc_config.o: sc_config.cpp
-		$(COMPILER) $(COMPILER_FLAGS) $< -o $@
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
+
+sc_log.o: sc_log.cpp
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
 sc_utility.o: sc_utility.cpp
-		$(COMPILER) $(COMPILER_FLAGS) $< -o $@
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
 sc_shader.o: sc_shader.cpp
-		$(COMPILER) $(COMPILER_FLAGS) $< -o $@	
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
 clean:
 		del *.o && del $(EXE)

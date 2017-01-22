@@ -29,6 +29,7 @@
 
 //Shuffle Company Headers
 #include "sc_config.h"
+#include "sc_log.h"
 
 //Defines
 #define MS_PER_FRAME 16
@@ -47,39 +48,42 @@ void render();
 //Global Variable Declarations
 SDL_Window *window;
 SDL_GLContext glContext;
-Config config;
 
 bool hasQuit = false;
 
 bool initiate()
 {
+	sc::openLog("shuffleLog.txt");
+
 	//Initiate config
-	if (!config.loadConfig("shuffle.config"))
+	if (!sc::config.loadConfig("shuffle.config"))
 	{
-		std::cout << "Failed to load config file: " << std::endl;
+		LOG_E << "Failed to load config file";
 		return false;
 	}
+
+	LOG_I << "Shuffle Company initializing";
 
 	//Initiate SDL
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
-		std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+		LOG_E << SDL_GetError();
 		return false;
 	}
 
 	//Initiate Window
-	window = SDL_CreateWindow("Shuffle Company", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, config.get("WINDOW_WIDTH"), config.get("WINDOW_HEIGHT"), SDL_WINDOW_OPENGL);
+	window = SDL_CreateWindow("Shuffle Company", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, sc::config.get("WINDOW_WIDTH"), sc::config.get("WINDOW_HEIGHT"), SDL_WINDOW_OPENGL);
 
 	if (window == NULL)
 	{
-		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+		LOG_E << SDL_GetError();
 		return false;
 	}
 
 	//Initiate Fullscreen
-	if (SDL_SetWindowFullscreen(window, config.get("FULLSCREEN") ? SDL_WINDOW_FULLSCREEN : 0))
+	if (SDL_SetWindowFullscreen(window, sc::config.get("FULLSCREEN") ? SDL_WINDOW_FULLSCREEN : 0))
 	{
-		std::cout << "SDL_SetWindowFullscreen Error: " << SDL_GetError() << std::endl;
+		LOG_E << SDL_GetError();
 		return false;
 	}
 
@@ -93,7 +97,7 @@ bool initiate()
 
 	if (glContext == NULL)
 	{
-		std::cout << "SDL_GL_CreateContext Error: " << SDL_GetError() << std::endl;
+		LOG_E << SDL_GetError();
 		return false;
 	}
 
@@ -103,12 +107,12 @@ bool initiate()
 
 	if (glewError != GLEW_OK)
 	{
-		std::cout << "GLEW Error: " << glewGetErrorString(glewError) << std::endl;
+		LOG_E << glewGetErrorString(glewError);
 		return false;
 	}
 
 	//Initiate OpenGL options
-    glViewport(0, 0, config.get("WINDOW_WIDTH"), config.get("WINDOW_HEIGHT"));
+    glViewport(0, 0, sc::config.get("WINDOW_WIDTH"), sc::config.get("WINDOW_HEIGHT"));
 	glEnable(GL_DEPTH_TEST); 
 
 	return true;
@@ -116,6 +120,7 @@ bool initiate()
 
 void closeout()
 {
+	sc::closeLog();
 	SDL_Quit();	
 }
 
@@ -149,6 +154,10 @@ int main(int argc, char **argv)
 		Uint32 startTime;
 		Sint32 delay;
 
+		LOG_I << "Initiating Game Loop";
+		LOG_D << "Debug mode set to " << sc::config.get("LOG_DEBUG");
+		LOG_D << "Info mode set to " << sc::config.get("LOG_INFO");
+
 		while (!hasQuit)
 		{
 			startTime = SDL_GetTicks();
@@ -165,7 +174,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		std::cout << "Initiation Error: Failed to start" << std::endl;
+		LOG_E << "Initiation Error: Failed to start";
 	}
 
 	closeout();

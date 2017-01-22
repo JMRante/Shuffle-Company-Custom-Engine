@@ -16,6 +16,9 @@
 #include <SDL.h>
 #include <cstdlib>
 
-char* sc_file_read(const char* filename);
+namespace sc
+{
+	char* fileRead(const char* filename);
+}
 
 #endif

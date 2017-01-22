@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <GL/glew.h>
+
 #include "sc_utility.h"
 
 class Shader
