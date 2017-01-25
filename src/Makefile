@@ -21,7 +21,7 @@ EXE = ShuffleCompany.exe
 
 all: $(EXE)
 
-$(EXE): sc_main.o sc_config.o sc_log.o sc_utility.o sc_shader.o
+$(EXE): sc_main.o sc_config.o sc_log.o sc_utility.o sc_renderer.o sc_shader.o
 		$(COMPILER) $^ $(LD_FLAGS) -o $@ $(VERSION)
 
 sc_main.o: sc_main.cpp
@@ -34,6 +34,9 @@ sc_log.o: sc_log.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
 sc_utility.o: sc_utility.cpp
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
+
+sc_renderer.o: sc_renderer.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
 sc_shader.o: sc_shader.cpp

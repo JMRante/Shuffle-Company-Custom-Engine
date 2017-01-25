@@ -30,6 +30,7 @@
 //Shuffle Company Headers
 #include "sc_config.h"
 #include "sc_log.h"
+#include "sc_renderer.h"
 
 //Defines
 #define MS_PER_FRAME 16
@@ -43,7 +44,6 @@ bool initiate();
 void closeout();
 
 void update();
-void render();
 
 //Global Variable Declarations
 SDL_Window *window;
@@ -138,14 +138,6 @@ void update()
 	}
 }
 
-void render()
-{
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	SDL_GL_SwapWindow(window);
-}
-
 int main(int argc, char **argv)
 {
 	if (initiate())
@@ -158,12 +150,15 @@ int main(int argc, char **argv)
 		LOG_D << "Debug mode set to " << sc::config.get("LOG_DEBUG");
 		LOG_D << "Info mode set to " << sc::config.get("LOG_INFO");
 
+		sc::Renderer renderer(window);
+		renderer.setClearColor(0.2f, 0.0f, 0.7f);
+
 		while (!hasQuit)
 		{
 			startTime = SDL_GetTicks();
 
 			update();
-			render();
+			renderer.render();
 
 			delay = startTime + MS_PER_FRAME - SDL_GetTicks();
 			if (delay >= 0)
