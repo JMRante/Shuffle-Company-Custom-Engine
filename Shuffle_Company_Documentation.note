@@ -19,3 +19,17 @@ The engine needs to be as small and efficient as possible. Keep things clean. Ga
 purpose built-in gameplay functionality all gameplay will be scripted externally.
 
 The more that things can be dynamically defined via data, the better. Hardcoding must be avoided at all costs.
+
+The tools, namely, the level editor, need to be a robust improvement of what was accomplished in the Wonderland Adventures series, adding both further 
+functionality and easy of use. Level design will follow the construction principals proven in Minecraft, with the cubic cell as the fundamental element
+for the landscape and the game elements.
+
+Performance wise, the engine should target Xbox360/PS3 era limitations. This keeps the game accessible to anyone with a computer from the past 7 years.
+Visuals will rely mostly on artstyle, lighting, and other shader effects, with smaller texture sizes and lower geometry counts on a whole. The artstyle
+will not be realistic, but stylized. An art guide will be published for those community members wanting to make content consistent with the core material,
+but of course the option to use other graphical styles should be open.
+
+The engine should be simple and fast in both construction and interface.
+
+While gameplay is king, story holds an important place the hearts of many players as well, as can be seen in the content created by the Wonderland community.
+Story, thus, should not be completely ignored or left to the wayside.
