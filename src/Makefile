@@ -10,18 +10,18 @@ FREEGLUT_INCLUDE = -IX:\Base\Dev\MinGWDevLib\freeglut\include
 GLEW_LIB = -LX:\Base\Dev\MinGWDevLib\glew-2.0.0_Source\glew-2.0.0\lib -lglew32
 GLEW_INCLUDE = -IX:\Base\Dev\MinGWDevLib\glew-2.0.0_Source\glew-2.0.0\include
 
-SOIL_LIB = -LX:\Base\Dev\MinGWDevLib\SOIL\lib -lSOIL
-SOIL_INCLUDE = -IX:\Base\Dev\MinGWDevLib\SOIL\src
+DevIL_LIB = -LX:\Base\Dev\MinGWDevLib\DevIL\lib -lDevIL -lilu
+DevIL_INCLUDE = -IX:\Base\Dev\MinGWDevLib\DevIL\include
 
 GLM_INCLUDE = -IX:\Base\Dev\MinGWDevLib\glm
 
-COMPILER_FLAGS = -g -Wall -c $(SDL_INCLUDE) $(SOIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE)
-LD_FLAGS = -mwindows -lmingw32 $(SDL_LIB) $(SOIL_LIB) $(FREEGLUT_LIB) $(GLEW_LIB)
+COMPILER_FLAGS = -g -Wall -c $(SDL_INCLUDE) $(DevIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE)
+LD_FLAGS = -mwindows -lmingw32 $(SDL_LIB) $(DevIL_LIB) $(FREEGLUT_LIB) $(GLEW_LIB)
 EXE = ShuffleCompany.exe
 
 all: $(EXE)
 
-$(EXE): sc_main.o sc_config.o sc_log.o sc_utility.o sc_renderer.o sc_shader.o
+$(EXE): sc_main.o sc_config.o sc_log.o sc_utility.o sc_game.o sc_renderer.o sc_shader.o
 		$(COMPILER) $^ $(LD_FLAGS) -o $@ $(VERSION)
 
 sc_main.o: sc_main.cpp
@@ -34,6 +34,9 @@ sc_log.o: sc_log.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
 sc_utility.o: sc_utility.cpp
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
+
+sc_game.o: sc_game.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
 sc_renderer.o: sc_renderer.cpp

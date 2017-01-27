@@ -26,9 +26,9 @@ namespace sc
 		members["LOG_INFO"] = 0;
 	}
 
-	bool Config::loadConfig(std::string filename)
+	bool Config::loadConfig(std::string filepath)
 	{
-		std::string configString(sc::fileRead(filename.c_str()));
+		std::string configString(sc::fileRead(filepath.c_str()));
 
 		if (configString.empty())
 		{

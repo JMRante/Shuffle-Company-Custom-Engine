@@ -25,11 +25,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "SOIL.h"
-
 //Shuffle Company Headers
 #include "sc_config.h"
 #include "sc_log.h"
+#include "sc_game.h"
 #include "sc_renderer.h"
 
 //Defines
@@ -42,8 +41,6 @@
 //Function Foward Declarations
 bool initiate();
 void closeout();
-
-void update();
 
 //Global Variable Declarations
 SDL_Window *window;
@@ -124,20 +121,6 @@ void closeout()
 	SDL_Quit();	
 }
 
-void update()
-{
-	//Handle events
-	SDL_Event event;
-
-	while (SDL_PollEvent(&event) != 0)
-	{
-		if (event.type == SDL_QUIT)
-		{
-			hasQuit = true;
-		}
-	}
-}
-
 int main(int argc, char **argv)
 {
 	if (initiate())
@@ -150,14 +133,14 @@ int main(int argc, char **argv)
 		LOG_D << "Debug mode set to " << sc::config.get("LOG_DEBUG");
 		LOG_D << "Info mode set to " << sc::config.get("LOG_INFO");
 
+		sc::Game game;
 		sc::Renderer renderer(window);
-		renderer.setClearColor(0.2f, 0.0f, 0.7f);
-
+		
 		while (!hasQuit)
 		{
 			startTime = SDL_GetTicks();
 
-			update();
+			hasQuit = game.update();
 			renderer.render();
 
 			delay = startTime + MS_PER_FRAME - SDL_GetTicks();

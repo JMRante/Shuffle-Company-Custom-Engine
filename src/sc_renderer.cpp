@@ -27,6 +27,16 @@ namespace sc
 		SDL_GL_SwapWindow(window);
 	}
 
+	void Renderer::setRenderWorld(sc::World *world)
+	{
+
+	}
+
+	void Renderer::setRenderUI(sc::UI *ui)
+	{
+
+	}
+
 	void Renderer::setClearColor(float r, float g, float b)
 	{
 		glClearColor(r, g, b, 1.0f);

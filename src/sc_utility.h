@@ -18,6 +18,8 @@
 
 namespace sc
 {
+	typedef char ID[16];
+	
 	char* fileRead(const char* filename);
 }
 

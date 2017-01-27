@@ -28,7 +28,7 @@ namespace sc
 		std::map<std::string, int> members;
 	public:
 		Config();
-		bool loadConfig(std::string filename);
+		bool loadConfig(std::string filepath);
 		int get(std::string member);
 	};
 
