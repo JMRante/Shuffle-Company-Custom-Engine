@@ -23,7 +23,7 @@
 #include <glm/glm.hpp>
 
 #include "sc_log.h"
-#include "sc_utilities.h"
+#include "sc_utility.h"
 
 namespace sc
 {
@@ -31,102 +31,118 @@ namespace sc
 	{
 		glm::vec3 position;
 		glm::vec3 normal;
-		glm::vec2 uv;
+		glm::vec2 textureCoord;
 	};
 
 	class Mesh
 	{
-	private:
-		std::vector<Vertex> vertices;
-		std::vector<int> indices;
-
 	public:
-		ID id;
-		GLuint VBO;
-		GLuint VAO;
-		GLuint EBO;
+		std::string id;
+		GLuint VAOid;
+		GLuint VBOid;
+		GLuint EBOid;
 
-		Mesh(ID id);
-		bool loadFromFile(std::string filepath);
-		bool loadFromData(std::vector<Vertex> vertices, std::vector<int> indices);
-		void setToRender();
-		void remove();
+		int indexCount;
+
+		Mesh(std::string id);
+		bool loadToGPU(std::vector<Vertex> *vertices, std::vector<int> *indices);
+		void removeFromGPU();
 	};
 
 	class Texture
 	{
 	public:
-		ID id;
+		std::string id;
 		GLuint GLid;
 
 		GLuint width;
 		GLuint height;
 
-		Texture(ID id);
-		bool loadFromFile(std::string filepath);
-		void setToRender();
-		void remove();
+		Texture(std::string id);
+		bool loadToGPU(std::string filepath);
+		void removeFromGPU();
 	};
 
 	class Shader
 	{
 	public:
-		ID id;
+		std::string id;
 		GLuint GLid;
 
-		Shader(ID id);
-		bool buildFromFiles(std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
-		void setToRender();
-		void remove();
+		Shader(std::string id);
+		bool loadToGPU(std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
+		void removeFromGPU();
 	};
 
 	class Material
 	{
-	private:
-		Shader shader;
-		Texture textureA;
-		Texture textureB;
-		Texture textureC;
-		Texture textureD;
-
 	public:
-		ID id;
+		std::string id;
 
-		Material(ID id, Texture *textureA, Shader *shader);
-		Material(ID id, Texture *textureA, Texture *textureB, Shader *shader);
-		Material(ID id, Texture *textureA, Texture *textureB, Texture *textureC, Shader *shader);
-		Material(ID id, Texture *textureA, Texture *textureB, Texture *textureC, Texture *textureD, Shader *shader);
-		void setToRender();
-		void remove();
+		Texture *textureA;
+		Texture *textureB;
+		Texture *textureC;
+		Texture *textureD;
+		Shader *shader;
+
+		int textureCount;
+
+		Material(std::string id, std::string shaderId);
+		Material(std::string id, std::string textureAId, std::string shaderId);
+		Material(std::string id, std::string textureAId, std::string textureBId, std::string shaderId);
+		Material(std::string id, std::string textureAId, std::string textureBId, std::string textureCId, std::string shaderId);
+		Material(std::string id, std::string textureAId, std::string textureBId, std::string textureCId, std::string textureDId, std::string shaderId);
 	};
+
+	class Model
+	{
+	public:
+		std::string id;
+
+		Mesh *mesh;
+		Material *material;
+		std::vector<Model> subModels;
+
+		glm::vec3 relativePosition;
+		glm::vec3 relativeRotation;
+		glm::vec3 relativeScale;
+
+		Model(std::string id, std::string meshId, std::string materialId);
+		Model* addSubModel(std::string id, std::string meshId, std::string materialId);
+		Model* getSubModel(std::string id);
+	}; 
 
 	class Assets
 	{
 	private:
-		std::stack<Mesh> meshStack;
-		std::stack<Texture> textureStack;
-		std::stack<Shader> shaderStack;
-		std::stack<Material> materialStack;
+		std::vector<Mesh> meshPool;
+		std::vector<Texture> texturePool;
+		std::vector<Shader> shaderPool;
+		std::vector<Material> materialPool;
+		std::vector<Model> modelPool;
 
-		int worldMeshStackStart;
-		int worldTextureStackStart;
-		int worldShaderStack;
-		int worldMaterialStackStart;
+		int worldMeshStart;
+		int worldTextureStart;
+		int worldShader;
+		int worldMaterialStart;
+		int worldModelStart;
 
 	public:
-		void loadBaseAssets();
+		bool loadMesh(std::string id, std::vector<Vertex> *vertices, std::vector<int> *indices);
+		bool loadTexture(std::string id, std::string filepath);
+		bool loadShader(std::string id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
+		bool loadMaterial(std::string id, std::string shaderId);
+		bool loadMaterial(std::string id, std::string textureAId, std::string shaderId);
+		bool loadModel(std::string id, std::string meshId, std::string materialId);
 
-		bool loadMesh(std::string filepath);
-		bool loadMesh(Mesh *mesh);
-
-		bool loadTexture(std::string filepath);
-		bool loadTexture(Texture *texture);
-
-		bool loadMaterial(Material *material);
-
-		bool loadWorldMesh();
-		bool loadWorldTexture();
+		Mesh* getMesh(std::string id);
+		Texture* getTexture(std::string id);
+		Shader* getShader(std::string id);
+		Material* getMaterial(std::string id);
+		Model* getModel(std::string id);
 	};
+
+	extern Assets assets;
 }
 
 #endif

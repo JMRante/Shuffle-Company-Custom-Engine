@@ -24,18 +24,47 @@ namespace sc
 
 		LOG_D << "Render";
 
+		//Render each world element
+		for (int i = 0; i < (int)renderWorld->elements.size(); i++)
+		{
+			renderGameElement(&renderWorld->elements[i]);
+		}
+
 		SDL_GL_SwapWindow(window);
 	}
 
-	void Renderer::setRenderWorld(sc::World *world)
+	void Renderer::renderGameElement(GameElement *gameElement)
 	{
-
+		switch (gameElement->model->material->textureCount)
+		{
+			case 0:
+				glUseProgram(gameElement->model->material->shader->GLid);
+				glBindVertexArray(gameElement->model->mesh->VAOid);
+					glDrawElements(GL_TRIANGLES, gameElement->model->mesh->indexCount, GL_UNSIGNED_INT, 0);
+				glBindVertexArray(0);
+				break;
+			case 1:
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			case 4:
+				break;
+			default:
+				break;
+		}
 	}
 
-	void Renderer::setRenderUI(sc::UI *ui)
+	void Renderer::setWorld(sc::World *world)
 	{
-
+		this->renderWorld = world;
 	}
+
+	// void Renderer::setUI(sc::UI *ui)
+	// {
+	// 	this->ui = ui;
+	// }
 
 	void Renderer::setClearColor(float r, float g, float b)
 	{

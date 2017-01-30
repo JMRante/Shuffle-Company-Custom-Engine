@@ -30,6 +30,7 @@
 #include "sc_log.h"
 #include "sc_game.h"
 #include "sc_renderer.h"
+#include "sc_assets.h"
 
 //Defines
 #define MS_PER_FRAME 16
@@ -135,7 +136,10 @@ int main(int argc, char **argv)
 
 		sc::Game game;
 		sc::Renderer renderer(window);
-		
+
+		game.start();
+		renderer.setWorld(game.currentState);
+
 		while (!hasQuit)
 		{
 			startTime = SDL_GetTicks();

@@ -14,48 +14,76 @@
 
 namespace sc
 {
+	Assets assets;
+
 	/*
 		Mesh
 				*/
-	Mesh::Mesh(ID id)
+	Mesh::Mesh(std::string id)
 	{
-		this.id = id;
-		VBO = 0;
-		VAO = 0;
-		EBO = 0;
+		this->id = id;
+		VAOid = 0;
+		VBOid = 0;
+		EBOid = 0;
+
+		indexCount = 0;
 	}
 
-	bool Mesh::loadFromFile(std::string filepath)
+	bool Mesh::loadToGPU(std::vector<Vertex> *vertices, std::vector<int> *indices)
 	{
+	    glGenVertexArrays(1, &VAOid);
+	    glGenBuffers(1, &VBOid);
+	    glGenBuffers(1, &EBOid);
 
+		glBindVertexArray(VAOid);
+		    glBindBuffer(GL_ARRAY_BUFFER, VBOid);
+		    glBufferData(GL_ARRAY_BUFFER, vertices->size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+		    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOid);
+		    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices->size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
+
+		    //Position
+		    glEnableVertexAttribArray(0);
+		    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+
+		    //Normal
+		    glEnableVertexAttribArray(1);		    
+		    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat)));
+
+		    //UV
+		    glEnableVertexAttribArray(2);		    
+		    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(6 * sizeof(GLfloat)));		    
+		glBindVertexArray(0);
+
+		indexCount = indices->size();
+
+		return true;
 	}
 
-	bool loadFromData(std::vector<Vertex> vertices, std::vector<int> indices)
+	void Mesh::removeFromGPU()
 	{
-
-	}
-
-	void Mesh::setToRender()
-	{
-
-	}
-
-	void Mesh::remove()
-	{
-
+		if (VAOid != 0)
+		{
+		    glDeleteVertexArrays(1, &VAOid);
+		    glDeleteBuffers(1, &VBOid);
+		    glDeleteBuffers(1, &EBOid);
+			VAOid = 0;
+			VBOid = 0;
+			EBOid = 0;
+		}
 	}
 
 
 	/*
 		Texture
 				*/
-	Texture::Texture(ID id)
+	Texture::Texture(std::string id)
 	{
-		this.id = id;
+		this->id = id;
 		GLid = 0;
 	}
 
-	bool Texture::loadFromFile(std::string filepath)
+	bool Texture::loadToGPU(std::string filepath)
 	{
 	    bool success = false;
 
@@ -73,13 +101,13 @@ namespace sc
 
 	        if (ilSuccess == IL_TRUE)
 	        {
-			    this.remove();
+			    this->removeFromGPU();
 
 			    width = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
 			    height = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
 
 			    //Generate texture ID
-			    glGenTextures(1, GLid);
+			    glGenTextures(1, &GLid);
 
 			    //Load texture into OpenGL
 			    glBindTexture(GL_TEXTURE_2D, GLid);
@@ -95,11 +123,11 @@ namespace sc
 			    if(error != GL_NO_ERROR)
 			    {
 			        LOG_E << "Error loading texture: " << gluErrorString(error);
-			        success false;
+			        success = false;
 			    }
 			    else
 			    {
-					success true;
+					success = true;
 			    }
 	        }
 
@@ -115,12 +143,7 @@ namespace sc
 	    return success;
 	}
 
-	void Texture::setToRender()
-	{
-        glBindTexture(GL_TEXTURE_2D, GLid);
-	}
-
-	void Texture::remove()
+	void Texture::removeFromGPU()
 	{
 	    if (GLid != 0)
 	    {
@@ -133,13 +156,13 @@ namespace sc
 	/*
 		Shader
 				*/
-	Shader::Shader(ID id)
+	Shader::Shader(std::string id)
 	{
-		this.id = id;
+		this->id = id;
 		GLid = 0;
 	}
 
-	bool Shader::buildFromFiles(std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
+	bool Shader::loadToGPU(std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
 	{
 		//Has shader already been built?
 		if (GLid != 0)
@@ -224,12 +247,7 @@ namespace sc
 		return true;
 	}
 
-	void Shader::setToRender()
-	{
-		glUseProgram(GLid);
-	}
-
-	void Shader::remove()
+	void Shader::removeFromGPU()
 	{
 		if (GLid != 0)
 		{
@@ -242,81 +260,224 @@ namespace sc
 	/*
 		Material
 				*/
-	Material::Material(ID id, Texture *textureA, Shader *shader)
+	Material::Material(std::string id, std::string shaderId)
 	{
-		this.id = id;
+		this->id = id;
+
+		textureA = NULL;
+		textureB = NULL;
+		textureC = NULL;
+		textureD = NULL;
+		shader = assets.getShader(shaderId);
+
+		textureCount = 0;		
 	}
 
-	Material::Material(ID id, Texture *textureA, Texture *textureB, Shader *shader)
+	Material::Material(std::string id, std::string textureAId, std::string shaderId)
 	{
-		this.id = id;
+		this->id = id;
+
+		textureA = assets.getTexture(textureAId);
+		textureB = NULL;
+		textureC = NULL;
+		textureD = NULL;
+		shader = assets.getShader(shaderId);
+
+		textureCount = 1;
 	}
 
-	Material::Material(ID id, Texture *textureA, Texture *textureB, Texture *textureC, Shader *shader)
+	Material::Material(std::string id, std::string textureAId, std::string textureBId, std::string shaderId)
 	{
-		this.id = id;
+		this->id = id;
+
+		textureA = assets.getTexture(textureAId);
+		textureB = assets.getTexture(textureBId);
+		textureC = NULL;
+		textureD = NULL;
+		shader = assets.getShader(shaderId);
+
+		textureCount = 2;
 	}
 
-	Material::Material(ID id, Texture *textureA, Texture *textureB, Texture *textureC, Texture *textureD, Shader *shader)
+	Material::Material(std::string id, std::string textureAId, std::string textureBId, std::string textureCId, std::string shaderId)
 	{
-		this.id = id;
+		this->id = id;
+
+		textureA = assets.getTexture(textureAId);
+		textureB = assets.getTexture(textureBId);
+		textureC = assets.getTexture(textureCId);
+		textureD = NULL;
+		shader = assets.getShader(shaderId);
+
+		textureCount = 3;
 	}
 
-	void Material::setToRender()
+	Material::Material(std::string id, std::string textureAId, std::string textureBId, std::string textureCId, std::string textureDId, std::string shaderId)
 	{
+		this->id = id;
 
+		textureA = assets.getTexture(textureAId);
+		textureB = assets.getTexture(textureBId);
+		textureC = assets.getTexture(textureCId);
+		textureD = assets.getTexture(textureDId);
+		shader = assets.getShader(shaderId);
+
+		textureCount = 4;
 	}
 
-	void Material::remove()
-	{
 
+	/*
+		Model
+				*/
+	Model::Model(std::string id, std::string meshId, std::string materialId)
+	{
+		this->id = id;
+
+		mesh = assets.getMesh(meshId);
+		material = assets.getMaterial(materialId);
+
+		relativePosition = glm::vec3(0.0f, 0.0f, 0.0f);
+		relativeRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+		relativeScale = glm::vec3(1.0f, 1.0f, 1.0f);
+	}
+
+	Model* Model::addSubModel(std::string id, std::string meshId, std::string materialId)
+	{
+		subModels.push_back(Model(id, meshId, materialId));
+		return &subModels.back();
+	}
+
+	Model* Model::getSubModel(std::string id)
+	{
+		for (int i = 0; i < (int)subModels.size(); i++)
+		{
+			if (subModels[i].id == id)
+			{
+				return &subModels[i];
+			}
+		}
+
+		//Eventually should return a default mesh object preloaded.
+		return NULL;		
 	}
 
 
 	/*
 		Assets
 				*/
-	void Assets::loadBaseAssets()
+	bool Assets::loadMesh(std::string id, std::vector<Vertex> *vertices, std::vector<int> *indices)
 	{
-
+		meshPool.push_back(Mesh(id));
+		return meshPool.back().loadToGPU(vertices, indices);
 	}
 
-
-	bool Assets::loadMesh(std::string filepath)
+	bool Assets::loadTexture(std::string id, std::string filepath)
 	{
-
+		texturePool.push_back(Texture(id));
+		return texturePool.back().loadToGPU(filepath);
 	}
 
-	bool Assets::loadMesh(Mesh *mesh)
+	bool Assets::loadShader(std::string id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
 	{
-
+		shaderPool.push_back(Shader(id));
+		return shaderPool.back().loadToGPU(vertexShaderFilepath, fragmentShaderFilepath);
 	}
 
-
-	bool Assets::loadTexture(std::string filepath)
+	bool Assets::loadMaterial(std::string id, std::string shaderId)
 	{
-
+		materialPool.push_back(Material(id, shaderId));
+		return true;
 	}
 
-	bool Assets::loadTexture(Texture *texture)
+	bool Assets::loadMaterial(std::string id, std::string textureAId, std::string shaderId)
 	{
-
+		materialPool.push_back(Material(id, textureAId, shaderId));
+		return true;
 	}
 
-
-	bool Assets::loadMaterial(Material *material)
+	bool Assets::loadModel(std::string id, std::string meshId, std::string materialId)
 	{
-
+		modelPool.push_back(Model(id, meshId, materialId));
+		return true;
 	}
 
-
-	bool Assets::loadWorldMesh()
+	Mesh* Assets::getMesh(std::string id)
 	{
+		for (int i = 0; i < (int)meshPool.size(); i++)
+		{
+			if (meshPool[i].id.compare(id) == 0)
+			{
+				return &meshPool[i];
+			}
+		}
 
+		//Eventually should return a default mesh object preloaded.
+		LOG_E << "Failed to get mesh resource " << id;
+
+		return NULL;
 	}
 
-	bool Assets::loadWorldTexture()
+	Texture* Assets::getTexture(std::string id)
 	{
+		for (int i = 0; i < (int)texturePool.size(); i++)
+		{
+			if (texturePool[i].id.compare(id) == 0)
+			{
+				return &texturePool[i];
+			}
+		}
 
+		//Eventually should return a default mesh object preloaded.
+		LOG_E << "Failed to get texture resource " << id;
+
+		return NULL;
+	}
+
+	Shader* Assets::getShader(std::string id)
+	{
+		for (int i = 0; i < (int)shaderPool.size(); i++)
+		{
+			if (shaderPool[i].id.compare(id) == 0)
+			{
+				return &shaderPool[i];
+			}
+		}
+
+		//Eventually should return a default mesh object preloaded.
+		LOG_E << "Failed to get shader resource " << id;
+
+		return NULL;
+	}
+
+	Material* Assets::getMaterial(std::string id)
+	{
+		for (int i = 0; i < (int)materialPool.size(); i++)
+		{
+			if (materialPool[i].id.compare(id) == 0)
+			{
+				return &materialPool[i];
+			}
+		}
+
+		//Eventually should return a default mesh object preloaded.
+		LOG_E << "Failed to get material resource " << id;
+
+		return NULL;
+	}
+
+	Model* Assets::getModel(std::string id)
+	{
+		for (int i = 0; i < (int)modelPool.size(); i++)
+		{
+			if (modelPool[i].id.compare(id) == 0)
+			{
+				return &modelPool[i];
+			}
+		}
+
+		//Eventually should return a default mesh object preloaded.
+		LOG_E << "Failed to get model resource " << id;
+
+		return NULL;
 	}
 }

@@ -21,10 +21,8 @@ namespace sc
 {
 	class World
 	{
-	private:
-		std::vector<GameElement> elements;
 	public:
-		void addGameElement(GameElement element);
+		std::vector<GameElement> elements;
 	};
 }
 
