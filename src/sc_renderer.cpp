@@ -22,8 +22,6 @@ namespace sc
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		LOG_D << "Render";
-
 		//Render each world element
 		for (int i = 0; i < (int)renderWorld->elements.size(); i++)
 		{
@@ -38,6 +36,8 @@ namespace sc
 		switch (gameElement->model->material->textureCount)
 		{
 			case 0:
+				LOG_D << "Rendering " << gameElement->model->id;
+
 				glUseProgram(gameElement->model->material->shader->GLid);
 				glBindVertexArray(gameElement->model->mesh->VAOid);
 					glDrawElements(GL_TRIANGLES, gameElement->model->mesh->indexCount, GL_UNSIGNED_INT, 0);

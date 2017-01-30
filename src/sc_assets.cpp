@@ -37,10 +37,10 @@ namespace sc
 
 		glBindVertexArray(VAOid);
 		    glBindBuffer(GL_ARRAY_BUFFER, VBOid);
-		    glBufferData(GL_ARRAY_BUFFER, vertices->size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+		    glBufferData(GL_ARRAY_BUFFER, vertices->size() * sizeof(Vertex), &((*vertices)[0]), GL_STATIC_DRAW);
 
 		    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOid);
-		    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices->size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
+		    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices->size() * sizeof(GLuint), &((*indices)[0]), GL_STATIC_DRAW);
 
 		    //Position
 		    glEnableVertexAttribArray(0);
@@ -57,16 +57,26 @@ namespace sc
 
 		indexCount = indices->size();
 
-		return true;
+		GLenum error = glGetError();
+
+		if (error != GL_NO_ERROR)
+		{
+			LOG_E << "Error loading mesh: " << gluErrorString(error);
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	void Mesh::removeFromGPU()
 	{
 		if (VAOid != 0)
 		{
-		    glDeleteVertexArrays(1, &VAOid);
-		    glDeleteBuffers(1, &VBOid);
-		    glDeleteBuffers(1, &EBOid);
+			glDeleteVertexArrays(1, &VAOid);
+			glDeleteBuffers(1, &VBOid);
+			glDeleteBuffers(1, &EBOid);
 			VAOid = 0;
 			VBOid = 0;
 			EBOid = 0;

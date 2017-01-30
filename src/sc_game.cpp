@@ -24,22 +24,26 @@ namespace sc
 		tempVert.position = glm::vec3(0.5f, 0.5f, 0.0f);
 		tempVert.normal = glm::vec3(0.0f, 0.0f, -1.0f);
 		tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
+		LOG_D << "Vertex: Pos-" << glm::to_string(tempVert.position) << " Normal-" << glm::to_string(tempVert.normal) << " UV-" << glm::to_string(tempVert.textureCoord);
 		vecVert.push_back(tempVert);
 
 		tempVert.position = glm::vec3(0.5f, -0.5f, 0.0f);
+		LOG_D << "Vertex: Pos-" << glm::to_string(tempVert.position) << " Normal-" << glm::to_string(tempVert.normal) << " UV-" << glm::to_string(tempVert.textureCoord);
 		vecVert.push_back(tempVert);
 
 		tempVert.position = glm::vec3(-0.5f, -0.5f, 0.0f);
+		LOG_D << "Vertex: Pos-" << glm::to_string(tempVert.position) << " Normal-" << glm::to_string(tempVert.normal) << " UV-" << glm::to_string(tempVert.textureCoord);
 		vecVert.push_back(tempVert);
 
 		tempVert.position = glm::vec3(-0.5f, 0.5f, 0.0f);
+		LOG_D << "Vertex: Pos-" << glm::to_string(tempVert.position) << " Normal-" << glm::to_string(tempVert.normal) << " UV-" << glm::to_string(tempVert.textureCoord);
 		vecVert.push_back(tempVert);
 
 		static const int ind[] = {0, 1, 3, 1, 2, 3};
 		std::vector<int> vecInd(ind, ind + sizeof(ind) / sizeof(ind[0]));
 
 		sc::assets.loadMesh("ME_SQUARE", &vecVert, &vecInd);
-		sc::assets.loadShader("SH_PASS", "/Resources/Shaders/sc_shader_testVertex.glsl", "/Resources/Shaders/sc_shader_testFragment.glsl");
+		sc::assets.loadShader("SH_PASS", "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");
 		sc::assets.loadMaterial("MA_TEST", "SH_PASS");
 		sc::assets.loadModel("MO_TEST", "ME_SQUARE", "MA_TEST");
 

@@ -21,6 +21,8 @@
 // #include "sc_ui.h"
 #include "sc_assets.h"
 
+#include "glm/ext.hpp"
+
 namespace sc
 {
 	class Game
