@@ -139,6 +139,7 @@ int main(int argc, char **argv)
 
 		game.start();
 		renderer.setWorld(game.currentState);
+		renderer.initCamera(0.01f, 100.0f);
 
 		while (!hasQuit)
 		{

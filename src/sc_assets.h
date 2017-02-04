@@ -79,19 +79,14 @@ namespace sc
 	public:
 		std::string id;
 
-		Texture *textureA;
-		Texture *textureB;
-		Texture *textureC;
-		Texture *textureD;
+		std::vector<int> integerMaterialArguments;
+		std::vector<float> floatMaterialArguments;
+		std::vector<glm::vec4> vec4MaterialArguments;
+		std::vector<Texture*> textureMaterialArguments;
+
 		Shader *shader;
 
-		int textureCount;
-
-		Material(std::string id, std::string shaderId);
-		Material(std::string id, std::string textureAId, std::string shaderId);
-		Material(std::string id, std::string textureAId, std::string textureBId, std::string shaderId);
-		Material(std::string id, std::string textureAId, std::string textureBId, std::string textureCId, std::string shaderId);
-		Material(std::string id, std::string textureAId, std::string textureBId, std::string textureCId, std::string textureDId, std::string shaderId);
+		Material(std::string id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<std::string> *tma, std::string shaderId);
 	};
 
 	class Model
@@ -123,7 +118,7 @@ namespace sc
 
 		int worldMeshStart;
 		int worldTextureStart;
-		int worldShader;
+		int worldShaderStart;
 		int worldMaterialStart;
 		int worldModelStart;
 
@@ -131,8 +126,7 @@ namespace sc
 		bool loadMesh(std::string id, std::vector<Vertex> *vertices, std::vector<int> *indices);
 		bool loadTexture(std::string id, std::string filepath);
 		bool loadShader(std::string id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
-		bool loadMaterial(std::string id, std::string shaderId);
-		bool loadMaterial(std::string id, std::string textureAId, std::string shaderId);
+		bool loadMaterial(std::string id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<std::string> *tma, std::string shaderId);
 		bool loadModel(std::string id, std::string meshId, std::string materialId);
 
 		Mesh* getMesh(std::string id);

@@ -44,10 +44,19 @@ namespace sc
 
 		sc::assets.loadMesh("ME_SQUARE", &vecVert, &vecInd);
 		sc::assets.loadShader("SH_PASS", "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");
-		sc::assets.loadMaterial("MA_TEST", "SH_PASS");
-		sc::assets.loadModel("MO_TEST", "ME_SQUARE", "MA_TEST");
+		
+		std::vector<glm::vec4> tempVec4;
+		tempVec4.push_back(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		sc::assets.loadMaterial("MA_RED", NULL, NULL, &tempVec4, NULL, "SH_PASS");
+		sc::assets.loadModel("MO_TESTA", "ME_SQUARE", "MA_RED");
 
-		currentState->elements.push_back(sc::GameElement("MO_TEST"));
+		std::vector<glm::vec4> tempVec4B;
+		tempVec4B.push_back(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+		sc::assets.loadMaterial("MA_BLUE", NULL, NULL, &tempVec4B, NULL, "SH_PASS");
+		sc::assets.loadModel("MO_TESTB", "ME_SQUARE", "MA_BLUE");
+
+		currentState->elements.push_back(sc::GameElement(glm::vec3(0.0f, 0.0f, -4.0f), glm::vec3(0.0f, glm::radians(45.0f), 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), "MO_TESTA"));
+		currentState->elements.push_back(sc::GameElement(glm::vec3(-1.0f, 0.0f, -2.0f), glm::vec3(glm::radians(45.0f), 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), "MO_TESTB"));
 	}
 
 	bool Game::update()

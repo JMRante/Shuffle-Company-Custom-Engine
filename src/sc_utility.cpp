@@ -45,4 +45,11 @@ namespace sc
         res[nb_read_total] = '\0';
         return res;
     }
+
+    std::string IntToString(int i)
+    {
+      std::ostringstream oss;
+      oss << i;
+      return oss.str();
+    }
 }

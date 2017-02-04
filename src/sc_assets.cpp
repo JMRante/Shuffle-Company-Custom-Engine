@@ -31,28 +31,28 @@ namespace sc
 
 	bool Mesh::loadToGPU(std::vector<Vertex> *vertices, std::vector<int> *indices)
 	{
-	    glGenVertexArrays(1, &VAOid);
-	    glGenBuffers(1, &VBOid);
-	    glGenBuffers(1, &EBOid);
+		glGenVertexArrays(1, &VAOid);
+		glGenBuffers(1, &VBOid);
+		glGenBuffers(1, &EBOid);
 
 		glBindVertexArray(VAOid);
-		    glBindBuffer(GL_ARRAY_BUFFER, VBOid);
-		    glBufferData(GL_ARRAY_BUFFER, vertices->size() * sizeof(Vertex), &((*vertices)[0]), GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, VBOid);
+			glBufferData(GL_ARRAY_BUFFER, vertices->size() * sizeof(Vertex), &((*vertices)[0]), GL_STATIC_DRAW);
 
-		    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOid);
-		    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices->size() * sizeof(GLuint), &((*indices)[0]), GL_STATIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOid);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices->size() * sizeof(GLuint), &((*indices)[0]), GL_STATIC_DRAW);
 
-		    //Position
-		    glEnableVertexAttribArray(0);
-		    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+			//Position
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
 
-		    //Normal
-		    glEnableVertexAttribArray(1);		    
-		    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat)));
+			//Normal
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat)));
 
-		    //UV
-		    glEnableVertexAttribArray(2);		    
-		    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(6 * sizeof(GLfloat)));		    
+			//UV
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(6 * sizeof(GLfloat)));
 		glBindVertexArray(0);
 
 		indexCount = indices->size();
@@ -95,71 +95,71 @@ namespace sc
 
 	bool Texture::loadToGPU(std::string filepath)
 	{
-	    bool success = false;
+		bool success = false;
 
-	    //Load image with DevIL
-	    ILuint ilID = 0;
-	    ilGenImages(1, &ilID);
-	    ilBindImage(ilID);
+		//Load image with DevIL
+		ILuint ilID = 0;
+		ilGenImages(1, &ilID);
+		ilBindImage(ilID);
 
-	    ILboolean ilSuccess = ilLoadImage(filepath.c_str());
+		ILboolean ilSuccess = ilLoadImage(filepath.c_str());
 
-	    if (ilSuccess == IL_TRUE)
-	    {
-	        //Convert image to RGBA
-	        ilSuccess = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+		if (ilSuccess == IL_TRUE)
+		{
+			//Convert image to RGBA
+			ilSuccess = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 
-	        if (ilSuccess == IL_TRUE)
-	        {
-			    this->removeFromGPU();
+			if (ilSuccess == IL_TRUE)
+			{
+				this->removeFromGPU();
 
-			    width = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
-			    height = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
+				width = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
+				height = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
 
-			    //Generate texture ID
-			    glGenTextures(1, &GLid);
+				//Generate texture ID
+				glGenTextures(1, &GLid);
 
-			    //Load texture into OpenGL
-			    glBindTexture(GL_TEXTURE_2D, GLid);
-				    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
+				//Load texture into OpenGL
+				glBindTexture(GL_TEXTURE_2D, GLid);
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
 
 					glGenerateMipmap(GL_TEXTURE_2D);
-				    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			    glBindTexture(GL_TEXTURE_2D, 0);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glBindTexture(GL_TEXTURE_2D, 0);
 
-			    GLenum error = glGetError();
+				GLenum error = glGetError();
 
-			    if(error != GL_NO_ERROR)
-			    {
-			        LOG_E << "Error loading texture: " << gluErrorString(error);
-			        success = false;
-			    }
-			    else
-			    {
+				if(error != GL_NO_ERROR)
+				{
+					LOG_E << "Error loading texture: " << gluErrorString(error);
+					success = false;
+				}
+				else
+				{
 					success = true;
-			    }
-	        }
+				}
+			}
 
-	        //Delete file from memory
-	        ilDeleteImages(1, &ilID);
-	    }
+			//Delete file from memory
+			ilDeleteImages(1, &ilID);
+		}
 
-	    if(!success)
-	    {
-	        LOG_E << "Unable to load the texture " << filepath;
-	    }
+		if(!success)
+		{
+			LOG_E << "Unable to load the texture " << filepath;
+		}
 
-	    return success;
+		return success;
 	}
 
 	void Texture::removeFromGPU()
 	{
-	    if (GLid != 0)
-	    {
-	        glDeleteTextures(1, &GLid);
+			if (GLid != 0)
+			{
+			glDeleteTextures(1, &GLid);
 			GLid = 0;
-	    }
+		}
 	}
 
 
@@ -270,69 +270,43 @@ namespace sc
 	/*
 		Material
 				*/
-	Material::Material(std::string id, std::string shaderId)
+	Material::Material(std::string id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<std::string> *tma, std::string shaderId)
 	{
 		this->id = id;
 
-		textureA = NULL;
-		textureB = NULL;
-		textureC = NULL;
-		textureD = NULL;
+		if (ima != NULL)
+		{
+			for (int i = 0; i < (int)ima->size(); i++)
+			{
+				integerMaterialArguments.push_back((*ima)[i]);
+			}
+		}
+
+		if (fma != NULL)
+		{
+			for (int i = 0; i < (int)fma->size(); i++)
+			{
+				floatMaterialArguments.push_back((*fma)[i]);
+			}
+		}
+
+		if (vma != NULL)
+		{
+			for (int i = 0; i < (int)vma->size(); i++)
+			{
+				vec4MaterialArguments.push_back((*vma)[i]);
+			}
+		}
+
+		if (tma != NULL)
+		{
+			for (int i = 0; i < (int)tma->size(); i++)
+			{
+				textureMaterialArguments.push_back(assets.getTexture((*tma)[i]));
+			}
+		}
+
 		shader = assets.getShader(shaderId);
-
-		textureCount = 0;		
-	}
-
-	Material::Material(std::string id, std::string textureAId, std::string shaderId)
-	{
-		this->id = id;
-
-		textureA = assets.getTexture(textureAId);
-		textureB = NULL;
-		textureC = NULL;
-		textureD = NULL;
-		shader = assets.getShader(shaderId);
-
-		textureCount = 1;
-	}
-
-	Material::Material(std::string id, std::string textureAId, std::string textureBId, std::string shaderId)
-	{
-		this->id = id;
-
-		textureA = assets.getTexture(textureAId);
-		textureB = assets.getTexture(textureBId);
-		textureC = NULL;
-		textureD = NULL;
-		shader = assets.getShader(shaderId);
-
-		textureCount = 2;
-	}
-
-	Material::Material(std::string id, std::string textureAId, std::string textureBId, std::string textureCId, std::string shaderId)
-	{
-		this->id = id;
-
-		textureA = assets.getTexture(textureAId);
-		textureB = assets.getTexture(textureBId);
-		textureC = assets.getTexture(textureCId);
-		textureD = NULL;
-		shader = assets.getShader(shaderId);
-
-		textureCount = 3;
-	}
-
-	Material::Material(std::string id, std::string textureAId, std::string textureBId, std::string textureCId, std::string textureDId, std::string shaderId)
-	{
-		this->id = id;
-
-		textureA = assets.getTexture(textureAId);
-		textureB = assets.getTexture(textureBId);
-		textureC = assets.getTexture(textureCId);
-		textureD = assets.getTexture(textureDId);
-		shader = assets.getShader(shaderId);
-
-		textureCount = 4;
 	}
 
 
@@ -393,15 +367,9 @@ namespace sc
 		return shaderPool.back().loadToGPU(vertexShaderFilepath, fragmentShaderFilepath);
 	}
 
-	bool Assets::loadMaterial(std::string id, std::string shaderId)
+	bool Assets::loadMaterial(std::string id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<std::string> *tma, std::string shaderId)
 	{
-		materialPool.push_back(Material(id, shaderId));
-		return true;
-	}
-
-	bool Assets::loadMaterial(std::string id, std::string textureAId, std::string shaderId)
-	{
-		materialPool.push_back(Material(id, textureAId, shaderId));
+		materialPool.push_back(Material(id, ima, fma, vma, tma, shaderId));
 		return true;
 	}
 

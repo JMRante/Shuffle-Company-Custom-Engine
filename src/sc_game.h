@@ -21,6 +21,8 @@
 // #include "sc_ui.h"
 #include "sc_assets.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "glm/ext.hpp"
 
 namespace sc

@@ -15,10 +15,13 @@
 
 #include <SDL.h>
 #include <cstdlib>
+#include <sstream>
+#include <string>
 
 namespace sc
 {
 	char* fileRead(const char* filename);
+	std::string IntToString(int i);
 }
 
 #endif
