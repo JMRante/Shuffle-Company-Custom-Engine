@@ -16,6 +16,9 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iterator>
 
 #include <GL/glew.h>
 #include <SDL.h>
@@ -45,6 +48,7 @@ namespace sc
 		int indexCount;
 
 		Mesh(std::string id);
+		bool loadToGPU(std::string filepath);
 		bool loadToGPU(std::vector<Vertex> *vertices, std::vector<int> *indices);
 		void removeFromGPU();
 	};
@@ -123,6 +127,7 @@ namespace sc
 		int worldModelStart;
 
 	public:
+		bool loadMesh(std::string id, std::string filepath);
 		bool loadMesh(std::string id, std::vector<Vertex> *vertices, std::vector<int> *indices);
 		bool loadTexture(std::string id, std::string filepath);
 		bool loadShader(std::string id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath);

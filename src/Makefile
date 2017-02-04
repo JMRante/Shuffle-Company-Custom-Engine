@@ -15,7 +15,9 @@ DevIL_INCLUDE = -IX:\Base\Dev\MinGWDevLib\DevIL\include
 
 GLM_INCLUDE = -IX:\Base\Dev\MinGWDevLib\glm
 
-COMPILER_FLAGS = -g -Wall -c $(SDL_INCLUDE) $(DevIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE)
+OBJLOAD_INCLUDE = -IX:\Base\Dev\MinGWDevLib\tinyobjloader-master
+
+COMPILER_FLAGS = -g -Wall -c $(SDL_INCLUDE) $(DevIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE) $(OBJLOAD_INCLUDE)
 LD_FLAGS = -mwindows -lmingw32 $(SDL_LIB) $(DevIL_LIB) $(FREEGLUT_LIB) $(GLEW_LIB)
 EXE = ShuffleCompany.exe
 

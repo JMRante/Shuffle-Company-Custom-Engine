@@ -12,6 +12,9 @@
 #include "sc_assets.h"
 #include <IL/il.h>
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
+
 namespace sc
 {
 	Assets assets;
@@ -27,6 +30,87 @@ namespace sc
 		EBOid = 0;
 
 		indexCount = 0;
+	}
+
+	bool Mesh::loadToGPU(std::string filepath)
+	{
+		std::vector<Vertex> currentVertices;
+		std::vector<int> currentIndices;
+
+		tinyobj::attrib_t attrib;
+		std::vector<tinyobj::shape_t> shapes;
+		std::vector<tinyobj::material_t> materials;
+
+		std::string err;
+		bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, filepath.c_str());
+
+		if (!err.empty()) 
+		{
+			std::cerr << err << std::endl;
+		}
+
+		if (!ret) 
+		{
+			return false;
+		}
+		
+		//Iterate through faces of object
+		size_t index_offset = 0;
+
+		for (size_t f = 0; f < shapes[0].mesh.num_face_vertices.size(); f++) 
+		{
+			int fv = shapes[0].mesh.num_face_vertices[f];
+
+			for (int v = 0; v < fv; v++) 
+			{
+				//Get vertex data
+				Vertex tempVert;
+				tinyobj::index_t idx = shapes[0].mesh.indices[index_offset + v];
+
+				tempVert.position[0] = attrib.vertices[3 * idx.vertex_index + 0];
+				tempVert.position[1] = attrib.vertices[3 * idx.vertex_index + 1];
+				tempVert.position[2] = attrib.vertices[3 * idx.vertex_index + 2];
+
+				tempVert.normal[0] = attrib.normals[3 * idx.normal_index + 0];
+				tempVert.normal[1] = attrib.normals[3 * idx.normal_index + 1];
+				tempVert.normal[2] = attrib.normals[3 * idx.normal_index + 2];
+
+				tempVert.textureCoord[0] = attrib.texcoords[2 * idx.texcoord_index + 0];
+				tempVert.textureCoord[1] = attrib.texcoords[2 * idx.texcoord_index + 1];
+
+				//Check if vertex already exists; if not, add it.
+				int index = -1;
+
+				for (size_t e = 0; e < currentVertices.size(); e++)
+				{
+					if (tempVert.position[0] == currentVertices[e].position[0]
+						&& tempVert.position[1] == currentVertices[e].position[1]
+						&& tempVert.position[2] == currentVertices[e].position[2]
+						&& tempVert.normal[0] == currentVertices[e].normal[0]
+						&& tempVert.normal[1] == currentVertices[e].normal[1]
+						&& tempVert.normal[2] == currentVertices[e].normal[2]
+						&& tempVert.textureCoord[0] == currentVertices[e].textureCoord[0]
+						&& tempVert.textureCoord[1] == currentVertices[e].textureCoord[1])
+					{
+						index = e;
+						break;
+					}
+				}
+
+				if (index == -1)
+				{
+					currentVertices.push_back(tempVert);
+					index = (int)currentVertices.size() - 1;				
+				}
+
+				currentIndices.push_back(index);
+				LOG_D << "Face: " << f << " Index: " << index << " VX: " << tempVert.position[0] << " VY: " << tempVert.position[1] << " VZ: " << tempVert.position[2];
+			}
+
+			index_offset += fv;
+		}
+
+		return loadToGPU(&currentVertices, &currentIndices);
 	}
 
 	bool Mesh::loadToGPU(std::vector<Vertex> *vertices, std::vector<int> *indices)
@@ -276,7 +360,7 @@ namespace sc
 
 		if (ima != NULL)
 		{
-			for (int i = 0; i < (int)ima->size(); i++)
+			for (size_t i = 0; i < ima->size(); i++)
 			{
 				integerMaterialArguments.push_back((*ima)[i]);
 			}
@@ -284,7 +368,7 @@ namespace sc
 
 		if (fma != NULL)
 		{
-			for (int i = 0; i < (int)fma->size(); i++)
+			for (size_t i = 0; i < fma->size(); i++)
 			{
 				floatMaterialArguments.push_back((*fma)[i]);
 			}
@@ -292,7 +376,7 @@ namespace sc
 
 		if (vma != NULL)
 		{
-			for (int i = 0; i < (int)vma->size(); i++)
+			for (size_t i = 0; i < vma->size(); i++)
 			{
 				vec4MaterialArguments.push_back((*vma)[i]);
 			}
@@ -300,7 +384,7 @@ namespace sc
 
 		if (tma != NULL)
 		{
-			for (int i = 0; i < (int)tma->size(); i++)
+			for (size_t i = 0; i < tma->size(); i++)
 			{
 				textureMaterialArguments.push_back(assets.getTexture((*tma)[i]));
 			}
@@ -333,7 +417,7 @@ namespace sc
 
 	Model* Model::getSubModel(std::string id)
 	{
-		for (int i = 0; i < (int)subModels.size(); i++)
+		for (size_t i = 0; i < subModels.size(); i++)
 		{
 			if (subModels[i].id == id)
 			{
@@ -349,6 +433,12 @@ namespace sc
 	/*
 		Assets
 				*/
+	bool Assets::loadMesh(std::string id, std::string filepath)
+	{
+		meshPool.push_back(Mesh(id));
+		return meshPool.back().loadToGPU(filepath);
+	}
+
 	bool Assets::loadMesh(std::string id, std::vector<Vertex> *vertices, std::vector<int> *indices)
 	{
 		meshPool.push_back(Mesh(id));
@@ -381,7 +471,7 @@ namespace sc
 
 	Mesh* Assets::getMesh(std::string id)
 	{
-		for (int i = 0; i < (int)meshPool.size(); i++)
+		for (size_t i = 0; i < meshPool.size(); i++)
 		{
 			if (meshPool[i].id.compare(id) == 0)
 			{
@@ -397,7 +487,7 @@ namespace sc
 
 	Texture* Assets::getTexture(std::string id)
 	{
-		for (int i = 0; i < (int)texturePool.size(); i++)
+		for (size_t i = 0; i < texturePool.size(); i++)
 		{
 			if (texturePool[i].id.compare(id) == 0)
 			{
@@ -413,7 +503,7 @@ namespace sc
 
 	Shader* Assets::getShader(std::string id)
 	{
-		for (int i = 0; i < (int)shaderPool.size(); i++)
+		for (size_t i = 0; i < shaderPool.size(); i++)
 		{
 			if (shaderPool[i].id.compare(id) == 0)
 			{
@@ -429,7 +519,7 @@ namespace sc
 
 	Material* Assets::getMaterial(std::string id)
 	{
-		for (int i = 0; i < (int)materialPool.size(); i++)
+		for (size_t i = 0; i < materialPool.size(); i++)
 		{
 			if (materialPool[i].id.compare(id) == 0)
 			{
@@ -445,7 +535,7 @@ namespace sc
 
 	Model* Assets::getModel(std::string id)
 	{
-		for (int i = 0; i < (int)modelPool.size(); i++)
+		for (size_t i = 0; i < modelPool.size(); i++)
 		{
 			if (modelPool[i].id.compare(id) == 0)
 			{
