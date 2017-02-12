@@ -1,0 +1,30 @@
+brushes
+brush_number
+material
+material
+material
+material
+material
+material
+
+stage
+brush_number
+x
+y
+z
+
+ OR
+
+brush_number
+x1
+y1
+z1
+x2
+y2
+z2
+
+
+6 phases
+Get position that satsifies extreme condition
+Expand it as much as possible
+Get next

@@ -15,14 +15,16 @@
 #include <vector>
 
 #include "sc_log.h"
-#include "sc_gameElement.h"
+#include "sc_entity.h"
 
 namespace sc
 {
 	class World
 	{
 	public:
-		std::vector<GameElement> elements;
+		sc::EntityManager entityManager;
+
+		void copy(World* otherWorld);
 	};
 }
 

@@ -23,56 +23,56 @@ namespace sc
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Render each world element
-		for (int i = 0; i < (int)renderWorld->elements.size(); i++)
+		sc::EntityManager* em = &renderWorld->entityManager;
+
+		for (auto drawIt = em->getDrawPoolBegin(); drawIt != em->getDrawPoolEnd(); drawIt++)
 		{
-			renderGameElement(&renderWorld->elements[i]);
+			if (drawIt->isVisible)
+			{
+				sc::Model* drawModel = drawIt->getModel();
+
+				glUseProgram(drawModel->material->shader->GLid);
+
+				//Bind all int values to the shader
+				for (size_t i = 0; i < drawModel->material->integerMaterialArguments.size(); i++)
+				{
+					glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("int_" + sc::IntToString(i)).c_str()), drawModel->material->integerMaterialArguments[i]);
+				}
+				//Bind all float values to the shader
+				for (size_t i = 0; i < drawModel->material->floatMaterialArguments.size(); i++)
+				{
+					glUniform1f(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("float_" + sc::IntToString(i)).c_str()), drawModel->material->floatMaterialArguments[i]);
+				}
+
+				//Bind all vec4 values to the shader
+				for (size_t i = 0; i < drawModel->material->vec4MaterialArguments.size(); i++)
+				{
+					glUniform4f(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("vec4_" + sc::IntToString(i)).c_str()), 
+						drawModel->material->vec4MaterialArguments[i][0],
+						drawModel->material->vec4MaterialArguments[i][1],
+						drawModel->material->vec4MaterialArguments[i][2],
+						drawModel->material->vec4MaterialArguments[i][3]);
+				}
+
+				//Bind all textures to the shader
+				for (size_t i = 0; i < drawModel->material->textureMaterialArguments.size(); i++)
+				{
+					glActiveTexture(GL_TEXTURE0 + i);
+					glBindTexture(GL_TEXTURE_2D, drawModel->material->textureMaterialArguments[i]->GLid);
+					glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("texture_" + sc::IntToString(i)).c_str()), i);
+				}
+
+				//Bind transform to shader
+				glm::mat4 pvw = em->getCamera(renderCameraEntityId)->getProjectionMatrix() * em->getCamera(renderCameraEntityId)->getViewMatrix() * em->getTransform(drawIt->getEntityId())->getWorldMatrix();
+				glUniformMatrix4fv(glGetUniformLocation(drawModel->material->shader->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
+
+				glBindVertexArray(drawModel->mesh->VAOid);
+					glDrawElements(GL_TRIANGLES, drawModel->mesh->indexCount, GL_UNSIGNED_INT, 0);
+				glBindVertexArray(0);
+			}
 		}
 
 		SDL_GL_SwapWindow(window);
-	}
-
-	void Renderer::renderGameElement(GameElement *gameElement)
-	{
-		LOG_D << "Rendering " << gameElement->model->id;
-
-		glUseProgram(gameElement->model->material->shader->GLid);
-
-		//Bind all int values to the shader
-		for (int i = 0; i < (int)gameElement->model->material->integerMaterialArguments.size(); i++)
-		{
-			glUniform1i(glGetUniformLocation(gameElement->model->material->shader->GLid, (const GLchar*)("int_" + sc::IntToString(i)).c_str()), gameElement->model->material->integerMaterialArguments[i]);
-		}
-		//Bind all float values to the shader
-		for (int i = 0; i < (int)gameElement->model->material->floatMaterialArguments.size(); i++)
-		{
-			glUniform1f(glGetUniformLocation(gameElement->model->material->shader->GLid, (const GLchar*)("float_" + sc::IntToString(i)).c_str()), gameElement->model->material->floatMaterialArguments[i]);
-		}
-
-		//Bind all vec4 values to the shader
-		for (int i = 0; i < (int)gameElement->model->material->vec4MaterialArguments.size(); i++)
-		{
-			glUniform4f(glGetUniformLocation(gameElement->model->material->shader->GLid, (const GLchar*)("vec4_" + sc::IntToString(i)).c_str()), 
-				gameElement->model->material->vec4MaterialArguments[i][0],
-				gameElement->model->material->vec4MaterialArguments[i][1],
-				gameElement->model->material->vec4MaterialArguments[i][2],
-				gameElement->model->material->vec4MaterialArguments[i][3]);
-		}
-
-		//Bind all textures to the shader
-		for (int i = 0; i < (int)gameElement->model->material->textureMaterialArguments.size(); i++)
-		{
-			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, gameElement->model->material->textureMaterialArguments[i]->GLid);
-			glUniform1i(glGetUniformLocation(gameElement->model->material->shader->GLid, (const GLchar*)("texture_" + sc::IntToString(i)).c_str()), i);
-		}
-
-		//Bind transform to shader
-		glUniformMatrix4fv(glGetUniformLocation(gameElement->model->material->shader->GLid, "transform"), 1, GL_FALSE, glm::value_ptr(gameElement->worldTransform.transform));
-		glUniformMatrix4fv(glGetUniformLocation(gameElement->model->material->shader->GLid, "camera"), 1, GL_FALSE, glm::value_ptr(camera->viewTransform.transform));
-
-		glBindVertexArray(gameElement->model->mesh->VAOid);
-			glDrawElements(GL_TRIANGLES, gameElement->model->mesh->indexCount, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
 	}
 
 	void Renderer::setWorld(sc::World *world)
@@ -80,25 +80,15 @@ namespace sc
 		this->renderWorld = world;
 	}
 
-	void Renderer::initCamera(float near, float far)
+	void Renderer::setCameraEntity(std::string cameraEntityId)
 	{
-		if (camera != NULL)
-		{
-			delete camera;
-		}
-
-		camera = new CameraElement(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), "", near, far);
+		this->renderCameraEntityId = cameraEntityId;
 	}
 
-	// void Renderer::setUI(sc::UI *ui)
-	// {
-	// 	this->ui = ui;
-	// }
-
-	void Renderer::setClearColor(float r, float g, float b)
+	void Renderer::setClearColor(glm::vec4 rgba)
 	{
-		glClearColor(r, g, b, 1.0f);
+		glClearColor(rgba[0], rgba[1], rgba[2], rgba[3]);
 
-		LOG_D << "Set clear color to " << r << " " << g << " " << b;
+		LOG_D << "Set clear color to " << rgba[0] << ", " << rgba[1] << ", " << rgba[2] << ", " << rgba[3];
 	}
 }

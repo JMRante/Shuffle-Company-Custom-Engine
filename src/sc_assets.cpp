@@ -85,14 +85,10 @@ namespace sc
 				{
 					if (tempVert.position[0] == currentVertices[e].position[0]
 						&& tempVert.position[1] == currentVertices[e].position[1]
-						&& tempVert.position[2] == currentVertices[e].position[2]
-						&& tempVert.normal[0] == currentVertices[e].normal[0]
-						&& tempVert.normal[1] == currentVertices[e].normal[1]
-						&& tempVert.normal[2] == currentVertices[e].normal[2]
-						&& tempVert.textureCoord[0] == currentVertices[e].textureCoord[0]
-						&& tempVert.textureCoord[1] == currentVertices[e].textureCoord[1])
+						&& tempVert.position[2] == currentVertices[e].position[2])
 					{
 						index = e;
+						// LOG_D << "Repeat vertex " << e;
 						break;
 					}
 				}
@@ -104,7 +100,7 @@ namespace sc
 				}
 
 				currentIndices.push_back(index);
-				LOG_D << "Face: " << f << " Index: " << index << " VX: " << tempVert.position[0] << " VY: " << tempVert.position[1] << " VZ: " << tempVert.position[2];
+				// LOG_D << "Face: " << f << " Index: " << index << " VX: " << tempVert.position[0] << " VY: " << tempVert.position[1] << " VZ: " << tempVert.position[2];
 			}
 
 			index_offset += fv;

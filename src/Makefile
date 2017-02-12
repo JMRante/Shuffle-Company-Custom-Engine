@@ -23,7 +23,7 @@ EXE = ShuffleCompany.exe
 
 all: $(EXE)
 
-$(EXE): sc_main.o sc_config.o sc_log.o sc_utility.o sc_game.o sc_renderer.o sc_assets.o sc_world.o sc_gameElement.o
+$(EXE): sc_main.o sc_config.o sc_log.o sc_utility.o sc_game.o sc_input.o sc_renderer.o sc_assets.o sc_world.o sc_entity.o sc_component.o sc_behaviors.o
 		$(COMPILER) $^ $(LD_FLAGS) -o $@ $(VERSION)
 
 sc_main.o: sc_main.cpp
@@ -41,6 +41,9 @@ sc_utility.o: sc_utility.cpp
 sc_game.o: sc_game.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
+sc_input.o: sc_input.cpp
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
+
 sc_renderer.o: sc_renderer.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
@@ -50,7 +53,13 @@ sc_assets.o: sc_assets.cpp
 sc_world.o: sc_world.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
-sc_gameElement.o: sc_gameElement.cpp
+sc_entity.o: sc_entity.cpp
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
+
+sc_component.o: sc_component.cpp
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
+
+sc_behaviors.o: sc_behaviors.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
 clean:

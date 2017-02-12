@@ -16,14 +16,15 @@
 
 #include <SDL.h>
 
-#include "sc_log.h"
-#include "sc_world.h"
-// #include "sc_ui.h"
-#include "sc_assets.h"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "glm/ext.hpp"
+
+#include "sc_log.h"
+#include "sc_world.h"
+#include "sc_assets.h"
+#include "sc_entity.h"
+#include "sc_behaviors.h"
 
 namespace sc
 {
@@ -34,10 +35,10 @@ namespace sc
 
 	public:
 		sc::World *currentState;
-		// sc::UI *ui; 
 
 		void start();
 		bool update();
+		sc::World *updateWorldState();
 	};
 }
 

@@ -24,13 +24,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "glm/ext.hpp"
 
 //Shuffle Company Headers
 #include "sc_config.h"
 #include "sc_log.h"
 #include "sc_game.h"
 #include "sc_renderer.h"
-#include "sc_assets.h"
 
 //Defines
 #define MS_PER_FRAME 16
@@ -113,6 +113,10 @@ bool initiate()
     glViewport(0, 0, sc::config.get("WINDOW_WIDTH"), sc::config.get("WINDOW_HEIGHT"));
 	glEnable(GL_DEPTH_TEST); 
 
+	//Initiate SDL options
+	SDL_GL_SetSwapInterval(1);
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+
 	return true;
 }
 
@@ -138,14 +142,14 @@ int main(int argc, char **argv)
 		sc::Renderer renderer(window);
 
 		game.start();
-		renderer.setWorld(game.currentState);
-		renderer.initCamera(0.01f, 100.0f);
+		renderer.setCameraEntity("E_CAMERA");
 
 		while (!hasQuit)
 		{
 			startTime = SDL_GetTicks();
 
 			hasQuit = game.update();
+			renderer.setWorld(game.updateWorldState());
 			renderer.render();
 
 			delay = startTime + MS_PER_FRAME - SDL_GetTicks();
