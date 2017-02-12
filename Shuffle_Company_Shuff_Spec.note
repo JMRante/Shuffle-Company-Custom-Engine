@@ -1,27 +1,12 @@
+shuff
 brushes
-brush_number
-material
-material
-material
-material
-material
-material
-
+{material} {material} {material} {material} {material};
+OR
+{material};
+OR
+{material} {material};
 stage
-brush_number
-x
-y
-z
-
- OR
-
-brush_number
-x1
-y1
-z1
-x2
-y2
-z2
+{brush_number}{x}{y}{z}; OR {brush_number}{x1}{y1}{z1}{x2}{y2}{z2};
 
 
 6 phases

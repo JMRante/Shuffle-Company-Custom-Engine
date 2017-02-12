@@ -134,6 +134,8 @@ namespace sc
 		bool loadMaterial(std::string id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<std::string> *tma, std::string shaderId);
 		bool loadModel(std::string id, std::string meshId, std::string materialId);
 
+		void loadDefaults();
+
 		Mesh* getMesh(std::string id);
 		Texture* getTexture(std::string id);
 		Shader* getShader(std::string id);

@@ -18,46 +18,11 @@ namespace sc
 		currentState = new sc::World();
 		nextState = new sc::World();
 
-
-		//Load Assets
-		sc::Vertex tempVert;
-		std::vector<sc::Vertex> vecVert;
-
-		tempVert.position = glm::vec3(0.5f, 0.5f, 0.0f);
-		tempVert.normal = glm::vec3(0.0f, 0.0f, -1.0f);
-		tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
-		vecVert.push_back(tempVert);
-
-		tempVert.position = glm::vec3(0.5f, -0.5f, 0.0f);
-		vecVert.push_back(tempVert);
-
-		tempVert.position = glm::vec3(-0.5f, -0.5f, 0.0f);
-		vecVert.push_back(tempVert);
-
-		tempVert.position = glm::vec3(-0.5f, 0.5f, 0.0f);
-		vecVert.push_back(tempVert);
-
-		static const int ind[] = {0, 1, 3, 1, 2, 3};
-		std::vector<int> vecInd(ind, ind + sizeof(ind) / sizeof(ind[0]));
-
-		sc::assets.loadMesh("ME_SQUARE", &vecVert, &vecInd);		
-		sc::assets.loadMesh("ME_SPHERE", "Resources/Meshes/ME_SPHERE.obj");
-
-		sc::assets.loadShader("SH_PASS", "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");
-
-		std::vector<glm::vec4> tempVec4;
-		tempVec4.push_back(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		sc::assets.loadMaterial("MA_RED", NULL, NULL, &tempVec4, NULL, "SH_PASS");
-		tempVec4.clear();
-		tempVec4.push_back(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-		sc::assets.loadMaterial("MA_BLUE", NULL, NULL, &tempVec4, NULL, "SH_PASS");
-
-		sc::assets.loadModel("MO_TESTA", "ME_SQUARE", "MA_RED");
-		sc::assets.loadModel("MO_TESTB", "ME_SPHERE", "MA_BLUE");
-
+		assets.loadDefaults();
 
 		//Build elements
 		sc::EntityManager* em = &nextState->entityManager;
+		currentState->stage.loadStage("Custom/Levels/TestLevel.shuff");
 
 		em->addEntity("E_CAMERA");
 		em->getTransform("E_CAMERA")->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));

@@ -143,13 +143,11 @@ namespace sc
 
 	int Input::getMouseXDelta()
 	{
-		LOG_D << "MXD: " << mouseXDelta;
 		return mouseXDelta;
 	}
 
 	int Input::getMouseYDelta()
 	{
-		LOG_D << "MYD: " << mouseYDelta;
 		return mouseYDelta;
 	}
 

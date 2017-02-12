@@ -465,6 +465,49 @@ namespace sc
 		return true;
 	}
 
+	void Assets::loadDefaults()
+	{
+		//Load default assets
+		Vertex tempVert;
+		std::vector<Vertex> vecVert;
+
+		//Flat Stage Cube Side
+		tempVert.position = glm::vec3(0.5f, 0.5f, 0.0f);
+		tempVert.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+		tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
+		vecVert.push_back(tempVert);
+
+		tempVert.position = glm::vec3(0.5f, -0.5f, 0.0f);
+		tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+		vecVert.push_back(tempVert);
+
+		tempVert.position = glm::vec3(-0.5f, -0.5f, 0.0f);
+		tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
+		vecVert.push_back(tempVert);
+
+		tempVert.position = glm::vec3(-0.5f, 0.5f, 0.0f);
+		tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
+		vecVert.push_back(tempVert);
+
+		static const int ind[] = {0, 1, 3, 1, 2, 3};
+		std::vector<int> vecInd(ind, ind + sizeof(ind) / sizeof(ind[0]));
+
+		loadMesh("ME_FLAT", &vecVert, &vecInd);
+		loadMesh("ME_SPHERE", "Resources/Meshes/ME_SPHERE.obj");
+
+		loadShader("SH_PASS", "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");
+
+		std::vector<glm::vec4> tempVec4;
+		tempVec4.push_back(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		loadMaterial("MA_RED", NULL, NULL, &tempVec4, NULL, "SH_PASS");
+		tempVec4.clear();
+		tempVec4.push_back(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+		loadMaterial("MA_BLUE", NULL, NULL, &tempVec4, NULL, "SH_PASS");
+
+		loadModel("MO_TESTA", "ME_FLAT", "MA_RED");
+		loadModel("MO_TESTB", "ME_SPHERE", "MA_BLUE");		
+	}
+
 	Mesh* Assets::getMesh(std::string id)
 	{
 		for (size_t i = 0; i < meshPool.size(); i++)

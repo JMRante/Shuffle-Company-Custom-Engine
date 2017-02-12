@@ -16,6 +16,7 @@
 
 #include "sc_log.h"
 #include "sc_entity.h"
+#include "sc_stage.h"
 
 namespace sc
 {
@@ -23,6 +24,7 @@ namespace sc
 	{
 	public:
 		sc::EntityManager entityManager;
+		sc::Stage stage;
 
 		void copy(World* otherWorld);
 	};
