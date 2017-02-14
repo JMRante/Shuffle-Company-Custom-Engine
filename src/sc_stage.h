@@ -15,6 +15,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <cmath>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -25,29 +26,48 @@
 #include "sc_assets.h"
 #include "sc_tokenizer.h"
 
+#define STAGE_WIDTH 200
+#define STAGE_DEPTH 200
+#define STAGE_HEIGHT 100
+
+#define MAX_SIMPLE_TEXTURES 194
+#define STAGE_TEXTURE_DIM 4096
+#define SIMPLE_TEXTURE_DIM 256
+
 namespace sc
 {
 	class Brush
 	{
 	public:
-		std::string mat_E;
-		std::string mat_N;
-		std::string mat_W;
-		std::string mat_S;
-		std::string mat_T;
-		std::string mat_B;
+		unsigned char tex_E;
+		unsigned char tex_N;
+		unsigned char tex_W;
+		unsigned char tex_S;
+		unsigned char tex_T;
+		unsigned char tex_B;
 
-		Brush(std::string mat);
+		Brush(unsigned char texNum);
 	};
 
 	class Stage
 	{
 	private:
 		sc::Model* model;
+		std::vector<std::string> textures;
 		std::vector<Brush> brushes;
+		unsigned char stage[STAGE_WIDTH][STAGE_DEPTH][STAGE_HEIGHT] = {};
 
 	public:
 		bool loadStage(std::string filepath);
+		bool readStageFile(std::string filepath);
+		bool loadStageTextures();
+		bool buildStageMesh();
+		bool createStageModel();
+
+		int getTextureX(unsigned char textureNum);
+		int getTextureY(unsigned char textureNum);
+		unsigned char getTextureNum(std::string textureName);
+
 		sc::Model* getModel();
 	};
 }

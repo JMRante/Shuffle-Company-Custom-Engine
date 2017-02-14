@@ -63,6 +63,7 @@ namespace sc
 		GLuint height;
 
 		Texture(std::string id);
+		bool loadToGPU(GLuint width, GLuint height, GLuint* data);
 		bool loadToGPU(std::string filepath);
 		void removeFromGPU();
 	};
@@ -130,6 +131,7 @@ namespace sc
 		bool loadMesh(std::string id, std::string filepath);
 		bool loadMesh(std::string id, std::vector<Vertex> *vertices, std::vector<int> *indices);
 		bool loadTexture(std::string id, std::string filepath);
+		bool loadTexture(std::string id, GLuint width, GLuint height, GLuint* data);
 		bool loadShader(std::string id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
 		bool loadMaterial(std::string id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<std::string> *tma, std::string shaderId);
 		bool loadModel(std::string id, std::string meshId, std::string materialId);

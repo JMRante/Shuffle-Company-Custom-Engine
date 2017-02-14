@@ -36,7 +36,7 @@ namespace sc
 		sc::Transform* transformA = em->getTransform("E_TESTA");
 		transformA->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
 		transformA->setRotation(glm::vec3(0.0f, glm::radians(45.0f), 0.0f));
-		sc::Draw drawA("MO_TESTA", true);
+		sc::Draw drawA("MO_STAGE", true);
 		em->addDraw("E_TESTA", drawA);
 
 		em->addEntity("E_TESTB");

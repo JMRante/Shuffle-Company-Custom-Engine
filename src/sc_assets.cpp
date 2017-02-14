@@ -10,6 +10,7 @@
 */
 
 #include "sc_assets.h"
+
 #include <IL/il.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -173,6 +174,33 @@ namespace sc
 		GLid = 0;
 	}
 
+	bool Texture::loadToGPU(GLuint width, GLuint height, GLuint* data)
+	{
+		this->removeFromGPU();
+
+		//Generate texture ID
+		glGenTextures(1, &GLid);
+
+		//Load texture into OpenGL
+		glBindTexture(GL_TEXTURE_2D, GLid);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+			glGenerateMipmap(GL_TEXTURE_2D);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		GLenum error = glGetError();
+
+		if(error != GL_NO_ERROR)
+		{
+			LOG_E << "Error loading texture: " << gluErrorString(error);
+			return false;
+		}
+
+		return true;
+	}
+
 	bool Texture::loadToGPU(std::string filepath)
 	{
 		bool success = false;
@@ -235,8 +263,8 @@ namespace sc
 
 	void Texture::removeFromGPU()
 	{
-			if (GLid != 0)
-			{
+		if (GLid != 0)
+		{
 			glDeleteTextures(1, &GLid);
 			GLid = 0;
 		}
@@ -447,6 +475,12 @@ namespace sc
 		return texturePool.back().loadToGPU(filepath);
 	}
 
+	bool Assets::loadTexture(std::string id, GLuint width, GLuint height, GLuint* data)
+	{
+		texturePool.push_back(Texture(id));
+		return texturePool.back().loadToGPU(width, height, data);
+	}
+
 	bool Assets::loadShader(std::string id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
 	{
 		shaderPool.push_back(Shader(id));
@@ -496,6 +530,8 @@ namespace sc
 		loadMesh("ME_SPHERE", "Resources/Meshes/ME_SPHERE.obj");
 
 		loadShader("SH_PASS", "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");
+		loadShader("SH_TEX", "Resources/Shaders/sc_shader_testTextureVertex.glsl", "Resources/Shaders/sc_shader_testTextureFragment.glsl");
+
 
 		std::vector<glm::vec4> tempVec4;
 		tempVec4.push_back(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -503,9 +539,13 @@ namespace sc
 		tempVec4.clear();
 		tempVec4.push_back(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 		loadMaterial("MA_BLUE", NULL, NULL, &tempVec4, NULL, "SH_PASS");
+		std::vector<std::string> tempString;
+		tempString.push_back("TX_TEST");
+		loadTexture("TX_TEST", "Resources/Textures/w5block256.png");
+		loadMaterial("MA_TEX", NULL, NULL, NULL, &tempString, "SH_TEX");
 
-		loadModel("MO_TESTA", "ME_FLAT", "MA_RED");
-		loadModel("MO_TESTB", "ME_SPHERE", "MA_BLUE");		
+		loadModel("MO_TESTA", "ME_FLAT", "MA_TEX");
+		loadModel("MO_TESTB", "ME_SPHERE", "MA_BLUE");
 	}
 
 	Mesh* Assets::getMesh(std::string id)

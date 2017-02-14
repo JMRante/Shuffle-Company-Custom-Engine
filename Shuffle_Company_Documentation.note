@@ -33,3 +33,19 @@ The engine should be simple and fast in both construction and interface.
 
 While gameplay is king, story holds an important place the hearts of many players as well, as can be seen in the content created by the Wonderland community.
 Story, thus, should not be completely ignored or left to the wayside.
+
+-Stage Implementation Details-
+
+The stage is the solid set of cubes making up the majority of the game world. The cubes can have different materials and geometry properties. A stage is a single
+model, consisting of one mesh loaded onto the GPU and one PBR material consisting of 4, 4096x4096 textures. Thus, the entire stage is handled in a single draw call.
+
+A stage is stored as a set of brushes and a set of chunks. Brushes are cubes with texture definitions for all 6 sides. Chunks are rectangular prisms of varying size
+that consist of the same brush type. Brushes and chunks are created and generated behind the scenes in the level editor. On loading a stage, the first thing to happen
+is the loading of brushes into a list. Once all the brushes are loaded, the engine knows which textures the level needs. It loads these textures from either the
+asset pool or, if they are not yet loaded, from a file. These textures are then programmatically packed into 4096x4096 textures, one for each PBR property, and sent
+to the GPU. The material for the stage, MA_STAGE, is defined. Then, the chunks are read and used to populate a 3D array of cubes referencing their respective brushes. 
+From this 3D array, the vertices, normals, and texture coordinates for the stage geometry are generated (and any geometry optimization that needs to happen is done).
+The texture coordinates are based upon the cubes brush defintion. Once the mesh is generated, it is sent to the GPU. The 3D array sticks around and is used for checking
+the position of stage cubes. Once a stage is loaded out, the stage mesh is removed from the GPU along with the 4 stage textures, the stage material, and the stage model.
+
+A single stage can have 194 simple tiles and 19 auto tiles.

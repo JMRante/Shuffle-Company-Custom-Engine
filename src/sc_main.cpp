@@ -21,6 +21,9 @@
 #include <SDL_opengl.h>
 #include <GL/glu.h>
 
+#include <IL/il.h> 
+#include <IL/ilu.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -116,6 +119,18 @@ bool initiate()
 	//Initiate SDL options
 	SDL_GL_SetSwapInterval(1);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
+
+	//Initiate DevIL
+	ilInit();
+	iluInit();
+	ilClearColour(0, 0, 0, 0);
+
+	ILenum ilError = ilGetError();
+	if (ilError != IL_NO_ERROR)
+	{
+		LOG_E << "Error initiating DevIL: " << iluErrorString(ilError);
+		return false;
+	}
 
 	return true;
 }

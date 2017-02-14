@@ -16,3 +16,18 @@ Plus 4 Additional Pixel Shader Maps:
 ~0.5gB of high-res textures alone in worse case scenario.
 
 When x4 original Wonderland tile texture size of 64x64.
+
+------------------
+
+Stages will use a 4096x4096 texture, being able to store 256 256x256 textures (adoption of GPU's supporting 4096x4096 textures is around 94%)
+
+4096x4096x4 = 67mb
+
+There will an albedo, normal, shininess, and metallic texture for each stage material.
+
+67mb x 4 = 268mb
+
+So the stage materials only need 268mb in texture memory, offering massive improvements over the original Wonderland Adventures texture system (4 time the number of tiles as well as four times the resolution; huge win!).
+
+3/4 of the stage texture will be for simple tiles, 1/4 for auto tiles.
+A single stage can have 194 simple tiles and 19 auto tiles.
