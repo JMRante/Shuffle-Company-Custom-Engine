@@ -13,3 +13,23 @@ stage
 Get position that satsifies extreme condition
 Expand it as much as possible
 Get next
+
+Sample vertexes for given array position
+x = 0, y = 0, z = 0
+
+. (0,0,1)       . (1,0,1)
+
+
+
+
+
+. (0,1,1)       . (1,1,1)
+
+
+. (0,0,0)       . (1,0,0)
+
+
+
+
+
+. (0,1,0)       . (1,1,0)

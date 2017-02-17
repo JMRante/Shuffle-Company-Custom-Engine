@@ -37,6 +37,14 @@ namespace sc
 		glm::vec2 textureCoord;
 	};
 
+	struct StageVertex
+	{
+		glm::vec3 position;
+		glm::vec3 normal;
+		glm::vec2 textureCoord;
+		float textureNum;
+	};
+
 	class Mesh
 	{
 	public:
@@ -50,6 +58,7 @@ namespace sc
 		Mesh(std::string id);
 		bool loadToGPU(std::string filepath);
 		bool loadToGPU(std::vector<Vertex> *vertices, std::vector<int> *indices);
+		bool loadToGPU(std::vector<StageVertex> *vertices, std::vector<int> *indices);
 		void removeFromGPU();
 	};
 
@@ -61,10 +70,12 @@ namespace sc
 
 		GLuint width;
 		GLuint height;
+		bool array;
 
 		Texture(std::string id);
-		bool loadToGPU(GLuint width, GLuint height, GLuint* data);
 		bool loadToGPU(std::string filepath);
+		bool loadToGPU(GLuint width, GLuint height, GLuint* data);
+		bool loadToGPU(GLuint width, GLuint height, std::vector<GLuint*> dataArray);
 		void removeFromGPU();
 	};
 
@@ -130,8 +141,12 @@ namespace sc
 	public:
 		bool loadMesh(std::string id, std::string filepath);
 		bool loadMesh(std::string id, std::vector<Vertex> *vertices, std::vector<int> *indices);
+		bool loadMesh(std::string id, std::vector<StageVertex> *vertices, std::vector<int> *indices);
+
 		bool loadTexture(std::string id, std::string filepath);
 		bool loadTexture(std::string id, GLuint width, GLuint height, GLuint* data);
+		bool loadTexture(std::string id, GLuint width, GLuint height, std::vector<GLuint*> dataArray);
+
 		bool loadShader(std::string id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
 		bool loadMaterial(std::string id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<std::string> *tma, std::string shaderId);
 		bool loadModel(std::string id, std::string meshId, std::string materialId);

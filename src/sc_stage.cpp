@@ -30,21 +30,25 @@ namespace sc
 	{
 		if (!readStageFile(filepath))
 		{
+			LOG_E << "Error: Could not open shuff file " << filepath;
 			return false;
 		}
 
 		if (!loadStageTextures())
 		{
+			LOG_E << "Error: Could not load the stage textures";
 			return false;
 		}
 
 		if (!buildStageMesh())
 		{
+			LOG_E << "Error: Could not build the stage mesh";
 			return false;
 		}
 
 		if (!createStageModel())
 		{
+			LOG_E << "Error: Could not create stage model";
 			return false;
 		}
 
@@ -117,6 +121,7 @@ namespace sc
 								while (t.checkType("int"))
 								{
 									brush = (unsigned char)(atoi(t.getToken().c_str()));
+									brush += 1;
 									LOG_I << "Brush: " << brush;
 									t.next();
 									if (t.checkType("int"))
@@ -161,7 +166,6 @@ namespace sc
 		}
 		else
 		{
-			LOG_E << "Could not open shuff file " << filepath;
 			return false;
 		}
 
@@ -172,87 +176,276 @@ namespace sc
 
 	bool Stage::loadStageTextures()
 	{
-		ILuint baseId = 0;
-		ilGenImages(1, &baseId);
-		ilBindImage(baseId);
+		std::vector<GLuint*> dataArray;
 
-		ILboolean success = ilTexImage(STAGE_TEXTURE_DIM, STAGE_TEXTURE_DIM, 0, 4, IL_RGBA, IL_UNSIGNED_BYTE, NULL);
+		ILuint texIds[MAX_SIMPLE_TEXTURES];
+		ilGenImages(MAX_SIMPLE_TEXTURES, texIds);
 
-		if (success == IL_TRUE)
+		ILboolean success;
+
+		for (size_t i = 0; i < textures.size(); i++)
 		{
-			for (size_t i = 0; i < textures.size(); i++)
-			{
-				ILuint tempId = 0;
-				ilGenImages(1, &tempId);
-				ilBindImage(tempId);
+			ilBindImage(texIds[i]);
 
-				success = ilLoadImage(("Resources/StageTextures/Simple/Albedo/ST_" + textures[i] + ".png").c_str());
+			success = ilLoadImage(("Resources/StageTextures/Simple/Albedo/ST_" + textures[i] + ".png").c_str());
+
+			if (success == IL_TRUE)
+			{
+				success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 
 				if (success == IL_TRUE)
 				{
-					success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-
-					if (success == IL_TRUE)
+					if (ilGetInteger(IL_IMAGE_WIDTH) == SIMPLE_TEXTURE_DIM && ilGetInteger(IL_IMAGE_HEIGHT) == SIMPLE_TEXTURE_DIM)
 					{
-						if (ilGetInteger(IL_IMAGE_WIDTH) == SIMPLE_TEXTURE_DIM && ilGetInteger(IL_IMAGE_HEIGHT) == SIMPLE_TEXTURE_DIM)
-						{
-							ilBindImage(baseId);
-							success = ilOverlayImage(tempId, (ILint)getTextureX(i), (ILint)getTextureY(i), 0);
-
-							if (success == IL_TRUE)
-							{
-								ilDeleteImages(1, &tempId);
-							}
-							else
-							{
-								LOG_E << "Failed to copy simple stage texture to stage texture";
-								return false;
-							}
-						}
-						else
-						{
-							LOG_E << "Simple stage texture has wrong dimensions. Should be 256x256";
-							return false;
-						}
+						dataArray.push_back((GLuint*)ilGetData());
 					}
 					else
 					{
-						LOG_E << "Error converting image to RGBA";
+						LOG_E << "Simple stage texture has wrong dimensions. Should be 256x256";
 						return false;
 					}
 				}
 				else
 				{
-					LOG_E << "Error loading simple stage texture";
+					LOG_E << "Error converting image to RGBA";
 					return false;
 				}
 			}
-		}
-		else
-		{
-			LOG_E << "Error creating stage texture";
-			return false;
+			else
+			{
+				LOG_E << "Error loading simple stage texture";
+				return false;
+			}
 		}
 
-		assets.loadTexture("TX_STAGE", STAGE_TEXTURE_DIM, STAGE_TEXTURE_DIM, (GLuint*)ilGetData());
-		ilDeleteImages(1, &baseId);
+		assets.loadTexture("TX_STAGE", SIMPLE_TEXTURE_DIM, SIMPLE_TEXTURE_DIM, dataArray);
+		ilDeleteImages(MAX_SIMPLE_TEXTURES, texIds);
 
 		std::vector<std::string> tempString;
 		tempString.push_back("TX_STAGE");
-		assets.loadMaterial("MA_STAGE", NULL, NULL, NULL, &tempString, "SH_TEX");
-
-		return true;
+		
+		return assets.loadMaterial("MA_STAGE", NULL, NULL, NULL, &tempString, "SH_STAGE");
 	}
 
 	bool Stage::buildStageMesh()
 	{
-		return true;
+		std::vector<sc::StageVertex> stageVertices;
+		std::vector<int> stageIndices;
+		int vertCount = 0;
+		sc::StageVertex tempVert;
+
+		for (int i = 0; i < STAGE_WIDTH; i++)
+		{
+			for (int j = 0; j < STAGE_DEPTH; j++)
+			{
+				for (int k = 0; k < STAGE_HEIGHT; k++)
+				{
+					if (stage[i][j][k] != 0)
+					{
+						Brush* brush = &(brushes[stage[i][j][k] - 1]);
+
+						//E
+						if (i + 1 >= STAGE_WIDTH || stage[i + 1][j][k] == 0)
+						{
+							tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 0.0f);
+							tempVert.normal       = glm::vec3(1.0f, 0.0f, 0.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
+							tempVert.textureNum   = (float)brush->tex_E;
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 1.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 1.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 0.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+							stageVertices.push_back(tempVert);
+
+							stageIndices.push_back(vertCount);
+							stageIndices.push_back(vertCount + 1);
+							stageIndices.push_back(vertCount + 2);
+
+							stageIndices.push_back(vertCount);
+							stageIndices.push_back(vertCount + 3);
+							stageIndices.push_back(vertCount + 1);
+
+							vertCount += 4;
+						}
+
+						//W
+						if (i - 1 <= -1 || stage[i - 1][j][k] == 0)
+						{
+							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 1.0f);
+							tempVert.normal       = glm::vec3(-1.0f, 0.0f, 0.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
+							tempVert.textureNum   = (float)brush->tex_W;
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 0.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 0.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 1.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+							stageVertices.push_back(tempVert);
+
+							stageIndices.push_back(vertCount);
+							stageIndices.push_back(vertCount + 1);
+							stageIndices.push_back(vertCount + 2);
+
+							stageIndices.push_back(vertCount);
+							stageIndices.push_back(vertCount + 3);
+							stageIndices.push_back(vertCount + 1);
+
+							vertCount += 4;
+						}
+
+						//S
+						if (k + 1 >= STAGE_HEIGHT || stage[i][j][k + 1] == 0)
+						{
+							tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 1.0f);
+							tempVert.normal       = glm::vec3(0.0f, 0.0f, 1.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
+							tempVert.textureNum   = (float)brush->tex_T;
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 0.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 1.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 0.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+							stageVertices.push_back(tempVert);
+
+							stageIndices.push_back(vertCount);
+							stageIndices.push_back(vertCount + 1);
+							stageIndices.push_back(vertCount + 2);
+
+							stageIndices.push_back(vertCount);
+							stageIndices.push_back(vertCount + 3);
+							stageIndices.push_back(vertCount + 1);
+
+							vertCount += 4;
+						}
+
+						//N
+						if (k - 1 <= -1 || stage[i][j][k - 1] == 0)
+						{
+							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 0.0f);
+							tempVert.normal       = glm::vec3(0.0f, 0.0f, -1.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
+							tempVert.textureNum   = (float)brush->tex_B;
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 0.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 0.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 0.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
+							stageVertices.push_back(tempVert);
+
+							stageIndices.push_back(vertCount);
+							stageIndices.push_back(vertCount + 1);
+							stageIndices.push_back(vertCount + 2);
+
+							stageIndices.push_back(vertCount);
+							stageIndices.push_back(vertCount + 3);
+							stageIndices.push_back(vertCount + 1);
+
+							vertCount += 4;
+						}
+
+						//T
+						if (j + 1 >= STAGE_DEPTH || stage[i][j + 1][k] == 0)
+						{
+							tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 1.0f);
+							tempVert.normal       = glm::vec3(0.0f, 1.0f, 0.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
+							tempVert.textureNum   = (float)brush->tex_S;
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 1.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 1.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 1.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+							stageVertices.push_back(tempVert);
+
+							stageIndices.push_back(vertCount);
+							stageIndices.push_back(vertCount + 1);
+							stageIndices.push_back(vertCount + 2);
+
+							stageIndices.push_back(vertCount);
+							stageIndices.push_back(vertCount + 3);
+							stageIndices.push_back(vertCount + 1);
+
+							vertCount += 4;
+						}
+
+						//B
+						if (j - 1 <= -1 || stage[i][j - 1][k] == 0)
+						{
+							tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 0.0f);
+							tempVert.normal       = glm::vec3(0.0f, -1.0f, 0.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
+							tempVert.textureNum   = (float)brush->tex_N;
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 1.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 0.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
+							stageVertices.push_back(tempVert);
+
+							tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 1.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+							stageVertices.push_back(tempVert);
+
+							stageIndices.push_back(vertCount);
+							stageIndices.push_back(vertCount + 1);
+							stageIndices.push_back(vertCount + 2);
+
+							stageIndices.push_back(vertCount);
+							stageIndices.push_back(vertCount + 3);
+							stageIndices.push_back(vertCount + 1);
+
+							vertCount += 4;					
+						}
+					}
+				}
+			}
+		}
+
+		return assets.loadMesh("ME_STAGE", &stageVertices, &stageIndices);
 	}
 
 	bool Stage::createStageModel()
 	{
-		assets.loadModel("MO_STAGE", "ME_FLAT", "MA_STAGE");
-		return true;
+		return assets.loadModel("MO_STAGE", "ME_STAGE", "MA_STAGE");
 	}
 
 	int Stage::getTextureX(unsigned char textureNum)
@@ -299,6 +492,30 @@ namespace sc
 		return -1;
 	}
 
+	float Stage::getTextureUMin(unsigned char textureNum)
+	{
+		// return (float)getTextureX(textureNum) / (float)STAGE_TEXTURE_DIM;
+		return 0.0f;
+	}
+
+	float Stage::getTextureVMin(unsigned char textureNum)
+	{
+		// return (float)getTextureY(textureNum) / (float)STAGE_TEXTURE_DIM;
+		return 0.0f;
+	}
+
+	float Stage::getTextureUMax(unsigned char textureNum)
+	{
+		// return getTextureUMin(textureNum) + ((float)SIMPLE_TEXTURE_DIM / (float)STAGE_TEXTURE_DIM);
+		return 0.5f;
+	}
+
+	float Stage::getTextureVMax(unsigned char textureNum)
+	{
+		// return getTextureVMin(textureNum) + ((float)SIMPLE_TEXTURE_DIM / (float)STAGE_TEXTURE_DIM);
+		return 0.5f;
+	}
+
 	unsigned char Stage::getTextureNum(std::string textureName)
 	{
 		size_t i = 0;
@@ -314,10 +531,5 @@ namespace sc
 		}
 
 		return 255;
-	}
-
-	sc::Model* Stage::getModel()
-	{
-		return model;
 	}
 }

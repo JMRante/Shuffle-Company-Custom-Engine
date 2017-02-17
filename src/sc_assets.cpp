@@ -151,6 +151,51 @@ namespace sc
 		}
 	}
 
+	bool Mesh::loadToGPU(std::vector<StageVertex> *vertices, std::vector<int> *indices)
+	{
+		glGenVertexArrays(1, &VAOid);
+		glGenBuffers(1, &VBOid);
+		glGenBuffers(1, &EBOid);
+
+		glBindVertexArray(VAOid);
+			glBindBuffer(GL_ARRAY_BUFFER, VBOid);
+			glBufferData(GL_ARRAY_BUFFER, vertices->size() * sizeof(StageVertex), &((*vertices)[0]), GL_STATIC_DRAW);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOid);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices->size() * sizeof(GLuint), &((*indices)[0]), GL_STATIC_DRAW);
+
+			//Position
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(StageVertex), (GLvoid*)0);
+
+			//Normal
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(StageVertex), (GLvoid*)(3 * sizeof(GLfloat)));
+
+			//UV
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(StageVertex), (GLvoid*)(6 * sizeof(GLfloat)));
+
+			//Texture
+			glEnableVertexAttribArray(3);
+			glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(StageVertex), (GLvoid*)(8 * sizeof(GLfloat)));
+		glBindVertexArray(0);
+
+		indexCount = indices->size();
+
+		GLenum error = glGetError();
+
+		if (error != GL_NO_ERROR)
+		{
+			LOG_E << "Error loading mesh: " << gluErrorString(error);
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
 	void Mesh::removeFromGPU()
 	{
 		if (VAOid != 0)
@@ -172,33 +217,7 @@ namespace sc
 	{
 		this->id = id;
 		GLid = 0;
-	}
-
-	bool Texture::loadToGPU(GLuint width, GLuint height, GLuint* data)
-	{
-		this->removeFromGPU();
-
-		//Generate texture ID
-		glGenTextures(1, &GLid);
-
-		//Load texture into OpenGL
-		glBindTexture(GL_TEXTURE_2D, GLid);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-			glGenerateMipmap(GL_TEXTURE_2D);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		GLenum error = glGetError();
-
-		if(error != GL_NO_ERROR)
-		{
-			LOG_E << "Error loading texture: " << gluErrorString(error);
-			return false;
-		}
-
-		return true;
+		array = false;
 	}
 
 	bool Texture::loadToGPU(std::string filepath)
@@ -231,9 +250,9 @@ namespace sc
 				glBindTexture(GL_TEXTURE_2D, GLid);
 					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
 
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 					glGenerateMipmap(GL_TEXTURE_2D);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glBindTexture(GL_TEXTURE_2D, 0);
 
 				GLenum error = glGetError();
@@ -259,6 +278,68 @@ namespace sc
 		}
 
 		return success;
+	}
+
+	bool Texture::loadToGPU(GLuint width, GLuint height, GLuint* data)
+	{
+		this->removeFromGPU();
+
+		//Generate texture ID
+		glGenTextures(1, &GLid);
+
+		//Load texture into OpenGL
+		glBindTexture(GL_TEXTURE_2D, GLid);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		GLenum error = glGetError();
+
+		if(error != GL_NO_ERROR)
+		{
+			LOG_E << "Error loading texture: " << gluErrorString(error);
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Texture::loadToGPU(GLuint width, GLuint height, std::vector<GLuint*> dataArray)
+	{
+		this->removeFromGPU();
+
+		//Generate texture ID
+		glGenTextures(1, &GLid);
+
+		//Load texture into OpenGL
+		glBindTexture(GL_TEXTURE_2D_ARRAY, GLid);
+			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, dataArray.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
+
+			for (size_t i = 0; i < dataArray.size(); i++)
+			{
+				glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, (GLint)i, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, dataArray[i]);
+			}
+
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	        //glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		GLenum error = glGetError();
+
+		if(error != GL_NO_ERROR)
+		{
+			LOG_E << "Error loading texture: " << gluErrorString(error);
+			return false;
+		}
+
+		array = true;
+		return true;
 	}
 
 	void Texture::removeFromGPU()
@@ -469,6 +550,13 @@ namespace sc
 		return meshPool.back().loadToGPU(vertices, indices);
 	}
 
+	bool Assets::loadMesh(std::string id, std::vector<StageVertex> *vertices, std::vector<int> *indices)
+	{
+		meshPool.push_back(Mesh(id));
+		return meshPool.back().loadToGPU(vertices, indices);
+	}
+
+
 	bool Assets::loadTexture(std::string id, std::string filepath)
 	{
 		texturePool.push_back(Texture(id));
@@ -480,6 +568,13 @@ namespace sc
 		texturePool.push_back(Texture(id));
 		return texturePool.back().loadToGPU(width, height, data);
 	}
+
+	bool Assets::loadTexture(std::string id, GLuint width, GLuint height, std::vector<GLuint*> dataArray)
+	{
+		texturePool.push_back(Texture(id));
+		return texturePool.back().loadToGPU(width, height, dataArray);
+	}
+
 
 	bool Assets::loadShader(std::string id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
 	{
@@ -531,6 +626,7 @@ namespace sc
 
 		loadShader("SH_PASS", "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");
 		loadShader("SH_TEX", "Resources/Shaders/sc_shader_testTextureVertex.glsl", "Resources/Shaders/sc_shader_testTextureFragment.glsl");
+		loadShader("SH_STAGE", "Resources/Shaders/sc_shader_stageVertex.glsl", "Resources/Shaders/sc_shader_stageFragment.glsl");
 
 
 		std::vector<glm::vec4> tempVec4;

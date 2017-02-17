@@ -31,3 +31,10 @@ So the stage materials only need 268mb in texture memory, offering massive impro
 
 3/4 of the stage texture will be for simple tiles, 1/4 for auto tiles.
 A single stage can have 194 simple tiles and 19 auto tiles.
+
+------------------
+
+Since a single tileset leads to bleeding in the min-max filtering, a new option must be found. Enter 2D texture arrays.
+
+Taking up a similar memory footprint, 200 256x256 simple stage textures will be stored in an array. Likewise, 20 256x256 autotile stage textures will be stored another array.
+In reality, these will really amount to 260 128x128 tiles in storage.

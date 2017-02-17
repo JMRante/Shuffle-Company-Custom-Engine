@@ -22,7 +22,11 @@ namespace sc
 
 		//Build elements
 		sc::EntityManager* em = &nextState->entityManager;
+
 		currentState->stage.loadStage("Custom/Levels/TestLevel.shuff");
+		em->addEntity("E_STAGE");
+		sc::Draw drawStage("MO_STAGE", true);
+		em->addDraw("E_STAGE", drawStage);
 
 		em->addEntity("E_CAMERA");
 		em->getTransform("E_CAMERA")->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -32,19 +36,19 @@ namespace sc
 		sc::DebugCamera* cameraBehave = new sc::DebugCamera(0.07f, 0.1f);
 		em->addBehavior("E_CAMERA", cameraBehave);
 
-		em->addEntity("E_TESTA");
-		sc::Transform* transformA = em->getTransform("E_TESTA");
-		transformA->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
-		transformA->setRotation(glm::vec3(0.0f, glm::radians(45.0f), 0.0f));
-		sc::Draw drawA("MO_STAGE", true);
-		em->addDraw("E_TESTA", drawA);
+		// em->addEntity("E_TESTA");
+		// sc::Transform* transformA = em->getTransform("E_TESTA");
+		// transformA->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
+		// transformA->setRotation(glm::vec3(0.0f, glm::radians(45.0f), 0.0f));
+		// sc::Draw drawA("MO_TESTB", true);
+		// em->addDraw("E_TESTA", drawA);
 
-		em->addEntity("E_TESTB");
-		sc::Transform* transformB = em->getTransform("E_TESTB");
-		transformB->setPosition(glm::vec3(-1.0f, 0.0f, -2.0f));
-		transformB->setScale(glm::vec3(0.25f, 0.25f, 0.25f));
-		sc::Draw drawB("MO_TESTB", true);
-		em->addDraw("E_TESTB", drawB);
+		// em->addEntity("E_TESTB");
+		// sc::Transform* transformB = em->getTransform("E_TESTB");
+		// transformB->setPosition(glm::vec3(-1.0f, 0.0f, -2.0f));
+		// transformB->setScale(glm::vec3(0.25f, 0.25f, 0.25f));
+		// sc::Draw drawB("MO_TESTB", true);
+		// em->addDraw("E_TESTB", drawB);
 
 		updateWorldState();
 	}

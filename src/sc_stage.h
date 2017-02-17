@@ -30,7 +30,9 @@
 #define STAGE_DEPTH 200
 #define STAGE_HEIGHT 100
 
-#define MAX_SIMPLE_TEXTURES 194
+#define MAX_SIMPLE_TEXTURES 200
+#define MAX_AUTO_TEXTURES 20
+
 #define STAGE_TEXTURE_DIM 4096
 #define SIMPLE_TEXTURE_DIM 256
 
@@ -52,7 +54,6 @@ namespace sc
 	class Stage
 	{
 	private:
-		sc::Model* model;
 		std::vector<std::string> textures;
 		std::vector<Brush> brushes;
 		unsigned char stage[STAGE_WIDTH][STAGE_DEPTH][STAGE_HEIGHT] = {};
@@ -66,9 +67,11 @@ namespace sc
 
 		int getTextureX(unsigned char textureNum);
 		int getTextureY(unsigned char textureNum);
+		float getTextureUMin(unsigned char textureNum);
+		float getTextureVMin(unsigned char textureNum);
+		float getTextureUMax(unsigned char textureNum);
+		float getTextureVMax(unsigned char textureNum);
 		unsigned char getTextureNum(std::string textureName);
-
-		sc::Model* getModel();
 	};
 }
 

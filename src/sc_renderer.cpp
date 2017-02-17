@@ -58,8 +58,17 @@ namespace sc
 				for (size_t i = 0; i < drawModel->material->textureMaterialArguments.size(); i++)
 				{
 					glActiveTexture(GL_TEXTURE0 + i);
-					glBindTexture(GL_TEXTURE_2D, drawModel->material->textureMaterialArguments[i]->GLid);
-					glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("texture_" + sc::IntToString(i)).c_str()), i);
+
+					if (drawModel->material->textureMaterialArguments[i]->array)
+					{
+						glBindTexture(GL_TEXTURE_2D_ARRAY, drawModel->material->textureMaterialArguments[i]->GLid);
+						glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("textureArray_" + sc::IntToString(i)).c_str()), i);
+					}
+					else
+					{
+						glBindTexture(GL_TEXTURE_2D, drawModel->material->textureMaterialArguments[i]->GLid);
+						glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("texture_" + sc::IntToString(i)).c_str()), i);
+					}
 				}
 
 				//Bind transform to shader
