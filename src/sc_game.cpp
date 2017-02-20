@@ -39,6 +39,11 @@ namespace sc
 		camera->calculateViewMatrix();
 		em->debugCameraPool.add(ID("E_CAMERA"), DebugCamera(0.07f, 0.1f));
 
+		em->addEntity(ID("E_RECT"));
+		em->transformPool.add(ID("E_RECT"), Transform());
+		DrawRectangle* dr = em->drawRectanglePool.add(ID("E_RECT"), DrawRectangle(16, 16, 128, 128, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), true));
+		dr->calculateTransform();
+
 		// em->addEntity(ID("E_TESTA"));
 		// tran = em->transformPool.add(ID("E_TESTA"), Transform());
 		// tran->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));

@@ -29,7 +29,6 @@
 #include "sc_world.h"
 #include "sc_entity.h"
 #include "sc_component.h"
-// #include "sc_ui.h"
 #include "sc_assets.h"
 
 namespace sc

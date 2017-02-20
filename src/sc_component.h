@@ -97,12 +97,28 @@ namespace sc
 	class DrawModel : public Component
 	{
 	public:
-		Model *model;
+		Model* model;
 		bool isVisible;
 
 		DrawModel();
 		DrawModel(ID modelId, bool isVisible);
 	};
+
+	class DrawRectangle : public Component
+	{
+	private:
+		float x;
+		float y;
+		float width;
+		float height;
+	public:
+		glm::vec4 color;
+		bool isVisible;
+
+		DrawRectangle(float x, float y, float width, float height, glm::vec4 color, bool isVisible);
+		void change(float x, float y, float width, float height);
+		void calculateTransform();
+	};	
 }
 
 #endif

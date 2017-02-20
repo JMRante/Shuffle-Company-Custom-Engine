@@ -84,32 +84,33 @@ namespace sc
 		}
 
 		//Render the UI (UIDraw components)
-		// glClear(GL_DEPTH_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
 
-		// for (auto UIDrawIt = em->getUIDrawRectanglePoolBegin(); UIDrawIt != em->getUIDrawRectanglePoolEnd(); UIDrawIt++)
-		// {
-		// 	if (UIIDrawIt->isVisible)
-		// 	{
-		// 		sc::Mesh* mesh = getMesh("ME_QUAD");
-		// 		sc::Shader* shad = getShader("SH_COLOR");
-		// 		glUseProgram(shad->GLid);
+		for (auto drawIt = em->drawRectanglePool.begin(); drawIt != em->drawRectanglePool.end(); drawIt++)
+		{
+			if (drawIt->isVisible)
+			{
+				Mesh* mesh = assets.getMesh(ID("ME_QUAD"));
+				Shader* shad = assets.getShader(ID("SH_COLOR"));
+				glUseProgram(shad->GLid);
 
-		// 		//Bind all vec4 values to the shader
-		// 		glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)("vec4_" + sc::IntToString(i)).c_str()), 
-		// 			drawModel->material->vec4MaterialArguments[i][0],
-		// 			drawModel->material->vec4MaterialArguments[i][1],
-		// 			drawModel->material->vec4MaterialArguments[i][2],
-		// 			drawModel->material->vec4MaterialArguments[i][3]);
+				//Bind all vec4 values to the shader
+				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"vec4_0"), 
+					drawIt->color[0],
+					drawIt->color[1],
+					drawIt->color[2],
+					drawIt->color[3]);
 
-		// 		//Bind transform to shader
-		// 		glm::mat4 pvw = em->getCamera(renderCameraEntityId)->getOrthoMatrix() * em->getTransform(UIDrawIt->getEntityId())->getWorldMatrix();
-		// 		glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
+				//Bind transform to shader
+				glm::mat4 pvw = em->cameraPool.get(renderCameraEntityId)->getOrthoMatrix() * em->transformPool.get(drawIt->entityId)->getWorldMatrix();
+				//glm::mat4 pvw = em->cameraPool.get(renderCameraEntityId)->getProjectionMatrix() * em->cameraPool.get(renderCameraEntityId)->getViewMatrix() * em->transformPool.get(drawIt->entityId)->getWorldMatrix();
+				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
-		// 		glBindVertexArray(mesh->VAOid);
-		// 			glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
-		// 		glBindVertexArray(0);
-		// 	}
-		// }
+				glBindVertexArray(mesh->VAOid);
+					glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+				glBindVertexArray(0);
+			}
+		}
 
 		SDL_GL_SwapWindow(window);
 	}

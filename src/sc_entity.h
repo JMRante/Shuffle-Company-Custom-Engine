@@ -19,7 +19,6 @@
 #include "sc_log.h"
 #include "sc_component.h"
 #include "sc_nature.h"
-//#include "sc_ui.h"
 #include "sc_utility.h"
 
 namespace sc
@@ -98,6 +97,7 @@ namespace sc
 		ComponentPool<Transform> transformPool;
 		ComponentPool<Camera> cameraPool;
 		ComponentPool<DrawModel> drawModelPool;
+		ComponentPool<DrawRectangle> drawRectanglePool;
 
 		//Natures
 		ComponentPool<DebugCamera> debugCameraPool;

@@ -159,7 +159,7 @@ namespace sc
 
 	void Camera::calculateOrthoMatrix()
 	{
-		orthoMatrix = glm::ortho(0.0f, (float)config.get("WINDOW_WIDTH"), (float)config.get("WINDOW_HEIGHT"), 0.0f, -1.0f, 1.0f);  
+		orthoMatrix = glm::ortho(0.0f, (float)config.get("WINDOW_WIDTH"), 0.0f, (float)config.get("WINDOW_HEIGHT"), -1.0f, 1.0f);  
 	}
 
 	glm::vec3 Camera::getForward()
@@ -191,5 +191,34 @@ namespace sc
 	{
 		model = assets.getModel(modelId);
 		this->isVisible = isVisible;
+	}
+
+	/*
+		DrawRectangle
+						*/
+	DrawRectangle::DrawRectangle(float x, float y, float width, float height, glm::vec4 color, bool isVisible)
+	{
+		this->x = x;
+		this->y = y;
+		this->width = width;
+		this->height = height;
+		this->color = color;
+	}
+
+	void DrawRectangle::change(float x, float y, float width, float height)
+	{
+		this->x = x;
+		this->y = y;
+		this->width = width;
+		this->height = height;
+
+		calculateTransform();
+	}
+
+	void DrawRectangle::calculateTransform()
+	{
+		Transform* transform = game.nextState->entityManager.transformPool.get(entityId);
+		transform->setScale(glm::vec3(width, height, 0.0f));
+		transform->setPosition(glm::vec3(x, y, 0.0f));
 	}
 }

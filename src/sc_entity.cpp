@@ -22,6 +22,7 @@ namespace sc
 		transformPool.copy(otherEM->transformPool);
 		cameraPool.copy(otherEM->cameraPool);
 		drawModelPool.copy(otherEM->drawModelPool);
+		drawRectanglePool.copy(otherEM->drawRectanglePool);
 
 		debugCameraPool.copy(otherEM->debugCameraPool);
 	}
@@ -60,6 +61,7 @@ namespace sc
 				transformPool.remove(id);
 				cameraPool.remove(id);
 				drawModelPool.remove(id);
+				drawRectanglePool.remove(id);
 
 				debugCameraPool.remove(id);
 
