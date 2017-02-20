@@ -10,9 +10,12 @@
 */
 
 #include "sc_game.h"
+#include "sc_world.h"
 
 namespace sc
 {
+	Game game;
+
 	void Game::start()
 	{
 		currentState = new sc::World();
@@ -21,34 +24,34 @@ namespace sc
 		assets.loadDefaults();
 
 		//Build elements
-		sc::EntityManager* em = &nextState->entityManager;
+		EntityManager* em = &nextState->entityManager;
 
-		currentState->stage.loadStage("Custom/Levels/TestLevel.shuff");
-		em->addEntity("E_STAGE");
-		sc::Draw drawStage("MO_STAGE", true);
-		em->addDraw("E_STAGE", drawStage);
+		nextState->stage.loadStage("Custom/Levels/TestLevel.shuff");
+		em->addEntity(ID("E_STAGE"));
+		Transform* tran = em->transformPool.add(ID("E_STAGE"), Transform());
+		em->drawModelPool.add(ID("E_STAGE"), DrawModel(ID("MO_STAGE"), true));
 
-		em->addEntity("E_CAMERA");
-		em->getTransform("E_CAMERA")->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-		em->getTransform("E_CAMERA")->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-		sc::Camera camera(em->getTransform("E_CAMERA"), 0.01f, 100.0f);
-		em->addCamera("E_CAMERA", camera);
-		sc::DebugCamera* cameraBehave = new sc::DebugCamera(0.07f, 0.1f);
-		em->addBehavior("E_CAMERA", cameraBehave);
+		em->addEntity(ID("E_CAMERA"));
+		tran = em->transformPool.add(ID("E_CAMERA"), Transform());
+		tran->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+		tran->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+		Camera* camera = em->cameraPool.add(ID("E_CAMERA"), Camera(0.01f, 100.0f));
+		camera->calculateViewMatrix();
+		em->debugCameraPool.add(ID("E_CAMERA"), DebugCamera(0.07f, 0.1f));
 
-		// em->addEntity("E_TESTA");
-		// sc::Transform* transformA = em->getTransform("E_TESTA");
-		// transformA->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
-		// transformA->setRotation(glm::vec3(0.0f, glm::radians(45.0f), 0.0f));
-		// sc::Draw drawA("MO_TESTB", true);
-		// em->addDraw("E_TESTA", drawA);
+		// em->addEntity(ID("E_TESTA"));
+		// tran = em->transformPool.add(ID("E_TESTA"), Transform());
+		// tran->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
+		// tran->setRotation(glm::vec3(0.0f, glm::radians(45.0f), 0.0f));
+		// DrawModel drawA(ID("MO_TESTA"), true);
+		// em->drawModelPool.add(ID("E_TESTA"), drawA);
 
-		// em->addEntity("E_TESTB");
-		// sc::Transform* transformB = em->getTransform("E_TESTB");
-		// transformB->setPosition(glm::vec3(-1.0f, 0.0f, -2.0f));
-		// transformB->setScale(glm::vec3(0.25f, 0.25f, 0.25f));
-		// sc::Draw drawB("MO_TESTB", true);
-		// em->addDraw("E_TESTB", drawB);
+		// em->addEntity(ID("E_TESTB"));
+		// tran = em->transformPool.add(ID("E_TESTB"), Transform());
+		// tran->setPosition(glm::vec3(-1.0f, 0.0f, -2.0f));
+		// tran->setScale(glm::vec3(0.25f, 0.25f, 0.25f));
+		// DrawModel drawB(ID("MO_TESTB"), true);
+		// em->drawModelPool.add(ID("E_TESTB"), drawB);
 
 		updateWorldState();
 	}
@@ -57,24 +60,23 @@ namespace sc
 	{
 		input.update();
 
-		for (auto behaveIt = currentState->entityManager.getBehaviorPoolBegin(); behaveIt != currentState->entityManager.getBehaviorPoolEnd(); behaveIt++)
-		{
-			(*behaveIt)->update(currentState, nextState);
-		}
+		EntityManager* em = &currentState->entityManager;
+
+		for (auto it = em->debugCameraPool.begin(); it != em->debugCameraPool.end(); it++) { (*it).update(); }
 
 		if (input.quitEvent())
 		{
 			return true;
 		}
 
+		updateWorldState();
 		return false;
 	}
 
-	sc::World* Game::updateWorldState()
+	void Game::updateWorldState()
 	{
 		LOG_D << "Updating World State";
 
 		currentState->copy(nextState);
-		return currentState;
 	}
 }

@@ -25,6 +25,7 @@
 #include "sc_log.h"
 #include "sc_assets.h"
 #include "sc_tokenizer.h"
+#include "sc_utility.h"
 
 #define STAGE_WIDTH 200
 #define STAGE_DEPTH 200

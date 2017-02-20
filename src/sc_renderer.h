@@ -37,16 +37,13 @@ namespace sc
 	class Renderer
 	{
 	private:
-		SDL_Window *window;
-		sc::World *renderWorld;
-		std::string renderCameraEntityId;
-		sc::Assets *renderAssets;
+		SDL_Window* window;
+		ID renderCameraEntityId;
 		
 	public:
-		Renderer(SDL_Window *window);
+		Renderer(SDL_Window* window);
 		void render();
-		void setWorld(sc::World *world);
-		void setCameraEntity(std::string cameraEntityId);
+		void setCameraEntity(ID cameraEntityId);
 		void setClearColor(glm::vec4 rgba);
 	};
 }

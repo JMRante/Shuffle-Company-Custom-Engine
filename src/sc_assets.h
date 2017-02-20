@@ -48,14 +48,14 @@ namespace sc
 	class Mesh
 	{
 	public:
-		std::string id;
+		ID id;
 		GLuint VAOid;
 		GLuint VBOid;
 		GLuint EBOid;
 
 		int indexCount;
 
-		Mesh(std::string id);
+		Mesh(ID id);
 		bool loadToGPU(std::string filepath);
 		bool loadToGPU(std::vector<Vertex> *vertices, std::vector<int> *indices);
 		bool loadToGPU(std::vector<StageVertex> *vertices, std::vector<int> *indices);
@@ -65,14 +65,14 @@ namespace sc
 	class Texture
 	{
 	public:
-		std::string id;
+		ID id;
 		GLuint GLid;
 
 		GLuint width;
 		GLuint height;
 		bool array;
 
-		Texture(std::string id);
+		Texture(ID id);
 		bool loadToGPU(std::string filepath);
 		bool loadToGPU(GLuint width, GLuint height, GLuint* data);
 		bool loadToGPU(GLuint width, GLuint height, std::vector<GLuint*> dataArray);
@@ -82,10 +82,10 @@ namespace sc
 	class Shader
 	{
 	public:
-		std::string id;
+		ID id;
 		GLuint GLid;
 
-		Shader(std::string id);
+		Shader(ID id);
 		bool loadToGPU(std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
 		void removeFromGPU();
 	};
@@ -93,7 +93,7 @@ namespace sc
 	class Material
 	{
 	public:
-		std::string id;
+		ID id;
 
 		std::vector<int> integerMaterialArguments;
 		std::vector<float> floatMaterialArguments;
@@ -102,13 +102,13 @@ namespace sc
 
 		Shader *shader;
 
-		Material(std::string id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<std::string> *tma, std::string shaderId);
+		Material(ID id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<ID> *tma, ID shaderId);
 	};
 
 	class Model
 	{
 	public:
-		std::string id;
+		ID id;
 
 		Mesh *mesh;
 		Material *material;
@@ -118,9 +118,9 @@ namespace sc
 		glm::vec3 relativeRotation;
 		glm::vec3 relativeScale;
 
-		Model(std::string id, std::string meshId, std::string materialId);
-		Model* addSubModel(std::string id, std::string meshId, std::string materialId);
-		Model* getSubModel(std::string id);
+		Model(ID id, ID meshId, ID materialId);
+		Model* addSubModel(ID id, ID meshId, ID materialId);
+		Model* getSubModel(ID id);
 	}; 
 
 	class Assets
@@ -139,25 +139,25 @@ namespace sc
 		int worldModelStart;
 
 	public:
-		bool loadMesh(std::string id, std::string filepath);
-		bool loadMesh(std::string id, std::vector<Vertex> *vertices, std::vector<int> *indices);
-		bool loadMesh(std::string id, std::vector<StageVertex> *vertices, std::vector<int> *indices);
+		bool loadMesh(ID id, std::string filepath);
+		bool loadMesh(ID id, std::vector<Vertex> *vertices, std::vector<int> *indices);
+		bool loadMesh(ID id, std::vector<StageVertex> *vertices, std::vector<int> *indices);
 
-		bool loadTexture(std::string id, std::string filepath);
-		bool loadTexture(std::string id, GLuint width, GLuint height, GLuint* data);
-		bool loadTexture(std::string id, GLuint width, GLuint height, std::vector<GLuint*> dataArray);
+		bool loadTexture(ID id, std::string filepath);
+		bool loadTexture(ID id, GLuint width, GLuint height, GLuint* data);
+		bool loadTexture(ID id, GLuint width, GLuint height, std::vector<GLuint*> dataArray);
 
-		bool loadShader(std::string id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
-		bool loadMaterial(std::string id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<std::string> *tma, std::string shaderId);
-		bool loadModel(std::string id, std::string meshId, std::string materialId);
+		bool loadShader(ID id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
+		bool loadMaterial(ID id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<ID> *tma, ID shaderId);
+		bool loadModel(ID id, ID meshId, ID materialId);
 
 		void loadDefaults();
 
-		Mesh* getMesh(std::string id);
-		Texture* getTexture(std::string id);
-		Shader* getShader(std::string id);
-		Material* getMaterial(std::string id);
-		Model* getModel(std::string id);
+		Mesh* getMesh(ID id);
+		Texture* getTexture(ID id);
+		Shader* getShader(ID id);
+		Material* getMaterial(ID id);
+		Model* getModel(ID id);
 	};
 
 	extern Assets assets;

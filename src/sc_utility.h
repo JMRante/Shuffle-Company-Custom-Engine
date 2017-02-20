@@ -18,10 +18,25 @@
 #include <sstream>
 #include <string>
 
+#define ID_SIZE 32
+
 namespace sc
 {
 	char* fileRead(const char* filename);
 	std::string IntToString(int i);
+
+	class ID
+	{
+	private:
+		char id[ID_SIZE];
+
+	public:
+		ID();
+		ID(const char* id);
+		bool is(const char* id);
+		bool is(ID id);
+		char* get();
+	};
 }
 
 #endif

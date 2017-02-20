@@ -52,4 +52,81 @@ namespace sc
       oss << i;
       return oss.str();
     }
+
+    /*
+        ID
+            */
+    ID::ID()
+    {
+        id[0] = '\0';
+    }
+
+    ID::ID(const char* id)
+    {
+        int i = 0;
+        bool end = false;
+
+        while (!end && i < ID_SIZE)
+        {
+            this->id[i] = id[i];
+
+            if (id[i] == '\0')
+            {
+                end = true;
+            }
+
+            i++;
+        }
+    }
+
+    bool ID::is(const char* id)
+    {
+        int i = 0;
+        bool end = false;
+
+        while (!end && i < ID_SIZE)
+        {
+            if (this->id[i] != id[i])
+            {
+                return false;
+            }
+
+            if (this->id[i] == '\0' || id[i] == '\0')
+            {
+                end = true;
+            }
+
+            i++;
+        }
+
+        return true;
+    }
+
+    bool ID::is(ID id)
+    {
+        int i = 0;
+        bool end = false;
+
+        while (!end && i < ID_SIZE)
+        {
+            if (this->id[i] != id.id[i])
+            {
+                return false;
+            }
+
+            if (this->id[i] == '\0' || id.id[i] == '\0')
+            {
+                end = true;
+            }
+
+            i++;
+        }
+
+        return true;
+    }
+
+    char* ID::get()
+    {
+        return id;
+    }
 }

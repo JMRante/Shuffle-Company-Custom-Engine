@@ -2,15 +2,15 @@
 
     SHUFFLE COMPANY SOURCE CODE
 
-    sc_behaviors.h
+    sc_nature.h
     ------------------------------------
 
 
 
 */
 
-#ifndef SC_GAMEELEMENTS
-#define SC_GAMEELEMENTS
+#ifndef SC_NATURE
+#define SC_NATURE
 
 #include <vector>
 #include <string>
@@ -28,16 +28,14 @@
 
 namespace sc
 {
-	class World;
-
-	class Behavior : public sc::Component
+	class Nature : public Component
 	{
 	public:
-		Behavior();
-		virtual void update(sc::World* pastWorld, sc::World* nextWorld) = 0;
+		Nature();
+		virtual void update() = 0;
 	};
 
-	class DebugCamera : public Behavior
+	class DebugCamera : public Nature
 	{
 	private:
 		float moveSpeed;
@@ -48,7 +46,7 @@ namespace sc
 	public:
 		DebugCamera(float moveSpeed, float mouseSpeed);
 
-		void update(sc::World* pastWorld, sc::World* nextWorld);
+		void update();
 	};
 }
 

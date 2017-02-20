@@ -23,8 +23,8 @@ namespace sc
 	class World
 	{
 	public:
-		sc::EntityManager entityManager;
-		sc::Stage stage;
+		EntityManager entityManager;
+		Stage stage;
 
 		void copy(World* otherWorld);
 	};

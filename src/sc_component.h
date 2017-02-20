@@ -23,21 +23,16 @@
 
 #include "sc_log.h"
 #include "sc_assets.h"
+#include "sc_utility.h"
 
 namespace sc
 {
 	class Component
 	{
-	private:
-		std::string id;
-		std::string entityId;
-
 	public:
-		Component(std::string id);
+		ID entityId;
 
-		std::string getId();
-		std::string getEntityId();
-		void setEntityId(std::string id);
+		Component();
 	};
 
 	class Transform : public Component
@@ -53,12 +48,15 @@ namespace sc
 		Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
 
 		glm::mat4 getWorldMatrix();
+		
 		void setPosition(glm::vec3 position);
 		void setRotation(glm::vec3 rotation);
 		void setScale(glm::vec3 scale);
+
 		glm::vec3 getPosition();
 		glm::vec3 getRotation();
 		glm::vec3 getScale();
+
 		void calculateWorldMatrix();
 	};
 
@@ -67,45 +65,43 @@ namespace sc
 	private:
 		glm::mat4 viewMatrix;
 		glm::mat4 projectionMatrix;
+		glm::mat4 orthoMatrix;
 
 		float fov;
 		float aspectRatio;
 		float near;
 		float far;
 
-		Transform* transform;
 		glm::vec3 forward;
 		glm::vec3 up;
 		glm::vec3 side;
 
 	public:
-		Camera(Transform* transform);
-		Camera(Transform* transform, float near, float far);
+		Camera();
+		Camera(float near, float far);
 
 		glm::mat4 getProjectionMatrix();
 		void calculateProjectionMatrix();
+
 		glm::mat4 getViewMatrix();
 		void calculateViewMatrix();
+
+		glm::mat4 getOrthoMatrix();
+		void calculateOrthoMatrix();
+		
 		glm::vec3 getForward();
 		glm::vec3 getUp();
 		glm::vec3 getSide();
-
-		void setTransform(Transform* transform);
 	};	
 
-	class Draw : public Component
+	class DrawModel : public Component
 	{
-	private:
-		sc::Model *model;
-
 	public:
+		Model *model;
 		bool isVisible;
 
-		Draw();
-		Draw(std::string modelId, bool isVisible);
-
-		void setModel(std::string modelId);
-		Model *getModel();
+		DrawModel();
+		DrawModel(ID modelId, bool isVisible);
 	};
 }
 

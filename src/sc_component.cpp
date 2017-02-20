@@ -10,37 +10,23 @@
 */
 
 #include "sc_component.h"
+
 #include <cmath>
+
+#include "sc_game.h"
+#include "sc_world.h"
 
 namespace sc
 {
 	/*
 		Component
 					*/
-	Component::Component(std::string id)
-	{
-		this->id = id;
-	}
-
-	std::string Component::getId()
-	{
-		return id;
-	}
-
-	std::string Component::getEntityId()
-	{
-		return entityId;
-	}
-
-	void Component::setEntityId(std::string id)
-	{
-		entityId = id;
-	}
+	Component::Component() {}
 
 	/*
 		Transform
 					*/
-	Transform::Transform() : Component("TRANSFORM")
+	Transform::Transform() : Component()
 	{
 		this->position = glm::vec3(0.0f, 0.0f, 0.0f);
 		this->rotation = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -48,7 +34,7 @@ namespace sc
 		calculateWorldMatrix();
 	}
 
-	Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : Component("TRANSFORM")
+	Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : Component()
 	{
 		this->position = position;
 		this->rotation = rotation;
@@ -103,36 +89,34 @@ namespace sc
 	/*
 		Camera
 				*/
-	Camera::Camera(Transform* transform) : Component("CAMERA")
+	Camera::Camera() : Component()
 	{
-		fov = (float)sc::config.get("FOV");
-		aspectRatio = ((float)sc::config.get("WINDOW_WIDTH"))/((float)sc::config.get("WINDOW_HEIGHT"));
+		fov = (float)config.get("FOV");
+		aspectRatio = ((float)config.get("WINDOW_WIDTH"))/((float)config.get("WINDOW_HEIGHT"));
 		this->near = 0.1f;
 		this->far = 100.0f;
 
-		this->transform = transform;
 		this->forward = glm::vec3(0.0f, 0.0f, -1.0f);
 		this->up = glm::vec3(0.0f, 1.0f, 0.0f);
 		this->side = glm::vec3(1.0f, 0.0f, 0.0f);
 
-		calculateViewMatrix();
 		calculateProjectionMatrix();
+		calculateOrthoMatrix();
 	}
 
-	Camera::Camera(Transform* transform, float near, float far) : Component("CAMERA")
+	Camera::Camera(float near, float far) : Component()
 	{
-		fov = (float)sc::config.get("FOV");
-		aspectRatio = ((float)sc::config.get("WINDOW_WIDTH"))/((float)sc::config.get("WINDOW_HEIGHT"));
+		fov = (float)config.get("FOV");
+		aspectRatio = ((float)config.get("WINDOW_WIDTH"))/((float)config.get("WINDOW_HEIGHT"));
 		this->near = near;
 		this->far = far;
 
-		this->transform = transform;
 		this->forward = glm::vec3(0.0f, 0.0f, -1.0f);
 		this->up = glm::vec3(0.0f, 1.0f, 0.0f);
 		this->side = glm::vec3(1.0f, 0.0f, 0.0f);
 
-		calculateViewMatrix();
 		calculateProjectionMatrix();
+		calculateOrthoMatrix();
 	}
 
 	glm::mat4 Camera::getProjectionMatrix()
@@ -152,6 +136,7 @@ namespace sc
 
 	void Camera::calculateViewMatrix()
 	{
+		Transform* transform = game.nextState->entityManager.transformPool.get(entityId);
 		glm::vec3 pos = transform->getPosition();
 		glm::vec3 rot = transform->getRotation();
 		float pitch = rot.x;
@@ -165,6 +150,16 @@ namespace sc
 		side = glm::normalize(glm::cross(forward, up));
 
 		viewMatrix = glm::lookAt(pos, pos + forward, up);
+	}
+
+	glm::mat4 Camera::getOrthoMatrix()
+	{
+		return orthoMatrix;
+	}
+
+	void Camera::calculateOrthoMatrix()
+	{
+		orthoMatrix = glm::ortho(0.0f, (float)config.get("WINDOW_WIDTH"), (float)config.get("WINDOW_HEIGHT"), 0.0f, -1.0f, 1.0f);  
 	}
 
 	glm::vec3 Camera::getForward()
@@ -182,34 +177,19 @@ namespace sc
 		return side;
 	}
 
-	void Camera::setTransform(Transform* transform)
-	{
-		this->transform = transform;
-	}
-
 
 	/*
-		Draw
-				*/
-	Draw::Draw() : Component("DRAW")
+		DrawModel
+					*/
+	DrawModel::DrawModel() : Component()
 	{
-		model = NULL;
+		model = assets.getModel("MO_ERR");
 		this->isVisible = false;
 	}
 
-	Draw::Draw(std::string modelId, bool isVisible) : Component("DRAW")
+	DrawModel::DrawModel(ID modelId, bool isVisible) : Component()
 	{
 		model = assets.getModel(modelId);
 		this->isVisible = isVisible;
-	}
-
-	void Draw::setModel(std::string modelId)
-	{
-		model = assets.getModel(modelId);
-	}
-
-	Model* Draw::getModel()
-	{
-		return model;
 	}
 }

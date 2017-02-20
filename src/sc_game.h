@@ -21,25 +21,26 @@
 #include "glm/ext.hpp"
 
 #include "sc_log.h"
-#include "sc_world.h"
+
 #include "sc_assets.h"
 #include "sc_entity.h"
-#include "sc_behaviors.h"
 
 namespace sc
 {
+	class World;
+
 	class Game
 	{
-	private:
-		sc::World *nextState;
-
 	public:
-		sc::World *currentState;
+		World* currentState;
+		World* nextState;
 
 		void start();
 		bool update();
-		sc::World *updateWorldState();
+		void updateWorldState();
 	};
+
+	extern Game game;
 }
 
 #endif

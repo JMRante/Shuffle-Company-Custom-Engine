@@ -2,10 +2,10 @@
 
     SHUFFLE COMPANY SOURCE CODE
 
-    sc_shader_stageVertex.glsl
+    sc_shader_flatColorVertex.glsl
     ------------------------------------
 
-	A vertex shader for rendering the stage
+	A vertex shader for rendering flat, single color triangles
 
 */
 
@@ -13,16 +13,10 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 textureCoord;
-layout (location = 3) in float textureNum;
 
 uniform mat4 PVW;
-
-out vec2 texCoord;
-out float texNum;
 
 void main()
 {
 	gl_Position = PVW * vec4(position, 1.0f);
-	texCoord = textureCoord;
-	texNum = textureNum;
 }

@@ -153,18 +153,16 @@ int main(int argc, char **argv)
 		LOG_D << "Debug mode set to " << sc::config.get("LOG_DEBUG");
 		LOG_D << "Info mode set to " << sc::config.get("LOG_INFO");
 
-		sc::Game game;
 		sc::Renderer renderer(window);
 
-		game.start();
-		renderer.setCameraEntity("E_CAMERA");
+		sc::game.start();
+		renderer.setCameraEntity(sc::ID("E_CAMERA"));
 
 		while (!hasQuit)
 		{
 			startTime = SDL_GetTicks();
 
-			hasQuit = game.update();
-			renderer.setWorld(game.updateWorldState());
+			hasQuit = sc::game.update();
 			renderer.render();
 
 			delay = startTime + MS_PER_FRAME - SDL_GetTicks();

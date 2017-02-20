@@ -28,7 +28,7 @@ namespace sc
 
 	bool Config::loadConfig(std::string filepath)
 	{
-		std::string configString(sc::fileRead(filepath.c_str()));
+		std::string configString(fileRead(filepath.c_str()));
 
 		if (configString.empty())
 		{

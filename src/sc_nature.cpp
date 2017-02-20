@@ -2,23 +2,22 @@
 
     SHUFFLE COMPANY SOURCE CODE
 
-    sc_behaviors.cpp
+    sc_nature.cpp
     ------------------------------------
 
 
 
 */
 
-#include "sc_behaviors.h"
+#include "sc_nature.h"
+#include "sc_game.h"
 #include "sc_world.h"
 
 namespace sc
 {
-	Behavior::Behavior() : sc::Component("BEHAVIOR")
-	{
-	}
+	Nature::Nature() : sc::Component() {}
 
-	DebugCamera::DebugCamera(float moveSpeed, float mouseSpeed) : Behavior()
+	DebugCamera::DebugCamera(float moveSpeed, float mouseSpeed) : Nature()
 	{
 		this->moveSpeed = moveSpeed;
 		this->mouseSpeed = mouseSpeed;
@@ -26,12 +25,13 @@ namespace sc
 		pitch = 0.0f;
 	}
 
-	void DebugCamera::update(sc::World* pastWorld, sc::World* nextWorld)
+	void DebugCamera::update()
 	{
-		sc::Transform* pastTrans = pastWorld->entityManager.getTransform(getEntityId());
-		sc::Transform* nextTrans = nextWorld->entityManager.getTransform(getEntityId());
-		sc::Camera* pastCamera = pastWorld->entityManager.getCamera(getEntityId());
-		sc::Camera* nextCamera = nextWorld->entityManager.getCamera(getEntityId());
+		Transform* currentTrans = game.currentState->entityManager.transformPool.get(entityId);
+		Transform* nextTrans = game.nextState->entityManager.transformPool.get(entityId);
+		Camera* currentCamera = game.currentState->entityManager.cameraPool.get(entityId);
+		Camera* nextCamera = game.nextState->entityManager.cameraPool.get(entityId);
+		DebugCamera* next = game.nextState->entityManager.debugCameraPool.get(entityId);
 
 		//Rotation
 		float mouseXDelta = (float)input.getMouseXDelta();
@@ -41,31 +41,33 @@ namespace sc
 		pitch += mouseYDelta * -mouseSpeed;
 		yaw = glm::mod(yaw, 360.0f);
 		pitch = glm::clamp(pitch, -89.0f, 89.0f);
-
+		
+		next->yaw = yaw;
+		next->pitch = pitch;
 		nextTrans->setRotation(glm::vec3(glm::radians(pitch), glm::radians(yaw), 0.0f));
 
 		//Translation
-		glm::vec3 pastPosition = pastTrans->getPosition();
+		glm::vec3 currentPosition = currentTrans->getPosition();
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		if (input.keyHeld(SDLK_d))
 		{
-			translate += pastCamera->getSide();
+			translate += currentCamera->getSide();
 		}
 
 		if (input.keyHeld(SDLK_w))
 		{
-			translate += pastCamera->getForward();
+			translate += currentCamera->getForward();
 		}
 
 		if (input.keyHeld(SDLK_a))
 		{
-			translate -= pastCamera->getSide();
+			translate -= currentCamera->getSide();
 		}
 
 		if (input.keyHeld(SDLK_s))
 		{
-			translate -= pastCamera->getForward();
+			translate -= currentCamera->getForward();
 		}
 
 		if (translate != glm::vec3(0.0f, 0.0f, 0.0f))
@@ -73,10 +75,7 @@ namespace sc
 			translate = moveSpeed * glm::normalize(translate);			
 		}
 
-		nextTrans->setPosition(pastPosition + translate);
-
-
-		nextCamera->setTransform(nextTrans);
+		nextTrans->setPosition(currentPosition + translate);
 		nextCamera->calculateViewMatrix();
 	}
 }

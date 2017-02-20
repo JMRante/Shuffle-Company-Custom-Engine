@@ -62,7 +62,7 @@ namespace sc
 
 		if (file)
 		{
-			sc::Tokenizer t(&file);
+			Tokenizer t(&file);
 			t.addDelimiter('\r');
 			t.addDelimiter('\n');
 			t.addDelimiter(' ');
@@ -218,21 +218,21 @@ namespace sc
 			}
 		}
 
-		assets.loadTexture("TX_STAGE", SIMPLE_TEXTURE_DIM, SIMPLE_TEXTURE_DIM, dataArray);
+		assets.loadTexture(ID("TX_STAGE"), SIMPLE_TEXTURE_DIM, SIMPLE_TEXTURE_DIM, dataArray);
 		ilDeleteImages(MAX_SIMPLE_TEXTURES, texIds);
 
-		std::vector<std::string> tempString;
-		tempString.push_back("TX_STAGE");
+		std::vector<ID> tempString;
+		tempString.push_back(ID("TX_STAGE"));
 		
-		return assets.loadMaterial("MA_STAGE", NULL, NULL, NULL, &tempString, "SH_STAGE");
+		return assets.loadMaterial(ID("MA_STAGE"), NULL, NULL, NULL, &tempString, ID("SH_STAGE"));
 	}
 
 	bool Stage::buildStageMesh()
 	{
-		std::vector<sc::StageVertex> stageVertices;
+		std::vector<StageVertex> stageVertices;
 		std::vector<int> stageIndices;
 		int vertCount = 0;
-		sc::StageVertex tempVert;
+		StageVertex tempVert;
 
 		for (int i = 0; i < STAGE_WIDTH; i++)
 		{
@@ -440,12 +440,12 @@ namespace sc
 			}
 		}
 
-		return assets.loadMesh("ME_STAGE", &stageVertices, &stageIndices);
+		return assets.loadMesh(ID("ME_STAGE"), &stageVertices, &stageIndices);
 	}
 
 	bool Stage::createStageModel()
 	{
-		return assets.loadModel("MO_STAGE", "ME_STAGE", "MA_STAGE");
+		return assets.loadModel(ID("MO_STAGE"), ID("ME_STAGE"), ID("MA_STAGE"));
 	}
 
 	int Stage::getTextureX(unsigned char textureNum)

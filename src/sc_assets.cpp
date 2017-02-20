@@ -23,7 +23,7 @@ namespace sc
 	/*
 		Mesh
 				*/
-	Mesh::Mesh(std::string id)
+	Mesh::Mesh(ID id)
 	{
 		this->id = id;
 		VAOid = 0;
@@ -213,7 +213,7 @@ namespace sc
 	/*
 		Texture
 				*/
-	Texture::Texture(std::string id)
+	Texture::Texture(ID id)
 	{
 		this->id = id;
 		GLid = 0;
@@ -355,7 +355,7 @@ namespace sc
 	/*
 		Shader
 				*/
-	Shader::Shader(std::string id)
+	Shader::Shader(ID id)
 	{
 		this->id = id;
 		GLid = 0;
@@ -459,7 +459,7 @@ namespace sc
 	/*
 		Material
 				*/
-	Material::Material(std::string id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<std::string> *tma, std::string shaderId)
+	Material::Material(ID id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<ID> *tma, ID shaderId)
 	{
 		this->id = id;
 
@@ -502,7 +502,7 @@ namespace sc
 	/*
 		Model
 				*/
-	Model::Model(std::string id, std::string meshId, std::string materialId)
+	Model::Model(ID id, ID meshId, ID materialId)
 	{
 		this->id = id;
 
@@ -514,17 +514,17 @@ namespace sc
 		relativeScale = glm::vec3(1.0f, 1.0f, 1.0f);
 	}
 
-	Model* Model::addSubModel(std::string id, std::string meshId, std::string materialId)
+	Model* Model::addSubModel(ID id, ID meshId, ID materialId)
 	{
 		subModels.push_back(Model(id, meshId, materialId));
 		return &subModels.back();
 	}
 
-	Model* Model::getSubModel(std::string id)
+	Model* Model::getSubModel(ID id)
 	{
 		for (size_t i = 0; i < subModels.size(); i++)
 		{
-			if (subModels[i].id == id)
+			if (subModels[i].id.is(id))
 			{
 				return &subModels[i];
 			}
@@ -538,57 +538,57 @@ namespace sc
 	/*
 		Assets
 				*/
-	bool Assets::loadMesh(std::string id, std::string filepath)
+	bool Assets::loadMesh(ID id, std::string filepath)
 	{
 		meshPool.push_back(Mesh(id));
 		return meshPool.back().loadToGPU(filepath);
 	}
 
-	bool Assets::loadMesh(std::string id, std::vector<Vertex> *vertices, std::vector<int> *indices)
+	bool Assets::loadMesh(ID id, std::vector<Vertex> *vertices, std::vector<int> *indices)
 	{
 		meshPool.push_back(Mesh(id));
 		return meshPool.back().loadToGPU(vertices, indices);
 	}
 
-	bool Assets::loadMesh(std::string id, std::vector<StageVertex> *vertices, std::vector<int> *indices)
+	bool Assets::loadMesh(ID id, std::vector<StageVertex> *vertices, std::vector<int> *indices)
 	{
 		meshPool.push_back(Mesh(id));
 		return meshPool.back().loadToGPU(vertices, indices);
 	}
 
 
-	bool Assets::loadTexture(std::string id, std::string filepath)
+	bool Assets::loadTexture(ID id, std::string filepath)
 	{
 		texturePool.push_back(Texture(id));
 		return texturePool.back().loadToGPU(filepath);
 	}
 
-	bool Assets::loadTexture(std::string id, GLuint width, GLuint height, GLuint* data)
+	bool Assets::loadTexture(ID id, GLuint width, GLuint height, GLuint* data)
 	{
 		texturePool.push_back(Texture(id));
 		return texturePool.back().loadToGPU(width, height, data);
 	}
 
-	bool Assets::loadTexture(std::string id, GLuint width, GLuint height, std::vector<GLuint*> dataArray)
+	bool Assets::loadTexture(ID id, GLuint width, GLuint height, std::vector<GLuint*> dataArray)
 	{
 		texturePool.push_back(Texture(id));
 		return texturePool.back().loadToGPU(width, height, dataArray);
 	}
 
 
-	bool Assets::loadShader(std::string id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
+	bool Assets::loadShader(ID id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
 	{
 		shaderPool.push_back(Shader(id));
 		return shaderPool.back().loadToGPU(vertexShaderFilepath, fragmentShaderFilepath);
 	}
 
-	bool Assets::loadMaterial(std::string id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<std::string> *tma, std::string shaderId)
+	bool Assets::loadMaterial(ID id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<ID> *tma, ID shaderId)
 	{
 		materialPool.push_back(Material(id, ima, fma, vma, tma, shaderId));
 		return true;
 	}
 
-	bool Assets::loadModel(std::string id, std::string meshId, std::string materialId)
+	bool Assets::loadModel(ID id, ID meshId, ID materialId)
 	{
 		modelPool.push_back(Model(id, meshId, materialId));
 		return true;
@@ -597,129 +597,127 @@ namespace sc
 	void Assets::loadDefaults()
 	{
 		//Load default assets
+		//Quad
 		Vertex tempVert;
 		std::vector<Vertex> vecVert;
 
-		//Flat Stage Cube Side
-		tempVert.position = glm::vec3(0.5f, 0.5f, 0.0f);
+		tempVert.position = glm::vec3(0.0f, 0.0f, 0.0f);
 		tempVert.normal = glm::vec3(0.0f, 0.0f, 1.0f);
-		tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
-		vecVert.push_back(tempVert);
-
-		tempVert.position = glm::vec3(0.5f, -0.5f, 0.0f);
-		tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
-		vecVert.push_back(tempVert);
-
-		tempVert.position = glm::vec3(-0.5f, -0.5f, 0.0f);
 		tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
 		vecVert.push_back(tempVert);
 
-		tempVert.position = glm::vec3(-0.5f, 0.5f, 0.0f);
+		tempVert.position = glm::vec3(1.0f, 0.0f, 0.0f);
+		tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+		vecVert.push_back(tempVert);
+
+		tempVert.position = glm::vec3(0.0f, 1.0f, 0.0f);
 		tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
 		vecVert.push_back(tempVert);
 
-		static const int ind[] = {0, 1, 3, 1, 2, 3};
+		tempVert.position = glm::vec3(1.0f, 1.0f, 0.0f);
+		tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
+		vecVert.push_back(tempVert);
+
+		static const int ind[] = {0, 1, 3, 0, 3, 2};
 		std::vector<int> vecInd(ind, ind + sizeof(ind) / sizeof(ind[0]));
 
-		loadMesh("ME_FLAT", &vecVert, &vecInd);
-		loadMesh("ME_SPHERE", "Resources/Meshes/ME_SPHERE.obj");
+		loadMesh(ID("ME_QUAD"), &vecVert, &vecInd);
+		loadMesh(ID("ME_SPHERE"), "Resources/Meshes/ME_SPHERE.obj");
 
-		loadShader("SH_PASS", "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");
-		loadShader("SH_TEX", "Resources/Shaders/sc_shader_testTextureVertex.glsl", "Resources/Shaders/sc_shader_testTextureFragment.glsl");
-		loadShader("SH_STAGE", "Resources/Shaders/sc_shader_stageVertex.glsl", "Resources/Shaders/sc_shader_stageFragment.glsl");
-
+		//Load Shaders
+		loadShader(ID("SH_PASS"), "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");
+		loadShader(ID("SH_TEX"), "Resources/Shaders/sc_shader_testTextureVertex.glsl", "Resources/Shaders/sc_shader_testTextureFragment.glsl");
+		loadShader(ID("SH_STAGE"), "Resources/Shaders/sc_shader_stageVertex.glsl", "Resources/Shaders/sc_shader_stageFragment.glsl");
+		loadShader(ID("SH_COLOR"), "Resources/Shaders/sc_shader_flatColorVertex.glsl", "Resources/Shaders/sc_shader_flatColorFragment.glsl");
 
 		std::vector<glm::vec4> tempVec4;
 		tempVec4.push_back(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		loadMaterial("MA_RED", NULL, NULL, &tempVec4, NULL, "SH_PASS");
+		loadMaterial(ID("MA_RED"), NULL, NULL, &tempVec4, NULL, ID("SH_PASS"));
 		tempVec4.clear();
 		tempVec4.push_back(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-		loadMaterial("MA_BLUE", NULL, NULL, &tempVec4, NULL, "SH_PASS");
-		std::vector<std::string> tempString;
-		tempString.push_back("TX_TEST");
-		loadTexture("TX_TEST", "Resources/Textures/w5block256.png");
-		loadMaterial("MA_TEX", NULL, NULL, NULL, &tempString, "SH_TEX");
+		loadMaterial(ID("MA_BLUE"), NULL, NULL, &tempVec4, NULL, ID("SH_PASS"));
 
-		loadModel("MO_TESTA", "ME_FLAT", "MA_TEX");
-		loadModel("MO_TESTB", "ME_SPHERE", "MA_BLUE");
+		loadModel(ID("MO_TESTA"), ID("ME_QUAD"), ID("MA_RED"));
+		loadModel(ID("MO_TESTB"), ID("ME_SPHERE"), ID("MA_BLUE"));
 	}
 
-	Mesh* Assets::getMesh(std::string id)
+	// Someday template these get functions
+	Mesh* Assets::getMesh(ID id)
 	{
-		for (size_t i = 0; i < meshPool.size(); i++)
+		for (auto ai = meshPool.begin(); ai != meshPool.end(); ai++)
 		{
-			if (meshPool[i].id.compare(id) == 0)
+			if (ai->id.is(id))
 			{
-				return &meshPool[i];
+				return &(*ai);
 			}
 		}
 
 		//Eventually should return a default mesh object preloaded.
-		LOG_E << "Failed to get mesh resource " << id;
+		LOG_E << "Failed to get mesh resource " << id.get();
 
 		return NULL;
 	}
 
-	Texture* Assets::getTexture(std::string id)
+	Texture* Assets::getTexture(ID id)
 	{
-		for (size_t i = 0; i < texturePool.size(); i++)
+		for (auto ai = texturePool.begin(); ai != texturePool.end(); ai++)
 		{
-			if (texturePool[i].id.compare(id) == 0)
+			if (ai->id.is(id))
 			{
-				return &texturePool[i];
+				return &(*ai);
 			}
 		}
 
 		//Eventually should return a default mesh object preloaded.
-		LOG_E << "Failed to get texture resource " << id;
+		LOG_E << "Failed to get texture resource " << id.get();
 
 		return NULL;
 	}
 
-	Shader* Assets::getShader(std::string id)
+	Shader* Assets::getShader(ID id)
 	{
-		for (size_t i = 0; i < shaderPool.size(); i++)
+		for (auto ai = shaderPool.begin(); ai != shaderPool.end(); ai++)
 		{
-			if (shaderPool[i].id.compare(id) == 0)
+			if (ai->id.is(id))
 			{
-				return &shaderPool[i];
+				return &(*ai);
 			}
 		}
 
 		//Eventually should return a default mesh object preloaded.
-		LOG_E << "Failed to get shader resource " << id;
+		LOG_E << "Failed to get shader resource " << id.get();
 
 		return NULL;
 	}
 
-	Material* Assets::getMaterial(std::string id)
+	Material* Assets::getMaterial(ID id)
 	{
-		for (size_t i = 0; i < materialPool.size(); i++)
+		for (auto ai = materialPool.begin(); ai != materialPool.end(); ai++)
 		{
-			if (materialPool[i].id.compare(id) == 0)
+			if (ai->id.is(id))
 			{
-				return &materialPool[i];
+				return &(*ai);
 			}
 		}
 
 		//Eventually should return a default mesh object preloaded.
-		LOG_E << "Failed to get material resource " << id;
+		LOG_E << "Failed to get material resource " << id.get();
 
 		return NULL;
 	}
 
-	Model* Assets::getModel(std::string id)
+	Model* Assets::getModel(ID id)
 	{
-		for (size_t i = 0; i < modelPool.size(); i++)
+		for (auto ai = modelPool.begin(); ai != modelPool.end(); ai++)
 		{
-			if (modelPool[i].id.compare(id) == 0)
+			if (ai->id.is(id))
 			{
-				return &modelPool[i];
+				return &(*ai);
 			}
 		}
 
 		//Eventually should return a default mesh object preloaded.
-		LOG_E << "Failed to get model resource " << id;
+		LOG_E << "Failed to get model resource " << id.get();
 
 		return NULL;
 	}

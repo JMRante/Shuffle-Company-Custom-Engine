@@ -2,10 +2,10 @@
 
     SHUFFLE COMPANY SOURCE CODE
 
-    sc_shader_testFragment.glsl
+    sc_shader_stageFragment.glsl
     ------------------------------------
 
-	A fragment shader for experimentation.
+	A fragment shader for rendering the stage
 
 */
 

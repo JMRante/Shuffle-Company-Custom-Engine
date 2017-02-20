@@ -13,23 +13,24 @@
 
 namespace sc
 {
-	Renderer::Renderer(SDL_Window *window)
+	Renderer::Renderer(SDL_Window* window)
 	{
 		this->window = window;
 	}
 
 	void Renderer::render()
 	{
+		//Render the world (Draw components)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Render each world element
-		sc::EntityManager* em = &renderWorld->entityManager;
+		EntityManager* em = &(game.currentState->entityManager);
 
-		for (auto drawIt = em->getDrawPoolBegin(); drawIt != em->getDrawPoolEnd(); drawIt++)
+		for (auto drawIt = em->drawModelPool.begin(); drawIt != em->drawModelPool.end(); drawIt++)
 		{
 			if (drawIt->isVisible)
 			{
-				sc::Model* drawModel = drawIt->getModel();
+				Model* drawModel = drawIt->model;
 
 				glUseProgram(drawModel->material->shader->GLid);
 
@@ -72,7 +73,8 @@ namespace sc
 				}
 
 				//Bind transform to shader
-				glm::mat4 pvw = em->getCamera(renderCameraEntityId)->getProjectionMatrix() * em->getCamera(renderCameraEntityId)->getViewMatrix() * em->getTransform(drawIt->getEntityId())->getWorldMatrix();
+				Camera* cam = em->cameraPool.get(renderCameraEntityId);
+				glm::mat4 pvw = cam->getProjectionMatrix() * cam->getViewMatrix() * em->transformPool.get(drawIt->entityId)->getWorldMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(drawModel->material->shader->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(drawModel->mesh->VAOid);
@@ -81,16 +83,40 @@ namespace sc
 			}
 		}
 
+		//Render the UI (UIDraw components)
+		// glClear(GL_DEPTH_BUFFER_BIT);
+
+		// for (auto UIDrawIt = em->getUIDrawRectanglePoolBegin(); UIDrawIt != em->getUIDrawRectanglePoolEnd(); UIDrawIt++)
+		// {
+		// 	if (UIIDrawIt->isVisible)
+		// 	{
+		// 		sc::Mesh* mesh = getMesh("ME_QUAD");
+		// 		sc::Shader* shad = getShader("SH_COLOR");
+		// 		glUseProgram(shad->GLid);
+
+		// 		//Bind all vec4 values to the shader
+		// 		glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)("vec4_" + sc::IntToString(i)).c_str()), 
+		// 			drawModel->material->vec4MaterialArguments[i][0],
+		// 			drawModel->material->vec4MaterialArguments[i][1],
+		// 			drawModel->material->vec4MaterialArguments[i][2],
+		// 			drawModel->material->vec4MaterialArguments[i][3]);
+
+		// 		//Bind transform to shader
+		// 		glm::mat4 pvw = em->getCamera(renderCameraEntityId)->getOrthoMatrix() * em->getTransform(UIDrawIt->getEntityId())->getWorldMatrix();
+		// 		glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
+
+		// 		glBindVertexArray(mesh->VAOid);
+		// 			glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+		// 		glBindVertexArray(0);
+		// 	}
+		// }
+
 		SDL_GL_SwapWindow(window);
 	}
 
-	void Renderer::setWorld(sc::World *world)
+	void Renderer::setCameraEntity(ID cameraEntityId)
 	{
-		this->renderWorld = world;
-	}
 
-	void Renderer::setCameraEntity(std::string cameraEntityId)
-	{
 		this->renderCameraEntityId = cameraEntityId;
 	}
 
