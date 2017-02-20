@@ -114,7 +114,8 @@ bool initiate()
 
 	//Initiate OpenGL options
     glViewport(0, 0, sc::config.get("WINDOW_WIDTH"), sc::config.get("WINDOW_HEIGHT"));
-	glEnable(GL_DEPTH_TEST); 
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 
 	//Initiate SDL options
 	SDL_GL_SetSwapInterval(1);
