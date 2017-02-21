@@ -13,9 +13,9 @@
 
 out vec4 color;
 
-uniform vec4 vec4_0;
+uniform vec4 flatColor;
 
 void main()
 {
-    color = vec4_0;
+    color = flatColor;
 }

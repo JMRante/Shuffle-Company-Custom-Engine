@@ -44,6 +44,11 @@ namespace sc
 		DrawRectangle* dr = em->drawRectanglePool.add(ID("E_RECT"), DrawRectangle(16, 16, 128, 128, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), true));
 		dr->calculateTransform();
 
+		em->addEntity(ID("E_SPRITE"));
+		em->transformPool.add(ID("E_SPRITE"), Transform());
+		DrawSprite* ds = em->drawSpritePool.add(ID("E_SPRITE"), DrawSprite(256, 16, 1.0, 1.0, ID("TX_SPR1"), true));
+		ds->calculateTransform();
+
 		// em->addEntity(ID("E_TESTA"));
 		// tran = em->transformPool.add(ID("E_TESTA"), Transform());
 		// tran->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));

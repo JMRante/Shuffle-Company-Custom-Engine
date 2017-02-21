@@ -111,6 +111,7 @@ namespace sc
 		float y;
 		float width;
 		float height;
+
 	public:
 		glm::vec4 color;
 		bool isVisible;
@@ -118,7 +119,28 @@ namespace sc
 		DrawRectangle(float x, float y, float width, float height, glm::vec4 color, bool isVisible);
 		void change(float x, float y, float width, float height);
 		void calculateTransform();
-	};	
+	};
+
+	class DrawSprite : public Component
+	{
+	private:
+		float x;
+		float y;
+		float scaleX;
+		float scaleY;
+		float texCoordX;
+		float texCoordY;
+
+	public:
+		Texture* texture;
+		bool isVisible;
+
+		DrawSprite(float x, float y, float scaleX, float scaleY, ID texId, bool isVisible);
+		void change(float x, float y, float scaleX, float scaleY);
+		void calculateTransform();
+		float getTexCoordScaleX();
+		float getTexCoordScaleY();
+	};
 }
 
 #endif

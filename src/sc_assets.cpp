@@ -12,6 +12,7 @@
 #include "sc_assets.h"
 
 #include <IL/il.h>
+#include <IL/ilu.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -243,15 +244,25 @@ namespace sc
 				width = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
 				height = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
 
+				//Pad non power of two textures for SPEED
+				GLuint widthPT = powerOfTwo(width);
+				GLuint heightPT = powerOfTwo(height);
+
+				if (width != widthPT || height != heightPT)
+				{
+					iluImageParameter(ILU_PLACEMENT, ILU_UPPER_LEFT);
+					iluEnlargeCanvas((int)widthPT, (int)heightPT, 1);
+				}
+
 				//Generate texture ID
 				glGenTextures(1, &GLid);
 
 				//Load texture into OpenGL
 				glBindTexture(GL_TEXTURE_2D, GLid);
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthPT, heightPT, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
 
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 					glGenerateMipmap(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -291,8 +302,8 @@ namespace sc
 		glBindTexture(GL_TEXTURE_2D, GLid);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -624,11 +635,15 @@ namespace sc
 		loadMesh(ID("ME_QUAD"), &vecVert, &vecInd);
 		loadMesh(ID("ME_SPHERE"), "Resources/Meshes/ME_SPHERE.obj");
 
+		//Load Textures
+		loadTexture(ID("TX_SPR1"), "Resources/Textures/testSprite.png");
+
 		//Load Shaders
 		loadShader(ID("SH_PASS"), "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");
 		loadShader(ID("SH_TEX"), "Resources/Shaders/sc_shader_testTextureVertex.glsl", "Resources/Shaders/sc_shader_testTextureFragment.glsl");
 		loadShader(ID("SH_STAGE"), "Resources/Shaders/sc_shader_stageVertex.glsl", "Resources/Shaders/sc_shader_stageFragment.glsl");
 		loadShader(ID("SH_COLOR"), "Resources/Shaders/sc_shader_flatColorVertex.glsl", "Resources/Shaders/sc_shader_flatColorFragment.glsl");
+		loadShader(ID("SH_SPRITE"), "Resources/Shaders/sc_shader_spriteVertex.glsl", "Resources/Shaders/sc_shader_spriteFragment.glsl");
 
 		std::vector<glm::vec4> tempVec4;
 		tempVec4.push_back(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));

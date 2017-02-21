@@ -98,6 +98,7 @@ namespace sc
 		ComponentPool<Camera> cameraPool;
 		ComponentPool<DrawModel> drawModelPool;
 		ComponentPool<DrawRectangle> drawRectanglePool;
+		ComponentPool<DrawSprite> drawSpritePool;
 
 		//Natures
 		ComponentPool<DebugCamera> debugCameraPool;

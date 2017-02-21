@@ -20,11 +20,13 @@ namespace sc
 
 	void Renderer::render()
 	{
-		//Render the world (Draw components)
+		//Render 3D, perspective elements
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//Render each world element
+		//Render each Model
 		EntityManager* em = &(game.currentState->entityManager);
+
+		int textureCount = 0;
 
 		for (auto drawIt = em->drawModelPool.begin(); drawIt != em->drawModelPool.end(); drawIt++)
 		{
@@ -58,18 +60,20 @@ namespace sc
 				//Bind all textures to the shader
 				for (size_t i = 0; i < drawModel->material->textureMaterialArguments.size(); i++)
 				{
-					glActiveTexture(GL_TEXTURE0 + i);
+					glActiveTexture(GL_TEXTURE0 + textureCount);
 
 					if (drawModel->material->textureMaterialArguments[i]->array)
 					{
 						glBindTexture(GL_TEXTURE_2D_ARRAY, drawModel->material->textureMaterialArguments[i]->GLid);
-						glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("textureArray_" + sc::IntToString(i)).c_str()), i);
+						glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("textureArray_" + sc::IntToString(i)).c_str()), textureCount);
 					}
 					else
 					{
 						glBindTexture(GL_TEXTURE_2D, drawModel->material->textureMaterialArguments[i]->GLid);
-						glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("texture_" + sc::IntToString(i)).c_str()), i);
+						glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("texture_" + sc::IntToString(i)).c_str()), textureCount);
 					}
+
+					textureCount++;
 				}
 
 				//Bind transform to shader
@@ -83,9 +87,10 @@ namespace sc
 			}
 		}
 
-		//Render the UI (UIDraw components)
+		//Render 2D, orthographic elements
 		glClear(GL_DEPTH_BUFFER_BIT);
 
+		//Render rectangles
 		for (auto drawIt = em->drawRectanglePool.begin(); drawIt != em->drawRectanglePool.end(); drawIt++)
 		{
 			if (drawIt->isVisible)
@@ -94,8 +99,7 @@ namespace sc
 				Shader* shad = assets.getShader(ID("SH_COLOR"));
 				glUseProgram(shad->GLid);
 
-				//Bind all vec4 values to the shader
-				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"vec4_0"), 
+				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"flatColor"), 
 					drawIt->color[0],
 					drawIt->color[1],
 					drawIt->color[2],
@@ -103,7 +107,33 @@ namespace sc
 
 				//Bind transform to shader
 				glm::mat4 pvw = em->cameraPool.get(renderCameraEntityId)->getOrthoMatrix() * em->transformPool.get(drawIt->entityId)->getWorldMatrix();
-				//glm::mat4 pvw = em->cameraPool.get(renderCameraEntityId)->getProjectionMatrix() * em->cameraPool.get(renderCameraEntityId)->getViewMatrix() * em->transformPool.get(drawIt->entityId)->getWorldMatrix();
+				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
+
+				glBindVertexArray(mesh->VAOid);
+					glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+				glBindVertexArray(0);
+			}
+		}
+
+		//Render Sprites
+		for (auto drawIt = em->drawSpritePool.begin(); drawIt != em->drawSpritePool.end(); drawIt++)
+		{
+			if (drawIt->isVisible)
+			{
+				Mesh* mesh = assets.getMesh(ID("ME_QUAD"));
+				Shader* shad = assets.getShader(ID("SH_SPRITE"));
+				glUseProgram(shad->GLid);
+
+				glUniform1f(glGetUniformLocation(shad->GLid, (const GLchar*)"texCoordScaleX"), drawIt->getTexCoordScaleX());
+				glUniform1f(glGetUniformLocation(shad->GLid, (const GLchar*)"texCoordScaleY"), drawIt->getTexCoordScaleY());
+				
+				glActiveTexture(GL_TEXTURE0 + textureCount);
+				glBindTexture(GL_TEXTURE_2D, drawIt->texture->GLid);
+				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"sprite"), textureCount);
+				textureCount++;
+
+				//Bind transform to shader
+				glm::mat4 pvw = em->cameraPool.get(renderCameraEntityId)->getOrthoMatrix() * em->transformPool.get(drawIt->entityId)->getWorldMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);
