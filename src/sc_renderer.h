@@ -26,8 +26,7 @@
 #include "sc_log.h"
 #include "sc_utility.h"
 #include "sc_game.h"
-#include "sc_world.h"
-#include "sc_entity.h"
+#include "sc_state.h"
 #include "sc_component.h"
 #include "sc_assets.h"
 

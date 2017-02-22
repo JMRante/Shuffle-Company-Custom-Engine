@@ -11,7 +11,7 @@
 
 #include "sc_nature.h"
 #include "sc_game.h"
-#include "sc_world.h"
+#include "sc_state.h"
 
 namespace sc
 {
@@ -27,11 +27,11 @@ namespace sc
 
 	void DebugCamera::update()
 	{
-		Transform* currentTrans = game.currentState->entityManager.transformPool.get(entityId);
-		Transform* nextTrans = game.nextState->entityManager.transformPool.get(entityId);
-		Camera* currentCamera = game.currentState->entityManager.cameraPool.get(entityId);
-		Camera* nextCamera = game.nextState->entityManager.cameraPool.get(entityId);
-		DebugCamera* next = game.nextState->entityManager.debugCameraPool.get(entityId);
+		Transform* currentTrans = game.currentState->transformPool.get(entityId);
+		Transform* nextTrans = game.nextState->transformPool.get(entityId);
+		Camera* currentCamera = game.currentState->cameraPool.get(entityId);
+		Camera* nextCamera = game.nextState->cameraPool.get(entityId);
+		DebugCamera* next = game.nextState->debugCameraPool.get(entityId);
 
 		//Rotation
 		float mouseXDelta = (float)input.getMouseXDelta();

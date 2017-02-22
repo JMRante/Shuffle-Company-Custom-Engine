@@ -14,7 +14,7 @@
 #include <cmath>
 
 #include "sc_game.h"
-#include "sc_world.h"
+#include "sc_state.h"
 
 namespace sc
 {
@@ -136,7 +136,7 @@ namespace sc
 
 	void Camera::calculateViewMatrix()
 	{
-		Transform* transform = game.nextState->entityManager.transformPool.get(entityId);
+		Transform* transform = game.nextState->transformPool.get(entityId);
 		glm::vec3 pos = transform->getPosition();
 		glm::vec3 rot = transform->getRotation();
 		float pitch = rot.x;
@@ -218,7 +218,7 @@ namespace sc
 
 	void DrawRectangle::calculateTransform()
 	{
-		Transform* transform = game.nextState->entityManager.transformPool.get(entityId);
+		Transform* transform = game.nextState->transformPool.get(entityId);
 		transform->setScale(glm::vec3(width, height, 0.0f));
 		transform->setPosition(glm::vec3(x, y, 0.0f));
 	}
@@ -249,7 +249,7 @@ namespace sc
 
 	void DrawSprite::calculateTransform()
 	{
-		Transform* transform = game.nextState->entityManager.transformPool.get(entityId);
+		Transform* transform = game.nextState->transformPool.get(entityId);
 		transform->setScale(glm::vec3(scaleX * sprite->width, scaleY * sprite->height, 0.0f));
 		transform->setPosition(glm::vec3(x, y, 0.0f));
 	}

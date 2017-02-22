@@ -24,11 +24,11 @@ namespace sc
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Render each Model
-		EntityManager* em = &(game.currentState->entityManager);
+		State* cs = game.currentState;
 
 		int textureCount = 0;
 
-		for (auto drawIt = em->drawModelPool.begin(); drawIt != em->drawModelPool.end(); drawIt++)
+		for (auto drawIt = cs->drawModelPool.begin(); drawIt != cs->drawModelPool.end(); drawIt++)
 		{
 			if (drawIt->isVisible)
 			{
@@ -77,8 +77,8 @@ namespace sc
 				}
 
 				//Bind transform to shader
-				Camera* cam = em->cameraPool.get(renderCameraEntityId);
-				glm::mat4 pvw = cam->getProjectionMatrix() * cam->getViewMatrix() * em->transformPool.get(drawIt->entityId)->getWorldMatrix();
+				Camera* cam = cs->cameraPool.get(renderCameraEntityId);
+				glm::mat4 pvw = cam->getProjectionMatrix() * cam->getViewMatrix() * cs->transformPool.get(drawIt->entityId)->getWorldMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(drawModel->material->shader->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(drawModel->mesh->VAOid);
@@ -91,7 +91,7 @@ namespace sc
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		//Render rectangles
-		for (auto drawIt = em->drawRectanglePool.begin(); drawIt != em->drawRectanglePool.end(); drawIt++)
+		for (auto drawIt = cs->drawRectanglePool.begin(); drawIt != cs->drawRectanglePool.end(); drawIt++)
 		{
 			if (drawIt->isVisible)
 			{
@@ -106,7 +106,7 @@ namespace sc
 					drawIt->color[3]);
 
 				//Bind transform to shader
-				glm::mat4 pvw = em->cameraPool.get(renderCameraEntityId)->getOrthoMatrix() * em->transformPool.get(drawIt->entityId)->getWorldMatrix();
+				glm::mat4 pvw = cs->cameraPool.get(renderCameraEntityId)->getOrthoMatrix() * cs->transformPool.get(drawIt->entityId)->getWorldMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);
@@ -116,7 +116,7 @@ namespace sc
 		}
 
 		//Render Sprites
-		for (auto drawIt = em->drawSpritePool.begin(); drawIt != em->drawSpritePool.end(); drawIt++)
+		for (auto drawIt = cs->drawSpritePool.begin(); drawIt != cs->drawSpritePool.end(); drawIt++)
 		{
 			if (drawIt->isVisible)
 			{
@@ -133,7 +133,7 @@ namespace sc
 				textureCount++;
 
 				//Bind transform to shader
-				glm::mat4 pvw = em->cameraPool.get(renderCameraEntityId)->getOrthoMatrix() * em->transformPool.get(drawIt->entityId)->getWorldMatrix();
+				glm::mat4 pvw = cs->cameraPool.get(renderCameraEntityId)->getOrthoMatrix() * cs->transformPool.get(drawIt->entityId)->getWorldMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);

@@ -10,7 +10,7 @@
 */
 
 #include "sc_game.h"
-#include "sc_world.h"
+#include "sc_state.h"
 
 namespace sc
 {
@@ -18,35 +18,33 @@ namespace sc
 
 	void Game::start()
 	{
-		currentState = new sc::World();
-		nextState = new sc::World();
+		currentState = new sc::State();
+		nextState = new sc::State();
 
 		assets.loadDefaults();
 
 		//Build elements
-		EntityManager* em = &nextState->entityManager;
-
 		nextState->stage.loadStage("Custom/Levels/TestLevel.shuff");
-		em->addEntity(ID("E_STAGE"));
-		Transform* tran = em->transformPool.add(ID("E_STAGE"), Transform());
-		em->drawModelPool.add(ID("E_STAGE"), DrawModel(ID("MO_STAGE"), true));
+		nextState->addEntity(ID("E_STAGE"));
+		Transform* tran = nextState->transformPool.add(ID("E_STAGE"), Transform());
+		nextState->drawModelPool.add(ID("E_STAGE"), DrawModel(ID("MO_STAGE"), true));
 
-		em->addEntity(ID("E_CAMERA"));
-		tran = em->transformPool.add(ID("E_CAMERA"), Transform());
+		nextState->addEntity(ID("E_CAMERA"));
+		tran = nextState->transformPool.add(ID("E_CAMERA"), Transform());
 		tran->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 		tran->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-		Camera* camera = em->cameraPool.add(ID("E_CAMERA"), Camera(0.01f, 100.0f));
+		Camera* camera = nextState->cameraPool.add(ID("E_CAMERA"), Camera(0.01f, 100.0f));
 		camera->calculateViewMatrix();
-		em->debugCameraPool.add(ID("E_CAMERA"), DebugCamera(0.07f, 0.1f));
+		nextState->debugCameraPool.add(ID("E_CAMERA"), DebugCamera(0.07f, 0.1f));
 
-		em->addEntity(ID("E_RECT"));
-		em->transformPool.add(ID("E_RECT"), Transform());
-		DrawRectangle* dr = em->drawRectanglePool.add(ID("E_RECT"), DrawRectangle(16, 16, 128, 128, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), true));
+		nextState->addEntity(ID("E_RECT"));
+		nextState->transformPool.add(ID("E_RECT"), Transform());
+		DrawRectangle* dr = nextState->drawRectanglePool.add(ID("E_RECT"), DrawRectangle(16, 16, 128, 128, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), true));
 		dr->calculateTransform();
 
-		em->addEntity(ID("E_SPRITE"));
-		em->transformPool.add(ID("E_SPRITE"), Transform());
-		DrawSprite* ds = em->drawSpritePool.add(ID("E_SPRITE"), DrawSprite(256, 16, 1.0, 1.0, ID("SP_TEST"), true));
+		nextState->addEntity(ID("E_SPRITE"));
+		nextState->transformPool.add(ID("E_SPRITE"), Transform());
+		DrawSprite* ds = nextState->drawSpritePool.add(ID("E_SPRITE"), DrawSprite(256, 16, 1.0, 1.0, ID("SP_TEST"), true));
 		ds->calculateTransform();
 
 		// em->addEntity(ID("E_TESTA"));
@@ -63,27 +61,25 @@ namespace sc
 		// DrawModel drawB(ID("MO_TESTB"), true);
 		// em->drawModelPool.add(ID("E_TESTB"), drawB);
 
-		updateWorldState();
+		updateState();
 	}
 
 	bool Game::update()
 	{
 		input.update();
 
-		EntityManager* em = &currentState->entityManager;
-
-		for (auto it = em->debugCameraPool.begin(); it != em->debugCameraPool.end(); it++) { (*it).update(); }
+		for (auto it = currentState->debugCameraPool.begin(); it != currentState->debugCameraPool.end(); it++) { (*it).update(); }
 
 		if (input.quitEvent())
 		{
 			return true;
 		}
 
-		updateWorldState();
+		updateState();
 		return false;
 	}
 
-	void Game::updateWorldState()
+	void Game::updateState()
 	{
 		LOG_D << "Updating World State";
 

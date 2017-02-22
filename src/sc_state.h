@@ -2,15 +2,15 @@
 
     SHUFFLE COMPANY SOURCE CODE
 
-    sc_entity.h
+    sc_state.h
     ------------------------------------
 
 
 
 */
 
-#ifndef SC_ENTITY
-#define SC_ENTITY
+#ifndef SC_STATE
+#define SC_STATE
 
 #include <typeinfo>
 #include <algorithm>
@@ -20,6 +20,7 @@
 #include "sc_component.h"
 #include "sc_nature.h"
 #include "sc_utility.h"
+#include "sc_stage.h"
 
 namespace sc
 {
@@ -87,7 +88,7 @@ namespace sc
 		}
 	};
 
-	class EntityManager
+	class State
 	{
 	private:
 		std::vector<ID> entities;
@@ -103,8 +104,11 @@ namespace sc
 		//Natures
 		ComponentPool<DebugCamera> debugCameraPool;
 
-		EntityManager();
-		void copy(EntityManager* otherEM);
+		//Singletons
+		Stage stage;
+
+		State();
+		void copy(State* otherEM);
 		bool addEntity(ID id);
 		bool entityExists(ID id);
 		bool removeEntity(ID id);

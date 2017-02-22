@@ -2,33 +2,33 @@
 
     SHUFFLE COMPANY SOURCE CODE
 
-    sc_entity.cpp
+    sc_state.cpp
     ------------------------------------
 
 
 
 */
 
-#include "sc_entity.h"
+#include "sc_state.h"
 
 namespace sc
 {
-	EntityManager::EntityManager() {}
+	State::State() {}
 
-	void EntityManager::copy(EntityManager* otherEM)
+	void State::copy(State* otherState)
 	{
-		entities = otherEM->entities;
+		entities = otherState->entities;
 
-		transformPool.copy(otherEM->transformPool);
-		cameraPool.copy(otherEM->cameraPool);
-		drawModelPool.copy(otherEM->drawModelPool);
-		drawRectanglePool.copy(otherEM->drawRectanglePool);
-		drawSpritePool.copy(otherEM->drawSpritePool);
+		transformPool.copy(otherState->transformPool);
+		cameraPool.copy(otherState->cameraPool);
+		drawModelPool.copy(otherState->drawModelPool);
+		drawRectanglePool.copy(otherState->drawRectanglePool);
+		drawSpritePool.copy(otherState->drawSpritePool);
 
-		debugCameraPool.copy(otherEM->debugCameraPool);
+		debugCameraPool.copy(otherState->debugCameraPool);
 	}
 
-	bool EntityManager::addEntity(ID id)
+	bool State::addEntity(ID id)
 	{
 		if (!entityExists(id))
 		{
@@ -40,7 +40,7 @@ namespace sc
 		return false;
 	}
 
-	bool EntityManager::entityExists(ID id)
+	bool State::entityExists(ID id)
 	{
 		for (auto ei = entities.begin(); ei != entities.end(); ei++)
 		{
@@ -53,7 +53,7 @@ namespace sc
 		return false;
 	}
 
-	bool EntityManager::removeEntity(ID id)
+	bool State::removeEntity(ID id)
 	{
 		for (auto ei = entities.begin(); ei != entities.end(); ei++)
 		{
