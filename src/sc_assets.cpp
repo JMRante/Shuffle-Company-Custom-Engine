@@ -244,22 +244,12 @@ namespace sc
 				width = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
 				height = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
 
-				//Pad non power of two textures for SPEED
-				GLuint widthPT = powerOfTwo(width);
-				GLuint heightPT = powerOfTwo(height);
-
-				if (width != widthPT || height != heightPT)
-				{
-					iluImageParameter(ILU_PLACEMENT, ILU_UPPER_LEFT);
-					iluEnlargeCanvas((int)widthPT, (int)heightPT, 1);
-				}
-
 				//Generate texture ID
 				glGenTextures(1, &GLid);
 
 				//Load texture into OpenGL
 				glBindTexture(GL_TEXTURE_2D, GLid);
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthPT, heightPT, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
 
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -361,6 +351,103 @@ namespace sc
 			GLid = 0;
 		}
 	}
+
+
+	/*
+		Sprite
+				*/
+	Sprite::Sprite(ID id)
+	{
+		this->id = id;
+		GLid = 0;
+	}
+
+	bool Sprite::loadToGPU(std::string filepath)
+	{
+		bool success = false;
+
+		//Load image with DevIL
+		ILuint ilID = 0;
+		ilGenImages(1, &ilID);
+		ilBindImage(ilID);
+
+		ILboolean ilSuccess = ilLoadImage(filepath.c_str());
+
+		if (ilSuccess == IL_TRUE)
+		{
+			//Convert image to RGBA
+			ilSuccess = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+
+			if (ilSuccess == IL_TRUE)
+			{
+				this->removeFromGPU();
+
+				width = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
+				height = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
+
+				//Pad non power of two textures for SPEED
+				GLuint widthPT = powerOfTwo(width);
+				GLuint heightPT = powerOfTwo(height);
+
+				if (width != widthPT || height != heightPT)
+				{
+					iluImageParameter(ILU_PLACEMENT, ILU_UPPER_LEFT);
+					iluEnlargeCanvas((int)widthPT, (int)heightPT, 1);
+				}
+
+				texCoordX = (float)width / (float)widthPT;
+				texCoordY = (float)height / (float)heightPT;
+
+				//Generate texture ID
+				glGenTextures(1, &GLid);
+
+				//Load texture into OpenGL
+				glBindTexture(GL_TEXTURE_2D, GLid);
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthPT, heightPT, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
+
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					glGenerateMipmap(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D, 0);
+
+				GLenum error = glGetError();
+
+				if(error != GL_NO_ERROR)
+				{
+					LOG_E << "Error loading sprite: " << gluErrorString(error);
+					success = false;
+				}
+				else
+				{
+					success = true;
+				}
+			}
+
+			//Delete file from memory
+			ilDeleteImages(1, &ilID);
+		}
+
+		if(!success)
+		{
+			LOG_E << "Unable to load the sprite " << filepath;
+		}
+
+		return success;		
+	}
+
+	void Sprite::removeFromGPU()
+	{
+		if (GLid != 0)
+		{
+			glDeleteTextures(1, &GLid);
+			GLid = 0;
+		}
+	}
+
+
+	/*
+		Font
+				*/
 
 
 	/*
@@ -587,6 +674,12 @@ namespace sc
 	}
 
 
+	bool Assets::loadSprite(ID id, std::string filepath)
+	{
+		spritePool.push_back(Sprite(id));
+		return spritePool.back().loadToGPU(filepath);
+	}
+
 	bool Assets::loadShader(ID id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
 	{
 		shaderPool.push_back(Shader(id));
@@ -635,8 +728,8 @@ namespace sc
 		loadMesh(ID("ME_QUAD"), &vecVert, &vecInd);
 		loadMesh(ID("ME_SPHERE"), "Resources/Meshes/ME_SPHERE.obj");
 
-		//Load Textures
-		loadTexture(ID("TX_SPR1"), "Resources/Textures/testSprite.png");
+		//Load Sprites
+		loadSprite(ID("SP_TEST"), "Resources/Textures/testSprite.png");
 
 		//Load Shaders
 		loadShader(ID("SH_PASS"), "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");
@@ -667,7 +760,7 @@ namespace sc
 			}
 		}
 
-		//Eventually should return a default mesh object preloaded.
+		//Eventually should return a default object preloaded.
 		LOG_E << "Failed to get mesh resource " << id.get();
 
 		return NULL;
@@ -683,10 +776,26 @@ namespace sc
 			}
 		}
 
-		//Eventually should return a default mesh object preloaded.
+		//Eventually should return a default object preloaded.
 		LOG_E << "Failed to get texture resource " << id.get();
 
 		return NULL;
+	}
+
+	Sprite* Assets::getSprite(ID id)
+	{
+		for (auto ai = spritePool.begin(); ai != spritePool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				return &(*ai);
+			}
+		}
+
+		//Eventually should return a default object preloaded.
+		LOG_E << "Failed to get sprite resource " << id.get();
+
+		return NULL;		
 	}
 
 	Shader* Assets::getShader(ID id)
@@ -699,7 +808,7 @@ namespace sc
 			}
 		}
 
-		//Eventually should return a default mesh object preloaded.
+		//Eventually should return a default object preloaded.
 		LOG_E << "Failed to get shader resource " << id.get();
 
 		return NULL;
@@ -715,7 +824,7 @@ namespace sc
 			}
 		}
 
-		//Eventually should return a default mesh object preloaded.
+		//Eventually should return a default object preloaded.
 		LOG_E << "Failed to get material resource " << id.get();
 
 		return NULL;
@@ -731,7 +840,7 @@ namespace sc
 			}
 		}
 
-		//Eventually should return a default mesh object preloaded.
+		//Eventually should return a default object preloaded.
 		LOG_E << "Failed to get model resource " << id.get();
 
 		return NULL;

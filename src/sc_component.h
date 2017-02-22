@@ -128,18 +128,14 @@ namespace sc
 		float y;
 		float scaleX;
 		float scaleY;
-		float texCoordX;
-		float texCoordY;
 
 	public:
-		Texture* texture;
+		Sprite* sprite;
 		bool isVisible;
 
-		DrawSprite(float x, float y, float scaleX, float scaleY, ID texId, bool isVisible);
+		DrawSprite(float x, float y, float scaleX, float scaleY, ID spriteId, bool isVisible);
 		void change(float x, float y, float scaleX, float scaleY);
 		void calculateTransform();
-		float getTexCoordScaleX();
-		float getTexCoordScaleY();
 	};
 }
 

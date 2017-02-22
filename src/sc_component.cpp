@@ -227,17 +227,14 @@ namespace sc
 	/*
 		DrawSprite
 					*/
-	DrawSprite::DrawSprite(float x, float y, float scaleX, float scaleY, ID texId, bool isVisible)
+	DrawSprite::DrawSprite(float x, float y, float scaleX, float scaleY, ID spriteId, bool isVisible)
 	{
 		this->x = x;
 		this->y = y;
 		this->scaleX = scaleX;
 		this->scaleY = scaleY;
-		this->texture = assets.getTexture(texId);
+		this->sprite = assets.getSprite(spriteId);
 		this->isVisible = isVisible;
-
-		texCoordX = (float)texture->width / (float)powerOfTwo(texture->width);
-		texCoordY = (float)texture->height / (float)powerOfTwo(texture->height);
 	}
 
 	void DrawSprite::change(float x, float y, float scaleX, float scaleY)
@@ -253,17 +250,7 @@ namespace sc
 	void DrawSprite::calculateTransform()
 	{
 		Transform* transform = game.nextState->entityManager.transformPool.get(entityId);
-		transform->setScale(glm::vec3(scaleX * texture->width, scaleY * texture->height, 0.0f));
+		transform->setScale(glm::vec3(scaleX * sprite->width, scaleY * sprite->height, 0.0f));
 		transform->setPosition(glm::vec3(x, y, 0.0f));
-	}
-
-	float DrawSprite::getTexCoordScaleX()
-	{
-		return texCoordX;
-	}
-
-	float DrawSprite::getTexCoordScaleY()
-	{
-		return texCoordY;
 	}
 }

@@ -46,7 +46,7 @@ namespace sc
 
 		em->addEntity(ID("E_SPRITE"));
 		em->transformPool.add(ID("E_SPRITE"), Transform());
-		DrawSprite* ds = em->drawSpritePool.add(ID("E_SPRITE"), DrawSprite(256, 16, 1.0, 1.0, ID("TX_SPR1"), true));
+		DrawSprite* ds = em->drawSpritePool.add(ID("E_SPRITE"), DrawSprite(256, 16, 1.0, 1.0, ID("SP_TEST"), true));
 		ds->calculateTransform();
 
 		// em->addEntity(ID("E_TESTA"));

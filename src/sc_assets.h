@@ -79,6 +79,27 @@ namespace sc
 		void removeFromGPU();
 	};
 
+	class Sprite
+	{
+	public:
+		ID id;
+		GLuint GLid;
+
+		GLuint width;
+		GLuint height;
+		float texCoordX;
+		float texCoordY;
+
+		Sprite(ID id);
+		bool loadToGPU(std::string filepath);
+		void removeFromGPU();		
+	};
+
+	class Font
+	{
+
+	};
+
 	class Shader
 	{
 	public:
@@ -128,12 +149,16 @@ namespace sc
 	private:
 		std::vector<Mesh> meshPool;
 		std::vector<Texture> texturePool;
+		std::vector<Sprite> spritePool;
+		std::vector<Font> fontPool;
 		std::vector<Shader> shaderPool;
 		std::vector<Material> materialPool;
 		std::vector<Model> modelPool;
 
 		int worldMeshStart;
 		int worldTextureStart;
+		int worldSpriteStart;
+		int worldFontStart;
 		int worldShaderStart;
 		int worldMaterialStart;
 		int worldModelStart;
@@ -147,6 +172,8 @@ namespace sc
 		bool loadTexture(ID id, GLuint width, GLuint height, GLuint* data);
 		bool loadTexture(ID id, GLuint width, GLuint height, std::vector<GLuint*> dataArray);
 
+		bool loadSprite(ID id, std::string filepath);
+
 		bool loadShader(ID id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
 		bool loadMaterial(ID id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<ID> *tma, ID shaderId);
 		bool loadModel(ID id, ID meshId, ID materialId);
@@ -155,6 +182,7 @@ namespace sc
 
 		Mesh* getMesh(ID id);
 		Texture* getTexture(ID id);
+		Sprite *getSprite(ID id);
 		Shader* getShader(ID id);
 		Material* getMaterial(ID id);
 		Model* getModel(ID id);

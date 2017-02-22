@@ -124,11 +124,11 @@ namespace sc
 				Shader* shad = assets.getShader(ID("SH_SPRITE"));
 				glUseProgram(shad->GLid);
 
-				glUniform1f(glGetUniformLocation(shad->GLid, (const GLchar*)"texCoordScaleX"), drawIt->getTexCoordScaleX());
-				glUniform1f(glGetUniformLocation(shad->GLid, (const GLchar*)"texCoordScaleY"), drawIt->getTexCoordScaleY());
+				glUniform1f(glGetUniformLocation(shad->GLid, (const GLchar*)"texCoordScaleX"), drawIt->sprite->texCoordX);
+				glUniform1f(glGetUniformLocation(shad->GLid, (const GLchar*)"texCoordScaleY"), drawIt->sprite->texCoordY);
 				
 				glActiveTexture(GL_TEXTURE0 + textureCount);
-				glBindTexture(GL_TEXTURE_2D, drawIt->texture->GLid);
+				glBindTexture(GL_TEXTURE_2D, drawIt->sprite->GLid);
 				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"sprite"), textureCount);
 				textureCount++;
 
