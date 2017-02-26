@@ -137,6 +137,20 @@ namespace sc
 		void change(float x, float y, float scaleX, float scaleY);
 		void calculateTransform();
 	};
+
+	class DrawText : public Component
+	{
+	public:
+		float x;
+		float y;
+
+		Font* font;
+		std::string text;
+		glm::vec4 color;
+		bool isVisible;
+
+		DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId, bool isVisible);
+	};
 }
 
 #endif

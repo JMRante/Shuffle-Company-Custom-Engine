@@ -448,6 +448,155 @@ namespace sc
 	/*
 		Font
 				*/
+	GLuint Font::VAOid = 0;
+	GLuint Font::VBOid = 0;
+
+	Font::Font(ID id)
+	{
+		this->id = id;
+		textureGLid = 0;
+	}
+
+	void Font::loadFontQuadToGPU()
+	{
+		glGenVertexArrays(1, &VAOid);
+		glGenBuffers(1, &VBOid);
+
+		glBindVertexArray(VAOid);
+			glBindBuffer(GL_ARRAY_BUFFER, VBOid);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+
+	bool Font::loadToGPU(std::string filepath, int height)
+	{
+		//Load face
+		if (FT_New_Face(assets.fontLibrary, filepath.c_str(), 0, &face))
+		{
+			LOG_E << "Failed to load font face from " << filepath;
+			return false;
+		}
+
+		FT_Set_Pixel_Sizes(face, 0, height);
+
+		//Get character information
+		int maxWidth = 0;
+		int maxHeight = 0;
+
+		for (int fc = 32; fc < 256; fc++)
+		{
+			if (FT_Load_Char(face, fc, FT_LOAD_RENDER))
+			{
+				LOG_E << "Failed to load font character " << (char)fc;
+			}
+
+			FontCharacter fontChar;
+			fontChar.size = glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows);
+			fontChar.bearing = glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top);
+			fontChar.advance = face->glyph->advance.x;
+
+			int bufferSize = face->glyph->bitmap.width * face->glyph->bitmap.rows;
+			fontChar.bitmap = new GLubyte[bufferSize];
+			memcpy(fontChar.bitmap, face->glyph->bitmap.buffer, bufferSize);
+			characters.insert(std::pair<GLchar, FontCharacter>((char)fc, fontChar));
+
+			if (fontChar.size.x > maxWidth)
+			{
+				maxWidth = fontChar.size.x;
+			}
+
+			if (fontChar.size.y > maxHeight)
+			{
+				maxHeight = fontChar.size.y;
+			}
+		}
+
+		maxWidth += 2;
+		maxHeight += 2;
+
+		//Store characters into texture
+		textureWidth = maxWidth * 16;
+		textureHeight = maxHeight * 16;
+
+		GLubyte fontPixels[textureWidth * textureHeight];
+
+		for (int fc = 32; fc < 256; fc++)
+		{
+			FontCharacter* fontChar = &characters[(GLchar)fc];
+
+			int startX = (fc % 16) * maxWidth;
+			int startY = (fc / 16) * maxHeight;
+
+			fontChar->textureCoords = glm::vec4((float)startX / (float)textureWidth, 
+												(float)(startX + fontChar->size.x) / (float)textureWidth, 
+												(float)startY / (float)textureHeight, 
+												(float)(startY + fontChar->size.y) / (float)textureHeight);
+
+			// LOG_D << "fc: " << fc; LOG_FLUSH;
+			// LOG_D << "startX: " << startX; LOG_FLUSH;
+			// LOG_D << "startY: " << startY; LOG_FLUSH;
+
+			for (int j = 0; j < fontChar->size.y; j++)
+			{
+				// LOG_DC << "\n";
+
+				for (int i = 0; i < fontChar->size.x; i++)
+				{
+					// LOG_DC << fontChar->bitmap[(j * fontChar->metrics.width) + i];
+					fontPixels[((j + startY) * textureWidth) + (i + startX)] = fontChar->bitmap[(j * fontChar->size.x) + i];
+				}
+			}
+		}
+
+		// for (int i = 0; i < textureWidth * textureHeight; i++)
+		// {
+		// 	if (i % textureWidth == 0)
+		// 	{
+		// 		LOG_DC << "\n";
+		// 	}
+
+		// 	LOG_DC << fontPixels[i];
+		// }
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glGenTextures(1, &textureGLid);
+			glBindTexture(GL_TEXTURE_2D, textureGLid);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, textureWidth, textureHeight, 0, GL_RED, GL_UNSIGNED_BYTE, &fontPixels);
+
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+		FT_Done_Face(face);
+
+		return true;
+	}
+
+	void Font::removeFromGPU()
+	{
+		if (textureGLid != 0)
+		{
+			glDeleteTextures(1, &textureGLid);
+			textureGLid = 0;
+		}
+	}
+
+	void Font::clearFontQuadFromGPU()
+	{
+		if (VAOid != 0)
+		{
+			glDeleteVertexArrays(1, &VAOid);
+			glDeleteBuffers(1, &VBOid);
+			VAOid = 0;
+			VBOid = 0;
+		}
+	}
 
 
 	/*
@@ -636,6 +785,15 @@ namespace sc
 	/*
 		Assets
 				*/
+	Assets::Assets()
+	{
+		//Initiate FreeType
+		if (FT_Init_FreeType(&fontLibrary))
+		{
+			LOG_E << "Error initiating FreeType";		
+		}
+	}
+
 	bool Assets::loadMesh(ID id, std::string filepath)
 	{
 		meshPool.push_back(Mesh(id));
@@ -678,6 +836,12 @@ namespace sc
 	{
 		spritePool.push_back(Sprite(id));
 		return spritePool.back().loadToGPU(filepath);
+	}
+
+	bool Assets::loadFont(ID id, std::string filepath, int height)
+	{
+		fontPool.push_back(Font(id));
+		return fontPool.back().loadToGPU(filepath, height);		
 	}
 
 	bool Assets::loadShader(ID id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
@@ -731,12 +895,17 @@ namespace sc
 		//Load Sprites
 		loadSprite(ID("SP_TEST"), "Resources/Textures/testSprite.png");
 
+		//Load Fonts
+		Font::loadFontQuadToGPU();
+		loadFont(ID("FT_TEST"), "Resources/Fonts/OpenSans-Regular.ttf", 28);
+
 		//Load Shaders
 		loadShader(ID("SH_PASS"), "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");
 		loadShader(ID("SH_TEX"), "Resources/Shaders/sc_shader_testTextureVertex.glsl", "Resources/Shaders/sc_shader_testTextureFragment.glsl");
 		loadShader(ID("SH_STAGE"), "Resources/Shaders/sc_shader_stageVertex.glsl", "Resources/Shaders/sc_shader_stageFragment.glsl");
 		loadShader(ID("SH_COLOR"), "Resources/Shaders/sc_shader_flatColorVertex.glsl", "Resources/Shaders/sc_shader_flatColorFragment.glsl");
 		loadShader(ID("SH_SPRITE"), "Resources/Shaders/sc_shader_spriteVertex.glsl", "Resources/Shaders/sc_shader_spriteFragment.glsl");
+		loadShader(ID("SH_FONT"), "Resources/Shaders/sc_shader_fontVertex.glsl", "Resources/Shaders/sc_shader_fontFragment.glsl");
 
 		std::vector<glm::vec4> tempVec4;
 		tempVec4.push_back(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -747,6 +916,8 @@ namespace sc
 
 		loadModel(ID("MO_TESTA"), ID("ME_QUAD"), ID("MA_RED"));
 		loadModel(ID("MO_TESTB"), ID("ME_SPHERE"), ID("MA_BLUE"));
+
+		FT_Done_FreeType(fontLibrary);
 	}
 
 	// Someday template these get functions
@@ -794,6 +965,22 @@ namespace sc
 
 		//Eventually should return a default object preloaded.
 		LOG_E << "Failed to get sprite resource " << id.get();
+
+		return NULL;		
+	}
+
+	Font* Assets::getFont(ID id)
+	{
+		for (auto ai = fontPool.begin(); ai != fontPool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				return &(*ai);
+			}
+		}
+
+		//Eventually should return a default object preloaded.
+		LOG_E << "Failed to get font resource " << id.get();
 
 		return NULL;		
 	}

@@ -26,10 +26,10 @@ namespace sc
 		//Render each Model
 		State* cs = game.currentState;
 
-		int textureCount = 0;
-
 		for (auto drawIt = cs->drawModelPool.begin(); drawIt != cs->drawModelPool.end(); drawIt++)
 		{
+			int textureCount = 0;
+
 			if (drawIt->isVisible)
 			{
 				Model* drawModel = drawIt->model;
@@ -79,7 +79,7 @@ namespace sc
 				//Bind transform to shader
 				Camera* cam = cs->cameraPool.get(renderCameraEntityId);
 				glm::mat4 pvw = cam->getProjectionMatrix() * cam->getViewMatrix() * cs->transformPool.get(drawIt->entityId)->getWorldMatrix();
-				glUniformMatrix4fv(glGetUniformLocation(drawModel->material->shader->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
+				glUniformMatrix4fv(glGetUniformLocation(drawModel->material->shader->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
 
 				glBindVertexArray(drawModel->mesh->VAOid);
 					glDrawElements(GL_TRIANGLES, drawModel->mesh->indexCount, GL_UNSIGNED_INT, 0);
@@ -127,10 +127,9 @@ namespace sc
 				glUniform1f(glGetUniformLocation(shad->GLid, (const GLchar*)"texCoordScaleX"), drawIt->sprite->texCoordX);
 				glUniform1f(glGetUniformLocation(shad->GLid, (const GLchar*)"texCoordScaleY"), drawIt->sprite->texCoordY);
 				
-				glActiveTexture(GL_TEXTURE0 + textureCount);
+				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, drawIt->sprite->GLid);
-				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"sprite"), textureCount);
-				textureCount++;
+				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"sprite"), 0);
 
 				//Bind transform to shader
 				glm::mat4 pvw = cs->cameraPool.get(renderCameraEntityId)->getOrthoMatrix() * cs->transformPool.get(drawIt->entityId)->getWorldMatrix();
@@ -138,6 +137,67 @@ namespace sc
 
 				glBindVertexArray(mesh->VAOid);
 					glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+				glBindVertexArray(0);
+			}
+		}
+
+		//Render Text
+		for (auto drawIt = cs->drawTextPool.begin(); drawIt != cs->drawTextPool.end(); drawIt++)
+		{
+			if (drawIt->isVisible)
+			{
+				Shader* shad = assets.getShader(ID("SH_FONT"));
+				glUseProgram(shad->GLid);
+
+				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"fontColor"), 
+					drawIt->color[0],
+					drawIt->color[1],
+					drawIt->color[2],
+					drawIt->color[3]);
+				
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, drawIt->font->textureGLid);
+				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"fontTexture"), 0);
+
+				glm::mat4 pvw = cs->cameraPool.get(renderCameraEntityId)->getOrthoMatrix();
+				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
+
+				GLfloat x = drawIt->x;
+				GLfloat y = drawIt->y;
+
+				std::string::const_iterator cIt;
+
+				glBindVertexArray(drawIt->font->VAOid);
+
+				for (cIt = drawIt->text.begin(); cIt != drawIt->text.end(); cIt++)
+				{
+					FontCharacter* fontChar = &(drawIt->font->characters[*cIt]);
+
+					GLfloat xpos = x + fontChar->bearing.x;
+					GLfloat ypos = y - (fontChar->size.y - fontChar->bearing.y);
+
+					GLfloat w = fontChar->size.x;
+					GLfloat h = fontChar->size.y;
+
+					GLfloat vertices[6][4] = {
+						{ xpos,     ypos + h,   fontChar->textureCoords.x, fontChar->textureCoords.z },
+						{ xpos,     ypos,       fontChar->textureCoords.x, fontChar->textureCoords.w },
+						{ xpos + w, ypos,       fontChar->textureCoords.y, fontChar->textureCoords.w },
+
+						{ xpos,     ypos + h,   fontChar->textureCoords.x, fontChar->textureCoords.z },
+						{ xpos + w, ypos,       fontChar->textureCoords.y, fontChar->textureCoords.w },
+						{ xpos + w, ypos + h,   fontChar->textureCoords.y, fontChar->textureCoords.z }
+					};
+
+					glBindBuffer(GL_ARRAY_BUFFER, drawIt->font->VBOid);
+						glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+					glDrawArrays(GL_TRIANGLES, 0, 6);
+
+					x += (fontChar->advance >> 6);
+				}
+
 				glBindVertexArray(0);
 			}
 		}

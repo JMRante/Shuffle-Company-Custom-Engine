@@ -23,6 +23,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "glm/ext.hpp"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include "sc_log.h"
 #include "sc_utility.h"
 #include "sc_game.h"

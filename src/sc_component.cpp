@@ -253,4 +253,18 @@ namespace sc
 		transform->setScale(glm::vec3(scaleX * sprite->width, scaleY * sprite->height, 0.0f));
 		transform->setPosition(glm::vec3(x, y, 0.0f));
 	}
+
+
+	/*
+		DrawText
+				*/
+	DrawText::DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId, bool isVisible)
+	{
+		this->x = x;
+		this->y = y;
+		this->text = text;
+		this->color = color;
+		this->font = assets.getFont(fontId);
+		this->isVisible = isVisible;
+	}
 }

@@ -47,6 +47,10 @@ namespace sc
 		DrawSprite* ds = nextState->drawSpritePool.add(ID("E_SPRITE"), DrawSprite(256, 16, 1.0, 1.0, ID("SP_TEST"), true));
 		ds->calculateTransform();
 
+		nextState->addEntity(ID("E_TEXT"));
+		nextState->transformPool.add(ID("E_TEXT"), Transform());
+		nextState->drawTextPool.add(ID("E_TEXT"), DrawText(512, 256, "Hello World!", glm::vec4(1.0, 1.0, 1.0f, 1.0), ID("FT_TEST"), true));
+
 		// em->addEntity(ID("E_TESTA"));
 		// tran = em->transformPool.add(ID("E_TESTA"), Transform());
 		// tran->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));

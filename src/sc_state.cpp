@@ -24,6 +24,7 @@ namespace sc
 		drawModelPool.copy(otherState->drawModelPool);
 		drawRectanglePool.copy(otherState->drawRectanglePool);
 		drawSpritePool.copy(otherState->drawSpritePool);
+		drawTextPool.copy(otherState->drawTextPool);
 
 		debugCameraPool.copy(otherState->debugCameraPool);
 	}
@@ -64,6 +65,7 @@ namespace sc
 				drawModelPool.remove(id);
 				drawRectanglePool.remove(id);
 				drawSpritePool.remove(id);
+				drawTextPool.remove(id);
 
 				debugCameraPool.remove(id);
 

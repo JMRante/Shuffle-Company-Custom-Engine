@@ -12,18 +12,23 @@
 #ifndef SC_ASSETS
 #define SC_ASSETS
 
-#include <stack>
+#include <map>
 #include <vector>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <iterator>
+#include <cmath>
 
 #include <GL/glew.h>
 #include <SDL.h>
 
 #include <glm/glm.hpp>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_GLYPH_H
 
 #include "sc_log.h"
 #include "sc_utility.h"
@@ -95,9 +100,35 @@ namespace sc
 		void removeFromGPU();		
 	};
 
+	struct FontCharacter
+	{
+		glm::vec4 textureCoords;
+		glm::ivec2 size;
+		glm::ivec2 bearing;
+		GLuint advance;
+		
+		GLubyte* bitmap;
+	};
+
 	class Font
 	{
+	public:
+		ID id;
+		FT_Face face;
+		std::map<GLchar, FontCharacter> characters;
 
+		GLuint textureGLid;
+		GLuint textureWidth;
+		GLuint textureHeight;
+
+		static GLuint VAOid;
+		static GLuint VBOid;
+
+		Font(ID id);
+		static void loadFontQuadToGPU();
+		bool loadToGPU(std::string filepath, int height);
+		void removeFromGPU();
+		static void clearFontQuadFromGPU();
 	};
 
 	class Shader
@@ -158,12 +189,15 @@ namespace sc
 		int worldMeshStart;
 		int worldTextureStart;
 		int worldSpriteStart;
-		int worldFontStart;
 		int worldShaderStart;
 		int worldMaterialStart;
 		int worldModelStart;
 
 	public:
+		FT_Library fontLibrary;
+
+		Assets();
+
 		bool loadMesh(ID id, std::string filepath);
 		bool loadMesh(ID id, std::vector<Vertex> *vertices, std::vector<int> *indices);
 		bool loadMesh(ID id, std::vector<StageVertex> *vertices, std::vector<int> *indices);
@@ -174,6 +208,8 @@ namespace sc
 
 		bool loadSprite(ID id, std::string filepath);
 
+		bool loadFont(ID id, std::string filepath, int height);
+
 		bool loadShader(ID id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
 		bool loadMaterial(ID id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<ID> *tma, ID shaderId);
 		bool loadModel(ID id, ID meshId, ID materialId);
@@ -182,7 +218,8 @@ namespace sc
 
 		Mesh* getMesh(ID id);
 		Texture* getTexture(ID id);
-		Sprite *getSprite(ID id);
+		Sprite* getSprite(ID id);
+		Font* getFont(ID id);
 		Shader* getShader(ID id);
 		Material* getMaterial(ID id);
 		Model* getModel(ID id);

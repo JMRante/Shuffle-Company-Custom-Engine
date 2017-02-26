@@ -17,8 +17,11 @@ GLM_INCLUDE = -IX:\Base\Dev\MinGWDevLib\glm
 
 OBJLOAD_INCLUDE = -IX:\Base\Dev\MinGWDevLib\tinyobjloader-master
 
-COMPILER_FLAGS = -g -Wall -c $(SDL_INCLUDE) $(DevIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE) $(OBJLOAD_INCLUDE)
-LD_FLAGS = -mwindows -lmingw32 $(SDL_LIB) $(DevIL_LIB) $(FREEGLUT_LIB) $(GLEW_LIB)
+FREETYPE_LIB = -LX:\Base\Dev\MinGWDevLib\freetype-2.7.1\objs -lfreetype
+FREETYPE_INCLUDE = -IX:\Base\Dev\MinGWDevLib\freetype-2.7.1\include
+
+COMPILER_FLAGS = -g -Wall -c $(SDL_INCLUDE) $(DevIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE) $(OBJLOAD_INCLUDE) $(FREETYPE_INCLUDE)
+LD_FLAGS = -mwindows -lmingw32 $(SDL_LIB) $(DevIL_LIB) $(FREEGLUT_LIB) $(GLEW_LIB) $(FREETYPE_LIB)
 EXE = ShuffleCompany.exe
 
 all: $(EXE)
