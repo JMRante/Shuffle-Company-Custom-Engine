@@ -21,7 +21,7 @@
 #include "glm/ext.hpp"
 
 #include "sc_log.h"
-
+#include "sc_prefabs.h"
 #include "sc_assets.h"
 
 namespace sc

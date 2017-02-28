@@ -47,10 +47,10 @@ namespace sc
 		
 		next->yaw = yaw;
 		next->pitch = pitch;
-		nextTrans->setRotation(glm::vec3(glm::radians(pitch), glm::radians(yaw), 0.0f));
+		nextTrans->rotation = glm::vec3(glm::radians(pitch), glm::radians(yaw), 0.0f);
 
 		//Translation
-		glm::vec3 currentPosition = currentTrans->getPosition();
+		glm::vec3 currentPosition = currentTrans->position;
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		if (input.keyHeld(SDLK_d))
@@ -78,7 +78,7 @@ namespace sc
 			translate = moveSpeed * glm::normalize(translate);			
 		}
 
-		nextTrans->setPosition(currentPosition + translate);
+		nextTrans->position = currentPosition + translate;
 		nextCamera->calculateViewMatrix();
 	}
 }

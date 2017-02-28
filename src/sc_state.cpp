@@ -27,6 +27,8 @@ namespace sc
 		drawTextPool.copy(otherState->drawTextPool);
 
 		debugCameraPool.copy(otherState->debugCameraPool);
+
+		stage = otherState->stage;
 	}
 
 	bool State::addEntity(ID id)

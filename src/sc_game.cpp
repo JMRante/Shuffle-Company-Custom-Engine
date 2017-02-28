@@ -24,32 +24,15 @@ namespace sc
 		assets.loadDefaults();
 
 		//Build elements
-		nextState->stage.loadStage("Custom/Levels/TestLevel.shuff");
-		nextState->addEntity(ID("E_STAGE"));
-		Transform* tran = nextState->transformPool.add(ID("E_STAGE"), Transform());
-		nextState->drawModelPool.add(ID("E_STAGE"), DrawModel(ID("MO_STAGE"), true));
+		createStage("Custom/Levels/TestLevel.shuff");
 
-		nextState->addEntity(ID("E_CAMERA"));
-		tran = nextState->transformPool.add(ID("E_CAMERA"), Transform());
-		tran->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-		tran->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-		Camera* camera = nextState->cameraPool.add(ID("E_CAMERA"), Camera(0.01f, 100.0f));
-		camera->calculateViewMatrix();
-		nextState->debugCameraPool.add(ID("E_CAMERA"), DebugCamera(0.07f, 0.1f));
+		createDebugCamera(ID("E_CAMERA"), glm::vec3(1.5f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.1f, 100.0f, 0.07f, 0.1f);
 
-		nextState->addEntity(ID("E_RECT"));
-		nextState->transformPool.add(ID("E_RECT"), Transform());
-		DrawRectangle* dr = nextState->drawRectanglePool.add(ID("E_RECT"), DrawRectangle(16, 16, 128, 128, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), true));
-		dr->calculateTransform();
+		createUIRectangle(ID("E_RECTA"), glm::vec2(32, 640), glm::vec2(128, 128), glm::vec2(0, 0), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+		createUIRectangle(ID("E_RECTB"), glm::vec2(0, 0), glm::vec2(128, 128), glm::vec2(64, 64), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
 
-		nextState->addEntity(ID("E_SPRITE"));
-		nextState->transformPool.add(ID("E_SPRITE"), Transform());
-		DrawSprite* ds = nextState->drawSpritePool.add(ID("E_SPRITE"), DrawSprite(256, 16, 1.0, 1.0, ID("SP_TEST"), true));
-		ds->calculateTransform();
-
-		nextState->addEntity(ID("E_TEXT"));
-		nextState->transformPool.add(ID("E_TEXT"), Transform());
-		nextState->drawTextPool.add(ID("E_TEXT"), DrawText(512, 256, "Hello World!", glm::vec4(1.0, 1.0, 1.0f, 1.0), ID("FT_TEST"), true));
+		createUISprite(ID("E_SPRITE"), glm::vec2(256, 16), glm::vec2(1.0f, 1.0f), glm::vec2(0, 0), ID("SP_TEST"));
+		createUIText(ID("E_TEXT"), glm::vec2(512, 256), "There are things beyond Hello World?", ID("FT_TEST"), glm::vec4(1.0, 1.0, 1.0f, 1.0));
 
 		updateState();
 	}

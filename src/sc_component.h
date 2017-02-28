@@ -38,25 +38,17 @@ namespace sc
 	class Transform : public Component
 	{
 	private:
-		glm::vec3 position;
-		glm::vec3 rotation;
-		glm::vec3 scale;
 		glm::mat4 worldMatrix;
 
 	public:
+		glm::vec3 position;
+		glm::vec3 rotation;
+		glm::vec3 scale;
+
 		Transform();
 		Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
 
 		glm::mat4 getWorldMatrix();
-		
-		void setPosition(glm::vec3 position);
-		void setRotation(glm::vec3 rotation);
-		void setScale(glm::vec3 scale);
-
-		glm::vec3 getPosition();
-		glm::vec3 getRotation();
-		glm::vec3 getScale();
-
 		void calculateWorldMatrix();
 	};
 
@@ -106,35 +98,35 @@ namespace sc
 
 	class DrawRectangle : public Component
 	{
-	private:
+	public:
 		float x;
 		float y;
 		float width;
 		float height;
+		float pivotX;
+		float pivotY;
 
-	public:
 		glm::vec4 color;
 		bool isVisible;
 
-		DrawRectangle(float x, float y, float width, float height, glm::vec4 color, bool isVisible);
-		void change(float x, float y, float width, float height);
+		DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color, bool isVisible);
 		void calculateTransform();
 	};
 
 	class DrawSprite : public Component
 	{
-	private:
+	public:
 		float x;
 		float y;
 		float scaleX;
 		float scaleY;
+		float pivotX;
+		float pivotY;
 
-	public:
 		Sprite* sprite;
 		bool isVisible;
 
-		DrawSprite(float x, float y, float scaleX, float scaleY, ID spriteId, bool isVisible);
-		void change(float x, float y, float scaleX, float scaleY);
+		DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId, bool isVisible);
 		void calculateTransform();
 	};
 

@@ -21,7 +21,10 @@ namespace sc
 	/*
 		Component
 					*/
-	Component::Component() {}
+	Component::Component() 
+	{
+		entityId = ID("NULL");
+	}
 
 	/*
 		Transform
@@ -45,39 +48,6 @@ namespace sc
 	glm::mat4 Transform::getWorldMatrix()
 	{
 		return worldMatrix;
-	}
-
-	void Transform::setPosition(glm::vec3 position)
-	{
-		this->position = position;
-		calculateWorldMatrix();
-	}
-
-	void Transform::setRotation(glm::vec3 rotation)
-	{
-		this->rotation = rotation;
-		calculateWorldMatrix();
-	}
-
-	void Transform::setScale(glm::vec3 scale)
-	{
-		this->scale = scale;
-		calculateWorldMatrix();
-	}
-
-	glm::vec3 Transform::getPosition()
-	{
-		return position;
-	}
-
-	glm::vec3 Transform::getRotation()
-	{
-		return rotation;
-	}
-
-	glm::vec3 Transform::getScale()
-	{
-		return scale;
 	}
 
 	void Transform::calculateWorldMatrix()
@@ -137,8 +107,8 @@ namespace sc
 	void Camera::calculateViewMatrix()
 	{
 		Transform* transform = game.nextState->transformPool.get(entityId);
-		glm::vec3 pos = transform->getPosition();
-		glm::vec3 rot = transform->getRotation();
+		glm::vec3 pos = transform->position;
+		glm::vec3 rot = transform->rotation;
 		float pitch = rot.x;
 		float yaw = rot.y;
 
@@ -197,68 +167,54 @@ namespace sc
 	/*
 		DrawRectangle
 						*/
-	DrawRectangle::DrawRectangle(float x, float y, float width, float height, glm::vec4 color, bool isVisible)
+	DrawRectangle::DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color, bool isVisible) : Component()
 	{
 		this->x = x;
 		this->y = y;
 		this->width = width;
 		this->height = height;
+		this->pivotX = pivotX;
+		this->pivotY = pivotY;
 		this->color = color;
-	}
-
-	void DrawRectangle::change(float x, float y, float width, float height)
-	{
-		this->x = x;
-		this->y = y;
-		this->width = width;
-		this->height = height;
-
-		calculateTransform();
 	}
 
 	void DrawRectangle::calculateTransform()
 	{
 		Transform* transform = game.nextState->transformPool.get(entityId);
-		transform->setScale(glm::vec3(width, height, 0.0f));
-		transform->setPosition(glm::vec3(x, y, 0.0f));
+		transform->scale = glm::vec3(width, height, 0.0f);
+		transform->position = glm::vec3(x - pivotX, y - pivotY, 0.0f);
+		transform->calculateWorldMatrix();
 	}
 
 
 	/*
 		DrawSprite
 					*/
-	DrawSprite::DrawSprite(float x, float y, float scaleX, float scaleY, ID spriteId, bool isVisible)
+	DrawSprite::DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId, bool isVisible) : Component()
 	{
 		this->x = x;
 		this->y = y;
 		this->scaleX = scaleX;
 		this->scaleY = scaleY;
+		this->pivotX = pivotX;
+		this->pivotY = pivotY;
 		this->sprite = assets.getSprite(spriteId);
 		this->isVisible = isVisible;
-	}
-
-	void DrawSprite::change(float x, float y, float scaleX, float scaleY)
-	{
-		this->x = x;
-		this->y = y;
-		this->scaleX = scaleX;
-		this->scaleY = scaleY;
-
-		calculateTransform();
 	}
 
 	void DrawSprite::calculateTransform()
 	{
 		Transform* transform = game.nextState->transformPool.get(entityId);
-		transform->setScale(glm::vec3(scaleX * sprite->width, scaleY * sprite->height, 0.0f));
-		transform->setPosition(glm::vec3(x, y, 0.0f));
+		transform->scale = glm::vec3(scaleX * sprite->width, scaleY * sprite->height, 0.0f);
+		transform->position = glm::vec3(x - pivotX, y - pivotY, 0.0f);
+		transform->calculateWorldMatrix();
 	}
 
 
 	/*
 		DrawText
 				*/
-	DrawText::DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId, bool isVisible)
+	DrawText::DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId, bool isVisible) : Component()
 	{
 		this->x = x;
 		this->y = y;
