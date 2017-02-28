@@ -15,7 +15,10 @@
 
 namespace sc
 {
-	Nature::Nature() : sc::Component() {}
+	Nature::Nature() : sc::Component() 
+	{
+		isActive = true;
+	}
 
 	DebugCamera::DebugCamera(float moveSpeed, float mouseSpeed) : Nature()
 	{

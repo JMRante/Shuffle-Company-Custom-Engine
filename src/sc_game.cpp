@@ -51,20 +51,6 @@ namespace sc
 		nextState->transformPool.add(ID("E_TEXT"), Transform());
 		nextState->drawTextPool.add(ID("E_TEXT"), DrawText(512, 256, "Hello World!", glm::vec4(1.0, 1.0, 1.0f, 1.0), ID("FT_TEST"), true));
 
-		// em->addEntity(ID("E_TESTA"));
-		// tran = em->transformPool.add(ID("E_TESTA"), Transform());
-		// tran->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
-		// tran->setRotation(glm::vec3(0.0f, glm::radians(45.0f), 0.0f));
-		// DrawModel drawA(ID("MO_TESTA"), true);
-		// em->drawModelPool.add(ID("E_TESTA"), drawA);
-
-		// em->addEntity(ID("E_TESTB"));
-		// tran = em->transformPool.add(ID("E_TESTB"), Transform());
-		// tran->setPosition(glm::vec3(-1.0f, 0.0f, -2.0f));
-		// tran->setScale(glm::vec3(0.25f, 0.25f, 0.25f));
-		// DrawModel drawB(ID("MO_TESTB"), true);
-		// em->drawModelPool.add(ID("E_TESTB"), drawB);
-
 		updateState();
 	}
 
@@ -72,7 +58,7 @@ namespace sc
 	{
 		input.update();
 
-		for (auto it = currentState->debugCameraPool.begin(); it != currentState->debugCameraPool.end(); it++) { (*it).update(); }
+		for (auto it = currentState->debugCameraPool.begin(); it != currentState->debugCameraPool.end(); it++) { if ((*it).isActive) (*it).update(); }
 
 		if (input.quitEvent())
 		{

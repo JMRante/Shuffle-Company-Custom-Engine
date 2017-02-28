@@ -31,6 +31,8 @@ namespace sc
 	class Nature : public Component
 	{
 	public:
+		bool isActive;
+
 		Nature();
 		virtual void update() = 0;
 	};
