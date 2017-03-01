@@ -25,7 +25,8 @@
 namespace sc
 {
 	char* fileRead(const char* filename);
-	std::string IntToString(int i);
+	std::string iToS(int i);
+	std::string fToS(float f);
 	GLuint powerOfTwo(GLuint num);
 
 	class ID

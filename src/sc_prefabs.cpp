@@ -40,6 +40,16 @@ namespace sc
 		return id;
 	}
 
+	ID createFramerateCounter(ID id, glm::vec2 position, glm::vec4 color, ID fontId)
+	{
+		game.nextState->addEntity(id);
+		game.nextState->transformPool.add(id, Transform());
+		game.nextState->drawTextPool.add(id, DrawText(position.x, position.y, "", color, fontId, true));
+		game.nextState->framerateCounterPool.add(id, FramerateCounter());
+
+		return id;
+	}
+
 	ID createUIRectangle(ID id, glm::vec2 position, glm::vec2 size, glm::vec2 pivot, glm::vec4 color)
 	{
 		game.nextState->addEntity(id);

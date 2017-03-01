@@ -39,18 +39,18 @@ namespace sc
 				//Bind all int values to the shader
 				for (size_t i = 0; i < drawModel->material->integerMaterialArguments.size(); i++)
 				{
-					glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("int_" + sc::IntToString(i)).c_str()), drawModel->material->integerMaterialArguments[i]);
+					glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("int_" + iToS(i)).c_str()), drawModel->material->integerMaterialArguments[i]);
 				}
 				//Bind all float values to the shader
 				for (size_t i = 0; i < drawModel->material->floatMaterialArguments.size(); i++)
 				{
-					glUniform1f(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("float_" + sc::IntToString(i)).c_str()), drawModel->material->floatMaterialArguments[i]);
+					glUniform1f(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("float_" + iToS(i)).c_str()), drawModel->material->floatMaterialArguments[i]);
 				}
 
 				//Bind all vec4 values to the shader
 				for (size_t i = 0; i < drawModel->material->vec4MaterialArguments.size(); i++)
 				{
-					glUniform4f(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("vec4_" + sc::IntToString(i)).c_str()), 
+					glUniform4f(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("vec4_" + iToS(i)).c_str()), 
 						drawModel->material->vec4MaterialArguments[i][0],
 						drawModel->material->vec4MaterialArguments[i][1],
 						drawModel->material->vec4MaterialArguments[i][2],
@@ -65,12 +65,12 @@ namespace sc
 					if (drawModel->material->textureMaterialArguments[i]->array)
 					{
 						glBindTexture(GL_TEXTURE_2D_ARRAY, drawModel->material->textureMaterialArguments[i]->GLid);
-						glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("textureArray_" + sc::IntToString(i)).c_str()), textureCount);
+						glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("textureArray_" + iToS(i)).c_str()), textureCount);
 					}
 					else
 					{
 						glBindTexture(GL_TEXTURE_2D, drawModel->material->textureMaterialArguments[i]->GLid);
-						glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("texture_" + sc::IntToString(i)).c_str()), textureCount);
+						glUniform1i(glGetUniformLocation(drawModel->material->shader->GLid, (const GLchar*)("texture_" + iToS(i)).c_str()), textureCount);
 					}
 
 					textureCount++;

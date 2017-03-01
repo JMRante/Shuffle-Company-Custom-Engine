@@ -196,6 +196,7 @@ namespace sc
 
 		//Natures
 		NaturePool<DebugCamera> debugCameraPool;
+		NaturePool<FramerateCounter> framerateCounterPool;
 
 		//Singletons
 		Stage stage;

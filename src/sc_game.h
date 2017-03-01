@@ -23,6 +23,7 @@
 #include "sc_log.h"
 #include "sc_prefabs.h"
 #include "sc_assets.h"
+#include "sc_config.h"
 
 namespace sc
 {

@@ -14,7 +14,7 @@
 namespace sc
 {
 	std::vector<Nature*> NaturePoolBase::pointers;
-	
+
 	State::State() {}
 
 	void State::copy(State* otherState)
@@ -29,6 +29,7 @@ namespace sc
 		drawTextPool.copy(otherState->drawTextPool);
 
 		debugCameraPool.copy(otherState->debugCameraPool);
+		framerateCounterPool.copy(otherState->framerateCounterPool);
 
 		stage = otherState->stage;
 	}
@@ -72,6 +73,7 @@ namespace sc
 				drawTextPool.remove(id);
 
 				debugCameraPool.remove(id);
+				framerateCounterPool.remove(id);
 
 				entities.erase(ei);
 				return true;

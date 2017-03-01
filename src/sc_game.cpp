@@ -27,6 +27,7 @@ namespace sc
 		createStage("Custom/Levels/TestLevel.shuff");
 
 		createDebugCamera(ID("E_CAMERA"), glm::vec3(1.5f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.1f, 100.0f, 0.07f, 0.1f);
+		createFramerateCounter(ID("E_FRAMECOUNT"), glm::vec2(16, sc::config.get("WINDOW_HEIGHT") - 16 - 16), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), ID("FT_MONO"));
 
 		createUIRectangle(ID("E_RECTA"), glm::vec2(32, 640), glm::vec2(128, 128), glm::vec2(0, 0), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 		createUIRectangle(ID("E_RECTB"), glm::vec2(0, 0), glm::vec2(128, 128), glm::vec2(64, 64), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));

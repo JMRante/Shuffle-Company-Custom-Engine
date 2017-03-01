@@ -25,6 +25,8 @@
 #include "sc_log.h"
 #include "sc_input.h"
 #include "sc_component.h"
+#include "sc_main.h"
+#include "sc_utility.h"
 
 namespace sc
 {
@@ -49,7 +51,19 @@ namespace sc
 
 	public:
 		DebugCamera(float moveSpeed, float mouseSpeed);
+		void update();
+	};
 
+	class FramerateCounter : public Nature
+	{
+	private:
+		float framerateHistory[60] = {};
+		int framerateHistoryCount;
+
+	public:
+		float framerateAverage;
+
+		FramerateCounter();
 		void update();
 	};
 }

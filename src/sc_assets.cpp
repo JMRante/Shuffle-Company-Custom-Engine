@@ -898,6 +898,7 @@ namespace sc
 		//Load Fonts
 		Font::loadFontQuadToGPU();
 		loadFont(ID("FT_TEST"), "Resources/Fonts/OpenSans-Regular.ttf", 28);
+		loadFont(ID("FT_MONO"), "Resources/Fonts/RobotoMono-Regular.ttf", 16);
 
 		//Load Shaders
 		loadShader(ID("SH_PASS"), "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");

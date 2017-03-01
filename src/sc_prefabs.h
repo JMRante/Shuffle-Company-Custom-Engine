@@ -30,6 +30,7 @@ namespace sc
 	ID createStage(std::string filepath);
 
 	ID createDebugCamera(ID id, glm::vec3 position, glm::vec3 rotation, float near, float far, float moveSpeed, float turnSpeed);
+	ID createFramerateCounter(ID id, glm::vec2 position, glm::vec4 color, ID fontId);
 
 	ID createUIRectangle(ID id, glm::vec2 position, glm::vec2 size, glm::vec2 pivot, glm::vec4 color);
 	ID createUISprite(ID id, glm::vec2 position, glm::vec2 scale, glm::vec2 pivot, ID spriteId);

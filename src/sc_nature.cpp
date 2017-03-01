@@ -81,4 +81,68 @@ namespace sc
 		nextTrans->position = currentPosition + translate;
 		nextCamera->calculateViewMatrix();
 	}
+
+	FramerateCounter::FramerateCounter()
+	{
+		framerateHistoryCount = -1;
+		framerateAverage = 0;
+	}
+
+	void FramerateCounter::update()
+	{
+		//Calculate
+		float currentFramerate;
+
+		if (delay > MS_PER_FRAME)
+		{
+			//Framerate is under cap
+			currentFramerate = 1000.0f / ((float) delay);
+		}
+		else
+		{
+			//Framerate is above cap
+			currentFramerate = 60.0f;
+		}
+
+		if (framerateHistoryCount < 60)
+		{
+			framerateHistoryCount++;
+			framerateHistory[framerateHistoryCount] = currentFramerate;
+		}
+		else
+		{
+			for (int i = 0; i < 60; i++)
+			{
+				if (i == 59)
+				{
+					framerateHistory[i] = currentFramerate;
+				}
+				else
+				{
+					framerateHistory[i] = framerateHistory[i + 1];
+				}
+			}
+		}
+
+		float sum = 0;
+
+		for (int i = 0; i < 60; i++)
+		{
+			sum += framerateHistory[i];
+		}
+
+		framerateAverage = sum / 60.0f;
+
+		//Update draw
+		DrawText* dt = game.nextState->drawTextPool.get(entityId);
+
+		if (dt == NULL)
+		{
+			LOG_D << framerateAverage;			
+		}
+		else
+		{
+			dt->text = fToS(framerateAverage);
+		}
+	}
 }

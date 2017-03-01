@@ -46,10 +46,17 @@ namespace sc
         return res;
     }
 
-    std::string IntToString(int i)
+    std::string iToS(int i)
     {
       std::ostringstream oss;
       oss << i;
+      return oss.str();
+    }
+
+    std::string fToS(float f)
+    {
+      std::ostringstream oss;
+      oss << f;
       return oss.str();
     }
 
