@@ -27,9 +27,10 @@ namespace sc
 	template <class T>
 	class ComponentPool
 	{
-	public:
+	private:
 		std::vector<T> pool;
 
+	public:
 		T* add(ID entityId, T component)
 		{
 			if (get(entityId) != NULL)
@@ -88,6 +89,97 @@ namespace sc
 		}
 	};
 
+	class NaturePoolBase
+	{
+	private:
+		static std::vector<Nature*> pointers;
+
+	public:
+		static std::vector<Nature*>::iterator begin()
+		{
+			return pointers.begin();
+		}
+
+		static std::vector<Nature*>::iterator end()
+		{
+			return pointers.end();
+		}		
+	};
+
+	template <class T>
+	class NaturePool : public NaturePoolBase
+	{
+	private:
+
+		std::vector<T> pool;
+
+	public:
+		T* add(ID entityId, T nature)
+		{
+			if (get(entityId) != NULL)
+			{
+				LOG_E << "Cannot add " << typeid(T).name() << ", entity " << entityId.get() << " already has one";
+				return NULL;
+			}
+
+			nature.entityId = entityId;
+			pool.push_back(nature);
+
+			T* naturePointer = &pool[pool.size() - 1];
+			pointers.push_back(naturePointer);
+
+			return naturePointer;
+		}
+
+		bool remove(ID entityId)
+		{
+			int poolDepth = 0;
+
+			for (auto ni = pool.begin(); ni != pool.end(); ni++)
+			{
+				if (ni->entityId.is(entityId))
+				{
+					pool.erase(ni);
+					pointers.erase(pointers.begin() + poolDepth);
+					return true;
+				}
+
+				poolDepth++;
+			}
+
+			LOG_E << "Cannot remove " << typeid(T).name() << ", entity " << entityId.get() << " doesn't have one";
+			return false;
+		}
+
+		T* get(ID entityId)
+		{
+			for (auto ni = pool.begin(); ni != pool.end(); ni++)
+			{
+				if (ni->entityId.is(entityId))
+				{
+					return &(*ni);
+				}
+			}
+
+			return NULL;
+		}
+
+		typename std::vector<T>::iterator begin()
+		{
+			return pool.begin();
+		}
+
+		typename std::vector<T>::iterator end()
+		{
+			return pool.end();
+		}
+
+		void copy(NaturePool<T> otherPool)
+		{
+			pool = otherPool.pool;
+		}
+	};
+
 	class State
 	{
 	private:
@@ -103,7 +195,7 @@ namespace sc
 		ComponentPool<DrawText> drawTextPool;
 
 		//Natures
-		ComponentPool<DebugCamera> debugCameraPool;
+		NaturePool<DebugCamera> debugCameraPool;
 
 		//Singletons
 		Stage stage;

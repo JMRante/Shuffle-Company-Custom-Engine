@@ -34,7 +34,9 @@ namespace sc
 		bool isActive;
 
 		Nature();
+		// virtual void create() = 0;
 		virtual void update() = 0;
+		// virtual void destory() = 0;
 	};
 
 	class DebugCamera : public Nature

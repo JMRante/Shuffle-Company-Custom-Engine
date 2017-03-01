@@ -41,7 +41,13 @@ namespace sc
 	{
 		input.update();
 
-		for (auto it = currentState->debugCameraPool.begin(); it != currentState->debugCameraPool.end(); it++) { if ((*it).isActive) (*it).update(); }
+		for (auto it = NaturePoolBase::begin(); it != NaturePoolBase::end(); it++) 
+		{ 
+			if ((*it)->isActive) 
+			{
+				(*it)->update(); 
+			}
+		}
 
 		if (input.quitEvent())
 		{

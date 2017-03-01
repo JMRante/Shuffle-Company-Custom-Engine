@@ -13,6 +13,8 @@
 
 namespace sc
 {
+	std::vector<Nature*> NaturePoolBase::pointers;
+	
 	State::State() {}
 
 	void State::copy(State* otherState)
