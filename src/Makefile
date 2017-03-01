@@ -17,13 +17,16 @@ GLM_INCLUDE = -IX:\Base\Dev\MinGWDevLib\glm
 
 OBJLOAD_INCLUDE = -IX:\Base\Dev\MinGWDevLib\tinyobjloader-master
 
-COMPILER_FLAGS = -g -Wall -c $(SDL_INCLUDE) $(DevIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE) $(OBJLOAD_INCLUDE)
-LD_FLAGS = -mwindows -lmingw32 $(SDL_LIB) $(DevIL_LIB) $(FREEGLUT_LIB) $(GLEW_LIB)
+FREETYPE_LIB = -LX:\Base\Dev\MinGWDevLib\freetype-2.7.1\objs -lfreetype
+FREETYPE_INCLUDE = -IX:\Base\Dev\MinGWDevLib\freetype-2.7.1\include
+
+COMPILER_FLAGS = -g -Wall -c $(SDL_INCLUDE) $(DevIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE) $(OBJLOAD_INCLUDE) $(FREETYPE_INCLUDE)
+LD_FLAGS = -mwindows -lmingw32 $(SDL_LIB) $(DevIL_LIB) $(FREEGLUT_LIB) $(GLEW_LIB) $(FREETYPE_LIB)
 EXE = ShuffleCompany.exe
 
 all: $(EXE)
 
-$(EXE): sc_main.o sc_config.o sc_log.o sc_utility.o sc_game.o sc_input.o sc_renderer.o sc_assets.o sc_world.o sc_entity.o sc_component.o sc_nature.o sc_stage.o sc_tokenizer.o
+$(EXE): sc_main.o sc_config.o sc_log.o sc_utility.o sc_game.o sc_input.o sc_renderer.o sc_assets.o sc_state.o sc_component.o sc_nature.o sc_stage.o sc_tokenizer.o sc_prefabs.o
 		$(COMPILER) $^ $(LD_FLAGS) -o $@ $(VERSION)
 
 sc_main.o: sc_main.cpp
@@ -50,10 +53,7 @@ sc_renderer.o: sc_renderer.cpp
 sc_assets.o: sc_assets.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
-sc_world.o: sc_world.cpp
-		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
-
-sc_entity.o: sc_entity.cpp
+sc_state.o: sc_state.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
 sc_component.o: sc_component.cpp
@@ -66,6 +66,9 @@ sc_stage.o: sc_stage.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
 sc_tokenizer.o: sc_tokenizer.cpp
+		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
+
+sc_prefabs.o: sc_prefabs.cpp
 		$(COMPILER) $(COMPILER_FLAGS) $< -o $@ $(VERSION)
 
 clean:

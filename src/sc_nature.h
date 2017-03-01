@@ -25,14 +25,20 @@
 #include "sc_log.h"
 #include "sc_input.h"
 #include "sc_component.h"
+#include "sc_main.h"
+#include "sc_utility.h"
 
 namespace sc
 {
 	class Nature : public Component
 	{
 	public:
+		bool isActive;
+
 		Nature();
+		// virtual void create() = 0;
 		virtual void update() = 0;
+		// virtual void destory() = 0;
 	};
 
 	class DebugCamera : public Nature
@@ -45,7 +51,19 @@ namespace sc
 
 	public:
 		DebugCamera(float moveSpeed, float mouseSpeed);
+		void update();
+	};
 
+	class FramerateCounter : public Nature
+	{
+	private:
+		float framerateHistory[60] = {};
+		int framerateHistoryCount;
+
+	public:
+		float framerateAverage;
+
+		FramerateCounter();
 		void update();
 	};
 }

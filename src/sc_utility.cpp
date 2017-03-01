@@ -46,11 +46,36 @@ namespace sc
         return res;
     }
 
-    std::string IntToString(int i)
+    std::string iToS(int i)
     {
       std::ostringstream oss;
       oss << i;
       return oss.str();
+    }
+
+    std::string fToS(float f)
+    {
+      std::ostringstream oss;
+      oss << f;
+      return oss.str();
+    }
+
+    //Function for quick power of two padding taken from Lazy Foo Production's OpenGL tutorial
+    //Fancy bitwise magic
+    GLuint powerOfTwo(GLuint num) 
+    { 
+        if (num != 0) 
+        { 
+            num--; 
+            num |= (num >> 1);
+            num |= (num >> 2);
+            num |= (num >> 4); 
+            num |= (num >> 8);
+            num |= (num >> 16);
+            num++; 
+        }
+
+        return num;
     }
 
     /*

@@ -11,11 +11,11 @@
 */
 
 //Outside Headers
+#include "sc_main.h"
+
 #include <cmath>
 #include <iostream>
 #include <string>
-
-#include <SDL.h>
 
 #include <GL/glew.h>
 #include <SDL_opengl.h>
@@ -23,6 +23,9 @@
 
 #include <IL/il.h> 
 #include <IL/ilu.h>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -35,13 +38,6 @@
 #include "sc_game.h"
 #include "sc_renderer.h"
 
-//Defines
-#define MS_PER_FRAME 16
-
-#define WINDOW_WIDTH 1280
-#define WINDOW_HEIGHT 720
-#define FOV 45.0f
-
 //Function Foward Declarations
 bool initiate();
 void closeout();
@@ -51,6 +47,9 @@ SDL_Window *window;
 SDL_GLContext glContext;
 
 bool hasQuit = false;
+
+Uint32 startTime = 0;
+Sint32 delay = 0;
 
 bool initiate()
 {
@@ -114,8 +113,12 @@ bool initiate()
 
 	//Initiate OpenGL options
     glViewport(0, 0, sc::config.get("WINDOW_WIDTH"), sc::config.get("WINDOW_HEIGHT"));
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+
+	glEnable(GL_BLEND); 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//Initiate SDL options
 	SDL_GL_SetSwapInterval(1);
@@ -147,9 +150,6 @@ int main(int argc, char **argv)
 	if (initiate())
 	{
 		//Main Game Loop
-		Uint32 startTime;
-		Sint32 delay;
-
 		LOG_I << "Initiating Game Loop";
 		LOG_D << "Debug mode set to " << sc::config.get("LOG_DEBUG");
 		LOG_D << "Info mode set to " << sc::config.get("LOG_INFO");

@@ -14,14 +14,17 @@
 #include <cmath>
 
 #include "sc_game.h"
-#include "sc_world.h"
+#include "sc_state.h"
 
 namespace sc
 {
 	/*
 		Component
 					*/
-	Component::Component() {}
+	Component::Component() 
+	{
+		entityId = ID("NULL");
+	}
 
 	/*
 		Transform
@@ -45,39 +48,6 @@ namespace sc
 	glm::mat4 Transform::getWorldMatrix()
 	{
 		return worldMatrix;
-	}
-
-	void Transform::setPosition(glm::vec3 position)
-	{
-		this->position = position;
-		calculateWorldMatrix();
-	}
-
-	void Transform::setRotation(glm::vec3 rotation)
-	{
-		this->rotation = rotation;
-		calculateWorldMatrix();
-	}
-
-	void Transform::setScale(glm::vec3 scale)
-	{
-		this->scale = scale;
-		calculateWorldMatrix();
-	}
-
-	glm::vec3 Transform::getPosition()
-	{
-		return position;
-	}
-
-	glm::vec3 Transform::getRotation()
-	{
-		return rotation;
-	}
-
-	glm::vec3 Transform::getScale()
-	{
-		return scale;
 	}
 
 	void Transform::calculateWorldMatrix()
@@ -136,9 +106,9 @@ namespace sc
 
 	void Camera::calculateViewMatrix()
 	{
-		Transform* transform = game.nextState->entityManager.transformPool.get(entityId);
-		glm::vec3 pos = transform->getPosition();
-		glm::vec3 rot = transform->getRotation();
+		Transform* transform = game.nextState->transformPool.get(entityId);
+		glm::vec3 pos = transform->position;
+		glm::vec3 rot = transform->rotation;
 		float pitch = rot.x;
 		float yaw = rot.y;
 
@@ -159,7 +129,7 @@ namespace sc
 
 	void Camera::calculateOrthoMatrix()
 	{
-		orthoMatrix = glm::ortho(0.0f, (float)config.get("WINDOW_WIDTH"), (float)config.get("WINDOW_HEIGHT"), 0.0f, -1.0f, 1.0f);  
+		orthoMatrix = glm::ortho(0.0f, (float)config.get("WINDOW_WIDTH"), 0.0f, (float)config.get("WINDOW_HEIGHT"), -1.0f, 1.0f);  
 	}
 
 	glm::vec3 Camera::getForward()
@@ -190,6 +160,67 @@ namespace sc
 	DrawModel::DrawModel(ID modelId, bool isVisible) : Component()
 	{
 		model = assets.getModel(modelId);
+		this->isVisible = isVisible;
+	}
+
+
+	/*
+		DrawRectangle
+						*/
+	DrawRectangle::DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color, bool isVisible) : Component()
+	{
+		this->x = x;
+		this->y = y;
+		this->width = width;
+		this->height = height;
+		this->pivotX = pivotX;
+		this->pivotY = pivotY;
+		this->color = color;
+	}
+
+	void DrawRectangle::calculateTransform()
+	{
+		Transform* transform = game.nextState->transformPool.get(entityId);
+		transform->scale = glm::vec3(width, height, 0.0f);
+		transform->position = glm::vec3(x - pivotX, y - pivotY, 0.0f);
+		transform->calculateWorldMatrix();
+	}
+
+
+	/*
+		DrawSprite
+					*/
+	DrawSprite::DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId, bool isVisible) : Component()
+	{
+		this->x = x;
+		this->y = y;
+		this->scaleX = scaleX;
+		this->scaleY = scaleY;
+		this->pivotX = pivotX;
+		this->pivotY = pivotY;
+		this->sprite = assets.getSprite(spriteId);
+		this->isVisible = isVisible;
+	}
+
+	void DrawSprite::calculateTransform()
+	{
+		Transform* transform = game.nextState->transformPool.get(entityId);
+		transform->scale = glm::vec3(scaleX * sprite->width, scaleY * sprite->height, 0.0f);
+		transform->position = glm::vec3(x - pivotX, y - pivotY, 0.0f);
+		transform->calculateWorldMatrix();
+	}
+
+
+	/*
+		DrawText
+				*/
+	DrawText::DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId, bool isVisible) : Component()
+	{
+		this->x = x;
+		this->y = y;
+		this->text = text;
+		this->color = color;
+		this->font = assets.getFont(fontId);
 		this->isVisible = isVisible;
 	}
 }

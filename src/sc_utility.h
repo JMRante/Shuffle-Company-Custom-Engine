@@ -13,7 +13,9 @@
 #ifndef SC_UTILITY
 #define SC_UTILITY
 
+#include <GL/glew.h>
 #include <SDL.h>
+
 #include <cstdlib>
 #include <sstream>
 #include <string>
@@ -23,7 +25,9 @@
 namespace sc
 {
 	char* fileRead(const char* filename);
-	std::string IntToString(int i);
+	std::string iToS(int i);
+	std::string fToS(float f);
+	GLuint powerOfTwo(GLuint num);
 
 	class ID
 	{

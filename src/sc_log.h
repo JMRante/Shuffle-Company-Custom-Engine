@@ -30,6 +30,9 @@ namespace sc
 #define LOG_E sc::logStream << "\nERROR: "
 #define LOG_D if (!sc::config.get("LOG_DEBUG")) {} else sc::logStream << "\nDEBUG: "
 #define LOG_I if (!sc::config.get("LOG_INFO")) {} else sc::logStream << "\nINFO: "
+#define LOG_EC sc::logStream
+#define LOG_DC if (!sc::config.get("LOG_DEBUG")) {} else sc::logStream
+#define LOG_IC if (!sc::config.get("LOG_INFO")) {} else sc::logStream
 #define LOG_FLUSH sc::logStream.flush()
 
 

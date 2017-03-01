@@ -21,23 +21,23 @@
 #include "glm/ext.hpp"
 
 #include "sc_log.h"
-
+#include "sc_prefabs.h"
 #include "sc_assets.h"
-#include "sc_entity.h"
+#include "sc_config.h"
 
 namespace sc
 {
-	class World;
+	class State;
 
 	class Game
 	{
 	public:
-		World* currentState;
-		World* nextState;
+		State* currentState;
+		State* nextState;
 
 		void start();
 		bool update();
-		void updateWorldState();
+		void updateState();
 	};
 
 	extern Game game;

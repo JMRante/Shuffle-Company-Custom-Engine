@@ -10,7 +10,7 @@
 */
 
 #include "sc_game.h"
-#include "sc_world.h"
+#include "sc_state.h"
 
 namespace sc
 {
@@ -18,62 +18,48 @@ namespace sc
 
 	void Game::start()
 	{
-		currentState = new sc::World();
-		nextState = new sc::World();
+		currentState = new sc::State();
+		nextState = new sc::State();
 
 		assets.loadDefaults();
 
 		//Build elements
-		EntityManager* em = &nextState->entityManager;
+		createStage("Custom/Levels/TestLevel.shuff");
 
-		nextState->stage.loadStage("Custom/Levels/TestLevel.shuff");
-		em->addEntity(ID("E_STAGE"));
-		Transform* tran = em->transformPool.add(ID("E_STAGE"), Transform());
-		em->drawModelPool.add(ID("E_STAGE"), DrawModel(ID("MO_STAGE"), true));
+		createDebugCamera(ID("E_CAMERA"), glm::vec3(1.5f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.1f, 100.0f, 0.07f, 0.1f);
+		createFramerateCounter(ID("E_FRAMECOUNT"), glm::vec2(16, sc::config.get("WINDOW_HEIGHT") - 16 - 16), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), ID("FT_MONO"));
 
-		em->addEntity(ID("E_CAMERA"));
-		tran = em->transformPool.add(ID("E_CAMERA"), Transform());
-		tran->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-		tran->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-		Camera* camera = em->cameraPool.add(ID("E_CAMERA"), Camera(0.01f, 100.0f));
-		camera->calculateViewMatrix();
-		em->debugCameraPool.add(ID("E_CAMERA"), DebugCamera(0.07f, 0.1f));
+		createUIRectangle(ID("E_RECTA"), glm::vec2(32, 640), glm::vec2(128, 128), glm::vec2(0, 0), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+		createUIRectangle(ID("E_RECTB"), glm::vec2(0, 0), glm::vec2(128, 128), glm::vec2(64, 64), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
 
-		// em->addEntity(ID("E_TESTA"));
-		// tran = em->transformPool.add(ID("E_TESTA"), Transform());
-		// tran->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
-		// tran->setRotation(glm::vec3(0.0f, glm::radians(45.0f), 0.0f));
-		// DrawModel drawA(ID("MO_TESTA"), true);
-		// em->drawModelPool.add(ID("E_TESTA"), drawA);
+		createUISprite(ID("E_SPRITE"), glm::vec2(256, 16), glm::vec2(1.0f, 1.0f), glm::vec2(0, 0), ID("SP_TEST"));
+		createUIText(ID("E_TEXT"), glm::vec2(512, 256), "There are things beyond Hello World?", ID("FT_TEST"), glm::vec4(1.0, 1.0, 1.0f, 1.0));
 
-		// em->addEntity(ID("E_TESTB"));
-		// tran = em->transformPool.add(ID("E_TESTB"), Transform());
-		// tran->setPosition(glm::vec3(-1.0f, 0.0f, -2.0f));
-		// tran->setScale(glm::vec3(0.25f, 0.25f, 0.25f));
-		// DrawModel drawB(ID("MO_TESTB"), true);
-		// em->drawModelPool.add(ID("E_TESTB"), drawB);
-
-		updateWorldState();
+		updateState();
 	}
 
 	bool Game::update()
 	{
 		input.update();
 
-		EntityManager* em = &currentState->entityManager;
-
-		for (auto it = em->debugCameraPool.begin(); it != em->debugCameraPool.end(); it++) { (*it).update(); }
+		for (auto it = NaturePoolBase::begin(); it != NaturePoolBase::end(); it++) 
+		{ 
+			if ((*it)->isActive) 
+			{
+				(*it)->update(); 
+			}
+		}
 
 		if (input.quitEvent())
 		{
 			return true;
 		}
 
-		updateWorldState();
+		updateState();
 		return false;
 	}
 
-	void Game::updateWorldState()
+	void Game::updateState()
 	{
 		LOG_D << "Updating World State";
 

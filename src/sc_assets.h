@@ -12,18 +12,23 @@
 #ifndef SC_ASSETS
 #define SC_ASSETS
 
-#include <stack>
+#include <map>
 #include <vector>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <iterator>
+#include <cmath>
 
 #include <GL/glew.h>
 #include <SDL.h>
 
 #include <glm/glm.hpp>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_GLYPH_H
 
 #include "sc_log.h"
 #include "sc_utility.h"
@@ -79,6 +84,53 @@ namespace sc
 		void removeFromGPU();
 	};
 
+	class Sprite
+	{
+	public:
+		ID id;
+		GLuint GLid;
+
+		GLuint width;
+		GLuint height;
+		float texCoordX;
+		float texCoordY;
+
+		Sprite(ID id);
+		bool loadToGPU(std::string filepath);
+		void removeFromGPU();		
+	};
+
+	struct FontCharacter
+	{
+		glm::vec4 textureCoords;
+		glm::ivec2 size;
+		glm::ivec2 bearing;
+		GLuint advance;
+		
+		GLubyte* bitmap;
+	};
+
+	class Font
+	{
+	public:
+		ID id;
+		FT_Face face;
+		std::map<GLchar, FontCharacter> characters;
+
+		GLuint textureGLid;
+		GLuint textureWidth;
+		GLuint textureHeight;
+
+		static GLuint VAOid;
+		static GLuint VBOid;
+
+		Font(ID id);
+		static void loadFontQuadToGPU();
+		bool loadToGPU(std::string filepath, int height);
+		void removeFromGPU();
+		static void clearFontQuadFromGPU();
+	};
+
 	class Shader
 	{
 	public:
@@ -128,17 +180,24 @@ namespace sc
 	private:
 		std::vector<Mesh> meshPool;
 		std::vector<Texture> texturePool;
+		std::vector<Sprite> spritePool;
+		std::vector<Font> fontPool;
 		std::vector<Shader> shaderPool;
 		std::vector<Material> materialPool;
 		std::vector<Model> modelPool;
 
 		int worldMeshStart;
 		int worldTextureStart;
+		int worldSpriteStart;
 		int worldShaderStart;
 		int worldMaterialStart;
 		int worldModelStart;
 
 	public:
+		FT_Library fontLibrary;
+
+		Assets();
+
 		bool loadMesh(ID id, std::string filepath);
 		bool loadMesh(ID id, std::vector<Vertex> *vertices, std::vector<int> *indices);
 		bool loadMesh(ID id, std::vector<StageVertex> *vertices, std::vector<int> *indices);
@@ -146,6 +205,10 @@ namespace sc
 		bool loadTexture(ID id, std::string filepath);
 		bool loadTexture(ID id, GLuint width, GLuint height, GLuint* data);
 		bool loadTexture(ID id, GLuint width, GLuint height, std::vector<GLuint*> dataArray);
+
+		bool loadSprite(ID id, std::string filepath);
+
+		bool loadFont(ID id, std::string filepath, int height);
 
 		bool loadShader(ID id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
 		bool loadMaterial(ID id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<ID> *tma, ID shaderId);
@@ -155,6 +218,8 @@ namespace sc
 
 		Mesh* getMesh(ID id);
 		Texture* getTexture(ID id);
+		Sprite* getSprite(ID id);
+		Font* getFont(ID id);
 		Shader* getShader(ID id);
 		Material* getMaterial(ID id);
 		Model* getModel(ID id);
