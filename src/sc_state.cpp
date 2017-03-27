@@ -29,6 +29,8 @@ namespace sc
 		drawTextPool.copy(otherState->drawTextPool);
 
 		debugCameraPool.copy(otherState->debugCameraPool);
+		editorCameraPool.copy(otherState->editorCameraPool);
+		cursorPool.copy(otherState->cursorPool);
 		framerateCounterPool.copy(otherState->framerateCounterPool);
 
 		stage = otherState->stage;
@@ -73,6 +75,8 @@ namespace sc
 				drawTextPool.remove(id);
 
 				debugCameraPool.remove(id);
+				editorCameraPool.remove(id);
+				cursorPool.remove(id);
 				framerateCounterPool.remove(id);
 
 				entities.erase(ei);

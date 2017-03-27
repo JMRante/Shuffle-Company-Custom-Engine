@@ -122,7 +122,8 @@ bool initiate()
 
 	//Initiate SDL options
 	SDL_GL_SetSwapInterval(1);
-	SDL_SetRelativeMouseMode(SDL_TRUE);
+	SDL_SetRelativeMouseMode(SDL_FALSE);
+	SDL_ShowCursor(SDL_DISABLE);
 
 	//Initiate DevIL
 	ilInit();

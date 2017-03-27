@@ -796,18 +796,45 @@ namespace sc
 
 	bool Assets::loadMesh(ID id, std::string filepath)
 	{
+		for (auto ai = meshPool.begin(); ai != meshPool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				LOG_E << "There already exists a " << id.get();
+				return false;
+			}
+		}
+
 		meshPool.push_back(Mesh(id));
 		return meshPool.back().loadToGPU(filepath);
 	}
 
 	bool Assets::loadMesh(ID id, std::vector<Vertex> *vertices, std::vector<int> *indices)
 	{
+		for (auto ai = meshPool.begin(); ai != meshPool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				LOG_E << "There already exists a " << id.get();
+				return false;
+			}
+		}
+		
 		meshPool.push_back(Mesh(id));
 		return meshPool.back().loadToGPU(vertices, indices);
 	}
 
 	bool Assets::loadMesh(ID id, std::vector<StageVertex> *vertices, std::vector<int> *indices)
 	{
+		for (auto ai = meshPool.begin(); ai != meshPool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				LOG_E << "There already exists a " << id.get();
+				return false;
+			}
+		}
+		
 		meshPool.push_back(Mesh(id));
 		return meshPool.back().loadToGPU(vertices, indices);
 	}
@@ -815,18 +842,45 @@ namespace sc
 
 	bool Assets::loadTexture(ID id, std::string filepath)
 	{
+		for (auto ai = texturePool.begin(); ai != texturePool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				LOG_E << "There already exists a " << id.get();
+				return false;
+			}
+		}
+
 		texturePool.push_back(Texture(id));
 		return texturePool.back().loadToGPU(filepath);
 	}
 
 	bool Assets::loadTexture(ID id, GLuint width, GLuint height, GLuint* data)
 	{
+		for (auto ai = texturePool.begin(); ai != texturePool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				LOG_E << "There already exists a " << id.get();
+				return false;
+			}
+		}
+		
 		texturePool.push_back(Texture(id));
 		return texturePool.back().loadToGPU(width, height, data);
 	}
 
 	bool Assets::loadTexture(ID id, GLuint width, GLuint height, std::vector<GLuint*> dataArray)
 	{
+		for (auto ai = texturePool.begin(); ai != texturePool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				LOG_E << "There already exists a " << id.get();
+				return false;
+			}
+		}
+		
 		texturePool.push_back(Texture(id));
 		return texturePool.back().loadToGPU(width, height, dataArray);
 	}
@@ -834,30 +888,75 @@ namespace sc
 
 	bool Assets::loadSprite(ID id, std::string filepath)
 	{
+		for (auto ai = spritePool.begin(); ai != spritePool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				LOG_E << "There already exists a " << id.get();
+				return false;
+			}
+		}
+		
 		spritePool.push_back(Sprite(id));
 		return spritePool.back().loadToGPU(filepath);
 	}
 
 	bool Assets::loadFont(ID id, std::string filepath, int height)
 	{
+		for (auto ai = fontPool.begin(); ai != fontPool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				LOG_E << "There already exists a " << id.get();
+				return false;
+			}
+		}
+		
 		fontPool.push_back(Font(id));
-		return fontPool.back().loadToGPU(filepath, height);		
+		return fontPool.back().loadToGPU(filepath, height);
 	}
 
 	bool Assets::loadShader(ID id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
 	{
+		for (auto ai = shaderPool.begin(); ai != shaderPool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				LOG_E << "There already exists a " << id.get();
+				return false;
+			}
+		}
+		
 		shaderPool.push_back(Shader(id));
 		return shaderPool.back().loadToGPU(vertexShaderFilepath, fragmentShaderFilepath);
 	}
 
 	bool Assets::loadMaterial(ID id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<ID> *tma, ID shaderId)
 	{
+		for (auto ai = materialPool.begin(); ai != materialPool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				LOG_E << "There already exists a " << id.get();
+				return false;
+			}
+		}
+		
 		materialPool.push_back(Material(id, ima, fma, vma, tma, shaderId));
 		return true;
 	}
 
 	bool Assets::loadModel(ID id, ID meshId, ID materialId)
 	{
+		for (auto ai = modelPool.begin(); ai != modelPool.end(); ai++)
+		{
+			if (ai->id.is(id))
+			{
+				LOG_E << "There already exists a " << id.get();
+				return false;
+			}
+		}
+		
 		modelPool.push_back(Model(id, meshId, materialId));
 		return true;
 	}
@@ -893,7 +992,13 @@ namespace sc
 		loadMesh(ID("ME_SPHERE"), "Resources/Meshes/ME_SPHERE.obj");
 
 		//Load Sprites
+		loadSprite(ID("ERROR"), "Resources/Textures/ERROR.png");
 		loadSprite(ID("SP_TEST"), "Resources/Textures/testSprite.png");
+
+		loadSprite(ID("SP_CLICKCUR"), "Resources/Textures/Cursor/SP_CLICKCUR.png");
+		loadSprite(ID("SP_DRAGCUR"), "Resources/Textures/Cursor/SP_DRAGCUR.png");
+		loadSprite(ID("SP_HOVERCUR"), "Resources/Textures/Cursor/SP_HOVERCUR.png");
+		loadSprite(ID("SP_POINTCUR"), "Resources/Textures/Cursor/SP_POINTCUR.png");
 
 		//Load Fonts
 		Font::loadFontQuadToGPU();
@@ -964,10 +1069,17 @@ namespace sc
 			}
 		}
 
-		//Eventually should return a default object preloaded.
 		LOG_E << "Failed to get sprite resource " << id.get();
 
-		return NULL;		
+		for (auto ai = spritePool.begin(); ai != spritePool.end(); ai++)
+		{
+			if (ai->id.is(ID("ERROR")))
+			{
+				return &(*ai);
+			}
+		}
+
+		return NULL;
 	}
 
 	Font* Assets::getFont(ID id)

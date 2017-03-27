@@ -196,6 +196,8 @@ namespace sc
 
 		//Natures
 		NaturePool<DebugCamera> debugCameraPool;
+		NaturePool<EditorCamera> editorCameraPool;
+		NaturePool<Cursor> cursorPool;
 		NaturePool<FramerateCounter> framerateCounterPool;
 
 		//Singletons

@@ -18,6 +18,7 @@
 #include <SDL.h>
 
 #include "sc_log.h"
+#include "sc_config.h"
 
 namespace sc
 {

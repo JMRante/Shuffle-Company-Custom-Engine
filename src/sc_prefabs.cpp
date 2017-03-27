@@ -15,12 +15,13 @@ namespace sc
 {
 	ID createStage(std::string filepath)
 	{
+		ID id = ID("E_STAGE");
 		game.nextState->stage.loadStage(filepath);
-		game.nextState->addEntity(ID("E_STAGE"));
-		game.nextState->transformPool.add(ID("E_STAGE"), Transform());
-		game.nextState->drawModelPool.add(ID("E_STAGE"), DrawModel(ID("MO_STAGE"), true));
+		game.nextState->addEntity(id);
+		game.nextState->transformPool.add(id, Transform());
+		game.nextState->drawModelPool.add(id, DrawModel(ID("MO_STAGE"), true));
 
-		return ID("E_STAGE");
+		return id;
 	}
 
 	ID createDebugCamera(ID id, glm::vec3 position, glm::vec3 rotation, float near, float far, float moveSpeed, float turnSpeed)
@@ -36,6 +37,23 @@ namespace sc
 		camera->calculateViewMatrix();
 
 		game.nextState->debugCameraPool.add(id, DebugCamera(moveSpeed, turnSpeed));
+
+		return id;
+	}
+
+	ID createEditorCamera(ID id, glm::vec3 position, float pitch, float near, float far, float keyMoveSpeed, float mouseMoveSpeed)
+	{
+		game.nextState->addEntity(id);
+
+		Transform* tran = game.nextState->transformPool.add(id, Transform());
+		tran->position = position;
+		tran->rotation = glm::vec3(glm::radians(pitch), glm::radians(180.0f), 0.0f);
+		tran->calculateWorldMatrix();
+
+		Camera* camera = game.nextState->cameraPool.add(id, Camera(near, far));
+		camera->calculateViewMatrix();
+
+		game.nextState->editorCameraPool.add(id, EditorCamera(keyMoveSpeed, mouseMoveSpeed));
 
 		return id;
 	}
@@ -75,6 +93,18 @@ namespace sc
 		game.nextState->addEntity(id);
 		game.nextState->transformPool.add(id, Transform());
 		game.nextState->drawTextPool.add(id, DrawText(position.x, position.y, text, color, fontId, true));
+
+		return id;
+	}
+
+	ID createCursor()
+	{
+		ID id = ID("E_CURSOR");
+		game.nextState->addEntity(id);
+		game.nextState->transformPool.add(id, Transform());
+		DrawSprite* ds = game.nextState->drawSpritePool.add(id, DrawSprite(input.getMouseX(), input.getMouseY(), 1.0, 1.0, 0.0f, 32.0f, ID("SP_POINTCUR"), true));
+		ds->calculateTransform();
+		game.nextState->cursorPool.add(id, Cursor());
 
 		return id;
 	}

@@ -158,7 +158,7 @@ namespace sc
 
 	int Input::getMouseY()
 	{
-		return mouseYLocal;
+		return sc::config.get("WINDOW_HEIGHT") - mouseYLocal;
 	}
 
 

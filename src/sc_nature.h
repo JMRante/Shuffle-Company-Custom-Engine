@@ -54,6 +54,33 @@ namespace sc
 		void update();
 	};
 
+	class EditorCamera : public Nature
+	{
+	private:
+		float keyMoveSpeed;
+		float mouseMoveSpeed;
+
+	public:
+		EditorCamera(float keyMoveSpeed, float mouseMoveSpeed);
+		void update();
+	};
+
+	enum CursorState {point, hover, click, drag};
+	class Cursor : public Nature
+	{
+	private:
+		Sprite* pointSprite;
+		Sprite* hoverSprite;
+		Sprite* clickSprite;
+		Sprite* dragSprite;
+
+	public:
+		CursorState state;
+
+		Cursor();
+		void update();
+	};
+
 	class FramerateCounter : public Nature
 	{
 	private:
