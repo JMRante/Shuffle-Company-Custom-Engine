@@ -62,7 +62,7 @@ namespace sc
 	{
 		game.nextState->addEntity(id);
 		game.nextState->transformPool.add(id, Transform());
-		game.nextState->drawTextPool.add(id, DrawText(position.x, position.y, "", color, fontId, true));
+		game.nextState->drawTextPool.add(id, DrawText(position.x, position.y, "", TextAlign::right, color, fontId, true));
 		game.nextState->framerateCounterPool.add(id, FramerateCounter());
 
 		return id;
@@ -88,11 +88,11 @@ namespace sc
 		return id;
 	}
 
-	ID createUIText(ID id, glm::vec2 position, std::string text, ID fontId, glm::vec4 color)
+	ID createUIText(ID id, glm::vec2 position, std::string text, TextAlign alignment, ID fontId, glm::vec4 color)
 	{
 		game.nextState->addEntity(id);
 		game.nextState->transformPool.add(id, Transform());
-		game.nextState->drawTextPool.add(id, DrawText(position.x, position.y, text, color, fontId, true));
+		game.nextState->drawTextPool.add(id, DrawText(position.x, position.y, text, alignment, color, fontId, true));
 
 		return id;
 	}

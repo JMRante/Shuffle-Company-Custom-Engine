@@ -130,18 +130,27 @@ namespace sc
 		void calculateTransform();
 	};
 
+	enum TextAlign {right, center, left};
 	class DrawText : public Component
 	{
+	private:
+		std::string text;
+		float width;
+
 	public:
 		float x;
 		float y;
 
-		Font* font;
-		std::string text;
+		TextAlign alignment;
 		glm::vec4 color;
+		Font* font;
 		bool isVisible;
 
-		DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId, bool isVisible);
+		DrawText(float x, float y, std::string text, TextAlign alignment, glm::vec4 color, ID fontId, bool isVisible);
+		void setText(std::string text);
+		std::string getText();
+		float getWidth();
+		void calculateWidth();
 	};
 }
 

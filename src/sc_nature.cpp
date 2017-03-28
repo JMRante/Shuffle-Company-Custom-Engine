@@ -260,7 +260,7 @@ namespace sc
 		}
 		else
 		{
-			dt->text = fToS(framerateAverage);
+			dt->setText(fToS(framerateAverage));
 		}
 	}
 }

@@ -214,7 +214,7 @@ namespace sc
 	/*
 		DrawText
 				*/
-	DrawText::DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId, bool isVisible) : Component()
+	DrawText::DrawText(float x, float y, std::string text, TextAlign alignment, glm::vec4 color, ID fontId, bool isVisible) : Component()
 	{
 		this->x = x;
 		this->y = y;
@@ -222,5 +222,55 @@ namespace sc
 		this->color = color;
 		this->font = assets.getFont(fontId);
 		this->isVisible = isVisible;
+		this->alignment = alignment;
+
+		calculateWidth();
+	}
+
+	void DrawText::setText(std::string text)
+	{
+		this->text = text;
+
+		calculateWidth();
+	}
+
+	std::string DrawText::getText()
+	{
+		return text;
+	}
+
+	float DrawText::getWidth()
+	{
+		return width;
+	}
+
+	void DrawText::calculateWidth()
+	{
+		width = 0;
+
+		for (size_t i = 0; i < text.length(); i++)
+		{
+			FontCharacter* fontChar = &(font->characters[text[i]]);
+
+			if (i == 0)
+			{
+				if (text.length() == 1)
+				{
+					width += fontChar->size.x;
+				}
+				else
+				{
+					width += ((fontChar->advance >> 6) - fontChar->bearing.x);
+				}
+			}
+			else if (i == text.length() - 1)
+			{
+				width += (fontChar->bearing.x + fontChar->size.x);
+			}
+			else
+			{
+				width += (fontChar->advance >> 6);
+			}
+		}
 	}
 }

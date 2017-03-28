@@ -35,7 +35,7 @@ namespace sc
 
 	ID createUIRectangle(ID id, glm::vec2 position, glm::vec2 size, glm::vec2 pivot, glm::vec4 color);
 	ID createUISprite(ID id, glm::vec2 position, glm::vec2 scale, glm::vec2 pivot, ID spriteId);
-	ID createUIText(ID id, glm::vec2 position, std::string text, ID fontId, glm::vec4 color);
+	ID createUIText(ID id, glm::vec2 position, std::string text, TextAlign alignment, ID fontId, glm::vec4 color);
 
 	ID createCursor();
 }

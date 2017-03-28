@@ -162,14 +162,30 @@ namespace sc
 				glm::mat4 pvw = cs->cameraPool.get(renderCameraEntityId)->getOrthoMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
 
-				GLfloat x = drawIt->x;
+				GLfloat x = 0.0f;
+
+				switch (drawIt->alignment)
+				{
+				case TextAlign::right:
+					x = drawIt->x;
+					break;
+				case TextAlign::center:
+					x = drawIt->x - (drawIt->getWidth() / 2.0f);
+					break;
+				case TextAlign::left:
+					x = drawIt->x - drawIt->getWidth();
+					break;
+				}
+
 				GLfloat y = drawIt->y;
 
 				std::string::const_iterator cIt;
+				std::string drawText = drawIt->getText();
 
 				glBindVertexArray(drawIt->font->VAOid);
 
-				for (cIt = drawIt->text.begin(); cIt != drawIt->text.end(); cIt++)
+
+				for (cIt = drawText.begin(); cIt != drawText.end(); cIt++)
 				{
 					FontCharacter* fontChar = &(drawIt->font->characters[*cIt]);
 
