@@ -15,6 +15,10 @@
 #include <vector>
 #include <string>
 
+#include <GL/glew.h>
+#include <SDL_opengl.h>
+#include <GL/glu.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -27,12 +31,24 @@
 
 namespace sc
 {
+	class State;
+
 	class Component
 	{
+	private:
+		std::vector<ID> types;
+
 	public:
 		ID entityId;
+		State* state;
 
 		Component();
+		bool isType(ID id);
+		bool sameTypes(Component* comp);
+		void addType(ID id);
+
+		void onStateInsert();
+		void onStateRemove();
 	};
 
 	class Transform : public Component
@@ -94,9 +110,25 @@ namespace sc
 
 		DrawModel();
 		DrawModel(ID modelId, bool isVisible);
+		void render(ID cameraId);
 	};
 
-	class DrawRectangle : public Component
+	class OrthoDraw : public Component
+	{
+	protected:
+		int layer;
+
+	public:
+		OrthoDraw();
+		virtual void render(ID cameraId) = 0;
+		void test();
+		void setLayer(int i);
+
+		void onStateInsert();
+		void onStateRemove();
+	};
+
+	class DrawRectangle : public OrthoDraw
 	{
 	public:
 		float x;
@@ -110,10 +142,12 @@ namespace sc
 		bool isVisible;
 
 		DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color, bool isVisible);
+		void render(ID cameraId);
+		void test();
 		void calculateTransform();
 	};
 
-	class DrawSprite : public Component
+	class DrawSprite : public OrthoDraw
 	{
 	public:
 		float x;
@@ -127,30 +161,46 @@ namespace sc
 		bool isVisible;
 
 		DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId, bool isVisible);
+		void render(ID cameraId);
+		void test();
 		void calculateTransform();
 	};
 
-	enum TextAlign {right, center, left};
-	class DrawText : public Component
+	enum TextHAlign {left, center, right};
+	enum TextVAlign {top, middle, bottom};
+	class DrawText : public OrthoDraw
 	{
 	private:
 		std::string text;
+		std::vector<float> lineWidths;
 		float width;
+		float height;
 
 	public:
 		float x;
 		float y;
 
-		TextAlign alignment;
+		TextHAlign hAlignment;
+		TextVAlign vAlignment;
+		TextHAlign justification;
+		float lineSeperation;
+
 		glm::vec4 color;
 		Font* font;
 		bool isVisible;
 
-		DrawText(float x, float y, std::string text, TextAlign alignment, glm::vec4 color, ID fontId, bool isVisible);
+		DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId);
+		void render(ID cameraId);
+		void test();
 		void setText(std::string text);
 		std::string getText();
 		float getWidth();
+		float getHeight();
+		float getLineWidth(int line);
 		void calculateWidth();
+		void calculateHeight();
+		float getDrawStartX(int line);
+		float getDrawStartY();
 	};
 }
 

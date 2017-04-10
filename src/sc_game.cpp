@@ -14,8 +14,6 @@
 
 namespace sc
 {
-	Game game;
-
 	void Game::start()
 	{
 		currentState = new sc::State();
@@ -23,32 +21,35 @@ namespace sc
 
 		assets.loadDefaults();
 
+		PrefabFactory pf(nextState);
+
 		//Build elements
-		createStage("Custom/Levels/TestLevel.shuff");
+		pf.createStage("Custom/Levels/TestLevel.shuff");
 
-		//createDebugCamera(ID("E_CAMERA"), glm::vec3(1.5f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.1f, 100.0f, 0.07f, 0.1f);
-		createEditorCamera(ID("E_CAMERA"), glm::vec3(0.0f, 12.0f, 10.0f), -60.0f, 0.1f, 100.0f, 0.1f, 0.01f);
-		createFramerateCounter(ID("E_FRAMECOUNT"), glm::vec2(16, sc::config.get("WINDOW_HEIGHT") - 16 - 16), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), ID("FT_MONO"));
-		createCursor();
+		//pf.createDebugCamera(ID("E_CAMERA"), glm::vec3(1.5f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.1f, 100.0f, 0.07f, 0.1f);
+		pf.createEditorCamera(ID("E_CAMERA"), glm::vec3(0.0f, 12.0f, 10.0f), -60.0f, 0.1f, 100.0f, 0.1f, 0.01f);
+		pf.createFramerateCounter(ID("E_FRAMECOUNT"), glm::vec2(16, sc::config.get("WINDOW_HEIGHT") - 32), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), ID("FT_MONO"));
+		ID cursorID = pf.createCursor();
+		nextState->drawSpritePool.get(cursorID)->setLayer(100);
 
-		// createUIRectangle(ID("E_RECTA"), glm::vec2(32, 640), glm::vec2(128, 128), glm::vec2(0, 0), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-		// createUIRectangle(ID("E_RECTB"), glm::vec2(0, 0), glm::vec2(128, 128), glm::vec2(64, 64), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
+		pf.createUISprite(ID("E_SPRITE"), glm::vec2(256, 16), glm::vec2(1.0f, 1.0f), glm::vec2(0, 0), ID("SP_TEST"));
+		pf.createUIRectangle(ID("E_RECTB"), glm::vec2(sc::config.get("WINDOW_WIDTH") / 2, sc::config.get("WINDOW_HEIGHT") / 2), glm::vec2(640, 256), glm::vec2(320, 128), glm::vec4(0.0f, 0.0f, 5.0f, 1.0f));
+		nextState->drawRectanglePool.get(ID("E_RECTB"))->setLayer(3);
+		pf.createUIText(ID("E_TEXT"), glm::vec2(sc::config.get("WINDOW_WIDTH") / 2, sc::config.get("WINDOW_HEIGHT") / 2), "There are things\nbeyond Hello World?\nDunno.\nBut multiple lines of varying size now fit well.\nHahaha!", glm::vec4(1.0, 1.0, 1.0f, 1.0), ID("FT_TEST"), TextHAlign::center, TextVAlign::middle, TextHAlign::center);
+		nextState->drawTextPool.get(ID("E_TEXT"))->setLayer(4);
 
-		// createUISprite(ID("E_SPRITE"), glm::vec2(256, 16), glm::vec2(1.0f, 1.0f), glm::vec2(0, 0), ID("SP_TEST"));
-		// createUIText(ID("E_TEXT"), glm::vec2(512, 256), "There are things beyond Hello World?", ID("FT_TEST"), glm::vec4(1.0, 1.0, 1.0f, 1.0));
-
-		updateState();
+		swapState();
 	}
 
 	bool Game::update()
 	{
 		input.update();
 
-		for (auto it = NaturePoolBase::begin(); it != NaturePoolBase::end(); it++) 
+		for (auto it = currentState->naturePointers.begin(); it != currentState->naturePointers.end(); it++) 
 		{ 
 			if ((*it)->isActive) 
 			{
-				(*it)->update(); 
+				(*it)->update(currentState, nextState); 
 			}
 		}
 
@@ -57,13 +58,13 @@ namespace sc
 			return true;
 		}
 
-		updateState();
+		swapState();
 		return false;
 	}
 
-	void Game::updateState()
+	void Game::swapState()
 	{
-		LOG_D << "Updating World State";
+		LOG_D << "Swapping game state";
 
 		currentState->copy(nextState);
 	}

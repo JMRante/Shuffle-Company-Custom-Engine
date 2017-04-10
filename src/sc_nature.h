@@ -37,8 +37,11 @@ namespace sc
 
 		Nature();
 		// virtual void create() = 0;
-		virtual void update() = 0;
+		virtual void update(State* readState, State* writeState) = 0;
 		// virtual void destory() = 0;
+		
+		void onStateInsert();
+		void onStateRemove();
 	};
 
 	class DebugCamera : public Nature
@@ -51,7 +54,7 @@ namespace sc
 
 	public:
 		DebugCamera(float moveSpeed, float mouseSpeed);
-		void update();
+		void update(State* readState, State* writeState);
 	};
 
 	class EditorCamera : public Nature
@@ -62,7 +65,7 @@ namespace sc
 
 	public:
 		EditorCamera(float keyMoveSpeed, float mouseMoveSpeed);
-		void update();
+		void update(State* readState, State* writeState);
 	};
 
 	enum CursorState {point, hover, click, drag};
@@ -75,10 +78,10 @@ namespace sc
 		Sprite* dragSprite;
 
 	public:
-		CursorState state;
+		CursorState cursorState;
 
 		Cursor();
-		void update();
+		void update(State* readState, State* writeState);
 	};
 
 	class FramerateCounter : public Nature
@@ -91,7 +94,7 @@ namespace sc
 		float framerateAverage;
 
 		FramerateCounter();
-		void update();
+		void update(State* readState, State* writeState);
 	};
 }
 

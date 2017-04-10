@@ -464,9 +464,15 @@ namespace sc
 
 		glBindVertexArray(VAOid);
 			glBindBuffer(GL_ARRAY_BUFFER, VBOid);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 5, NULL, GL_DYNAMIC_DRAW);
+
+				//Position
 				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+
+				//UV
+				glEnableVertexAttribArray(1);
+				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 	}
@@ -514,6 +520,9 @@ namespace sc
 			}
 		}
 
+		maxCharWidth = maxWidth;
+		maxCharHeight = maxHeight;
+
 		maxWidth += 2;
 		maxHeight += 2;
 
@@ -535,31 +544,14 @@ namespace sc
 												(float)startY / (float)textureHeight, 
 												(float)(startY + fontChar->size.y) / (float)textureHeight);
 
-			// LOG_D << "fc: " << fc; LOG_FLUSH;
-			// LOG_D << "startX: " << startX; LOG_FLUSH;
-			// LOG_D << "startY: " << startY; LOG_FLUSH;
-
 			for (int j = 0; j < fontChar->size.y; j++)
 			{
-				// LOG_DC << "\n";
-
 				for (int i = 0; i < fontChar->size.x; i++)
 				{
-					// LOG_DC << fontChar->bitmap[(j * fontChar->metrics.width) + i];
 					fontPixels[((j + startY) * textureWidth) + (i + startX)] = fontChar->bitmap[(j * fontChar->size.x) + i];
 				}
 			}
 		}
-
-		// for (int i = 0; i < textureWidth * textureHeight; i++)
-		// {
-		// 	if (i % textureWidth == 0)
-		// 	{
-		// 		LOG_DC << "\n";
-		// 	}
-
-		// 	LOG_DC << fontPixels[i];
-		// }
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			glGenTextures(1, &textureGLid);

@@ -31,6 +31,8 @@ namespace sc
 		std::vector<T> pool;
 
 	public:
+		State* state;
+
 		T* add(ID entityId, T component)
 		{
 			if (get(entityId) != NULL)
@@ -40,9 +42,13 @@ namespace sc
 			}
 
 			component.entityId = entityId;
+			component.state = state;
 			pool.push_back(component);
+			T* cPointer = &pool[pool.size() - 1];
 
-			return &pool[pool.size() - 1];
+			cPointer->onStateInsert();
+
+			return cPointer;
 		}
 
 		bool remove(ID entityId)
@@ -51,6 +57,8 @@ namespace sc
 			{
 				if (ci->entityId.is(entityId))
 				{
+					ci->onStateRemove();
+
 					pool.erase(ci);
 					return true;
 				}
@@ -85,97 +93,7 @@ namespace sc
 
 		void copy(ComponentPool<T> otherPool)
 		{
-			pool = otherPool.pool;
-		}
-	};
-
-	class NaturePoolBase
-	{
-	private:
-		static std::vector<Nature*> pointers;
-
-	public:
-		static std::vector<Nature*>::iterator begin()
-		{
-			return pointers.begin();
-		}
-
-		static std::vector<Nature*>::iterator end()
-		{
-			return pointers.end();
-		}		
-	};
-
-	template <class T>
-	class NaturePool : public NaturePoolBase
-	{
-	private:
-
-		std::vector<T> pool;
-
-	public:
-		T* add(ID entityId, T nature)
-		{
-			if (get(entityId) != NULL)
-			{
-				LOG_E << "Cannot add " << typeid(T).name() << ", entity " << entityId.get() << " already has one";
-				return NULL;
-			}
-
-			nature.entityId = entityId;
-			pool.push_back(nature);
-
-			T* naturePointer = &pool[pool.size() - 1];
-			pointers.push_back(naturePointer);
-
-			return naturePointer;
-		}
-
-		bool remove(ID entityId)
-		{
-			int poolDepth = 0;
-
-			for (auto ni = pool.begin(); ni != pool.end(); ni++)
-			{
-				if (ni->entityId.is(entityId))
-				{
-					pool.erase(ni);
-					pointers.erase(pointers.begin() + poolDepth);
-					return true;
-				}
-
-				poolDepth++;
-			}
-
-			LOG_E << "Cannot remove " << typeid(T).name() << ", entity " << entityId.get() << " doesn't have one";
-			return false;
-		}
-
-		T* get(ID entityId)
-		{
-			for (auto ni = pool.begin(); ni != pool.end(); ni++)
-			{
-				if (ni->entityId.is(entityId))
-				{
-					return &(*ni);
-				}
-			}
-
-			return NULL;
-		}
-
-		typename std::vector<T>::iterator begin()
-		{
-			return pool.begin();
-		}
-
-		typename std::vector<T>::iterator end()
-		{
-			return pool.end();
-		}
-
-		void copy(NaturePool<T> otherPool)
-		{
+			state = otherPool.state;
 			pool = otherPool.pool;
 		}
 	};
@@ -195,13 +113,17 @@ namespace sc
 		ComponentPool<DrawText> drawTextPool;
 
 		//Natures
-		NaturePool<DebugCamera> debugCameraPool;
-		NaturePool<EditorCamera> editorCameraPool;
-		NaturePool<Cursor> cursorPool;
-		NaturePool<FramerateCounter> framerateCounterPool;
+		ComponentPool<DebugCamera> debugCameraPool;
+		ComponentPool<EditorCamera> editorCameraPool;
+		ComponentPool<Cursor> cursorPool;
+		ComponentPool<FramerateCounter> framerateCounterPool;
 
 		//Singletons
 		Stage stage;
+
+		//Pointer Lists
+		std::vector<Nature*> naturePointers;
+		std::vector<OrthoDraw*> orthoPointers;
 
 		State();
 		void copy(State* otherEM);

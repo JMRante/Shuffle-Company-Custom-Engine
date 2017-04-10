@@ -15,9 +15,26 @@
 
 namespace sc
 {
-	Nature::Nature() : sc::Component() 
+	Nature::Nature() : Component() 
 	{
+		addType(ID("NATURE"));
 		isActive = true;
+	}
+
+	void Nature::onStateInsert()
+	{
+		state->naturePointers.push_back(this);		
+	}
+
+	void Nature::onStateRemove()
+	{
+		for (auto ni = state->naturePointers.begin(); ni != state->naturePointers.end(); ni++)
+		{
+			if ((*ni)->entityId.is(entityId) && (*ni)->sameTypes((Component*) this))
+			{
+				state->naturePointers.erase(ni);
+			}
+		}
 	}
 
 
@@ -32,13 +49,13 @@ namespace sc
 		pitch = 0.0f;
 	}
 
-	void DebugCamera::update()
+	void DebugCamera::update(State* readState, State* writeState)
 	{
-		Transform* currentTrans = game.currentState->transformPool.get(entityId);
-		Transform* nextTrans = game.nextState->transformPool.get(entityId);
-		Camera* currentCamera = game.currentState->cameraPool.get(entityId);
-		Camera* nextCamera = game.nextState->cameraPool.get(entityId);
-		DebugCamera* next = game.nextState->debugCameraPool.get(entityId);
+		Transform* currentTrans = readState->transformPool.get(entityId);
+		Transform* nextTrans = writeState->transformPool.get(entityId);
+		Camera* currentCamera = readState->cameraPool.get(entityId);
+		Camera* nextCamera = writeState->cameraPool.get(entityId);
+		DebugCamera* next = writeState->debugCameraPool.get(entityId);
 
 		//Rotation
 		float mouseXDelta = (float)input.getMouseXDelta();
@@ -95,11 +112,11 @@ namespace sc
 		this->mouseMoveSpeed = mouseMoveSpeed;
 	}
 
-	void EditorCamera::update()
+	void EditorCamera::update(State* readState, State* writeState)
 	{
-		Transform* currentTrans = game.currentState->transformPool.get(entityId);
-		Transform* nextTrans = game.nextState->transformPool.get(entityId);
-		Camera* nextCamera = game.nextState->cameraPool.get(entityId);
+		Transform* currentTrans = readState->transformPool.get(entityId);
+		Transform* nextTrans = writeState->transformPool.get(entityId);
+		Camera* nextCamera = writeState->cameraPool.get(entityId);
 
 		glm::vec3 currentPosition = currentTrans->position;
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -151,7 +168,7 @@ namespace sc
 				*/
 	Cursor::Cursor()
 	{
-		state = CursorState::point;
+		cursorState = CursorState::point;
 
 		pointSprite = assets.getSprite(ID("SP_POINTCUR"));
 		hoverSprite = assets.getSprite(ID("SP_HOVERCUR"));
@@ -159,9 +176,9 @@ namespace sc
 		dragSprite = assets.getSprite(ID("SP_DRAGCUR"));
 	}
 
-	void Cursor::update()
+	void Cursor::update(State* readState, State* writeState)
 	{
-		DrawSprite* nextSprite = game.nextState->drawSpritePool.get(entityId);
+		DrawSprite* nextSprite = writeState->drawSpritePool.get(entityId);
 
 		int mouseX = input.getMouseX();
 		int mouseY = input.getMouseY();
@@ -172,14 +189,14 @@ namespace sc
 
 		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE))
 		{
-			state = CursorState::drag;
+			cursorState = CursorState::drag;
 		}
 		else
 		{
-			state = CursorState::point;
+			cursorState = CursorState::point;
 		}
 
-		switch (state)
+		switch (cursorState)
 		{
 		case CursorState::point:
 			nextSprite->sprite = pointSprite;
@@ -206,7 +223,7 @@ namespace sc
 		framerateAverage = 0;
 	}
 
-	void FramerateCounter::update()
+	void FramerateCounter::update(State* readState, State* writeState)
 	{
 		//Calculate
 		float currentFramerate;
@@ -252,7 +269,7 @@ namespace sc
 		framerateAverage = sum / 60.0f;
 
 		//Update draw
-		DrawText* dt = game.nextState->drawTextPool.get(entityId);
+		DrawText* dt = writeState->drawTextPool.get(entityId);
 
 		if (dt == NULL)
 		{

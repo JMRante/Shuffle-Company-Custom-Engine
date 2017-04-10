@@ -37,10 +37,8 @@ namespace sc
 
 		void start();
 		bool update();
-		void updateState();
+		void swapState();
 	};
-
-	extern Game game;
 }
 
 #endif

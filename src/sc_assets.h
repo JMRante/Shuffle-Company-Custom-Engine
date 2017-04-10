@@ -121,6 +121,9 @@ namespace sc
 		GLuint textureWidth;
 		GLuint textureHeight;
 
+		int maxCharWidth;
+		int maxCharHeight;
+
 		static GLuint VAOid;
 		static GLuint VBOid;
 
