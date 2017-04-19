@@ -47,8 +47,8 @@ namespace sc
 		bool sameTypes(Component* comp);
 		void addType(ID id);
 
-		void onStateInsert();
-		void onStateRemove();
+		virtual void onStateInsert();
+		virtual void onStateRemove();
 	};
 
 	class Transform : public Component
@@ -120,8 +120,7 @@ namespace sc
 
 	public:
 		OrthoDraw();
-		virtual void render(ID cameraId) = 0;
-		void test();
+		virtual void render(ID cameraId);
 		void setLayer(int i);
 
 		void onStateInsert();
@@ -142,8 +141,7 @@ namespace sc
 		bool isVisible;
 
 		DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color, bool isVisible);
-		void render(ID cameraId);
-		void test();
+		//void render(ID cameraId);
 		void calculateTransform();
 	};
 
@@ -161,8 +159,7 @@ namespace sc
 		bool isVisible;
 
 		DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId, bool isVisible);
-		void render(ID cameraId);
-		void test();
+		//void render(ID cameraId);
 		void calculateTransform();
 	};
 
@@ -190,8 +187,7 @@ namespace sc
 		bool isVisible;
 
 		DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId);
-		void render(ID cameraId);
-		void test();
+		//void render(ID cameraId);
 		void setText(std::string text);
 		std::string getText();
 		float getWidth();

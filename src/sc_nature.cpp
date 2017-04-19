@@ -23,7 +23,7 @@ namespace sc
 
 	void Nature::onStateInsert()
 	{
-		state->naturePointers.push_back(this);		
+		state->naturePointers.push_back(this);
 	}
 
 	void Nature::onStateRemove()

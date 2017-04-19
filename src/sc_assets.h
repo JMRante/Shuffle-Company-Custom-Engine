@@ -167,27 +167,27 @@ namespace sc
 
 		Mesh *mesh;
 		Material *material;
-		std::vector<Model> subModels;
+		std::vector<Model*> subModels;
 
 		glm::vec3 relativePosition;
 		glm::vec3 relativeRotation;
 		glm::vec3 relativeScale;
 
 		Model(ID id, ID meshId, ID materialId);
-		Model* addSubModel(ID id, ID meshId, ID materialId);
+		Model* addSubModel(Model* model);
 		Model* getSubModel(ID id);
 	}; 
 
 	class Assets
 	{
 	private:
-		std::vector<Mesh> meshPool;
-		std::vector<Texture> texturePool;
-		std::vector<Sprite> spritePool;
-		std::vector<Font> fontPool;
-		std::vector<Shader> shaderPool;
-		std::vector<Material> materialPool;
-		std::vector<Model> modelPool;
+		std::vector<Mesh*> meshPool;
+		std::vector<Texture*> texturePool;
+		std::vector<Sprite*> spritePool;
+		std::vector<Font*> fontPool;
+		std::vector<Shader*> shaderPool;
+		std::vector<Material*> materialPool;
+		std::vector<Model*> modelPool;
 
 		int worldMeshStart;
 		int worldTextureStart;
@@ -201,23 +201,16 @@ namespace sc
 
 		Assets();
 
-		bool loadMesh(ID id, std::string filepath);
-		bool loadMesh(ID id, std::vector<Vertex> *vertices, std::vector<int> *indices);
-		bool loadMesh(ID id, std::vector<StageVertex> *vertices, std::vector<int> *indices);
-
-		bool loadTexture(ID id, std::string filepath);
-		bool loadTexture(ID id, GLuint width, GLuint height, GLuint* data);
-		bool loadTexture(ID id, GLuint width, GLuint height, std::vector<GLuint*> dataArray);
-
-		bool loadSprite(ID id, std::string filepath);
-
-		bool loadFont(ID id, std::string filepath, int height);
-
-		bool loadShader(ID id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
-		bool loadMaterial(ID id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<ID> *tma, ID shaderId);
-		bool loadModel(ID id, ID meshId, ID materialId);
-
 		void loadDefaults();
+		void clearDefaults();
+
+		bool loadMesh(ID id, Mesh* mesh);
+		bool loadTexture(ID id, Texture* texture);
+		bool loadSprite(ID id, Sprite* sprite);
+		bool loadFont(ID id, Font* font);
+		bool loadShader(ID id, Shader* shader);
+		bool loadMaterial(ID id, Material* material);
+		bool loadModel(ID id, Model* model);
 
 		Mesh* getMesh(ID id);
 		Texture* getTexture(ID id);

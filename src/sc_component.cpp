@@ -311,52 +311,53 @@ namespace sc
 		layer = 0;
 	}
 
-	void OrthoDraw::test() {}
+	void OrthoDraw::render(ID cameraId) {}
 
 	void OrthoDraw::setLayer(int i)
 	{
-		for (size_t i = 0; i < state->orthoPointers.size(); i++)
-		{
-			if ((*state->orthoPointers[i]).entityId.is(entityId) && (*state->orthoPointers[i]).sameTypes((Component*) this))
-			{
-				state->orthoPointers.erase(state->orthoPointers.begin() + i);
-			}
-		}
+		// for (size_t i = 0; i < state->orthoPointers.size(); i++)
+		// {
+		// 	if ((*state->orthoPointers[i]).entityId.is(entityId) && (*state->orthoPointers[i]).sameTypes((Component*) this))
+		// 	{
+		// 		state->orthoPointers.erase(state->orthoPointers.begin() + i);
+		// 	}
+		// }
 
-		bool inserted = false;
+		// bool inserted = false;
 
-		for (size_t i = 0; i < state->orthoPointers.size(); i++)
-		{
-			if (layer < (*state->orthoPointers[i]).layer)
-			{
-				state->orthoPointers.insert(state->orthoPointers.begin() + i, this);
-				inserted = true;
-			}
-		}
+		// for (size_t i = 0; i < state->orthoPointers.size(); i++)
+		// {
+		// 	if (layer < (*state->orthoPointers[i]).layer)
+		// 	{
+		// 		state->orthoPointers.insert(state->orthoPointers.begin() + i, this);
+		// 		inserted = true;
+		// 	}
+		// }
 
-		if (!inserted)
-		{
-			state->orthoPointers.push_back(this);
-		}
+		// if (!inserted)
+		// {
+		// 	state->orthoPointers.push_back(this);
+		// }
 	}
 
 	void OrthoDraw::onStateInsert()
 	{
-		bool inserted = false;
+		// bool inserted = false;
 
-		for (size_t i = 0; i < state->orthoPointers.size(); i++)
-		{
-			if (layer < (*state->orthoPointers[i]).layer)
-			{
-				state->orthoPointers.insert(state->orthoPointers.begin() + i, this);
-				inserted = true;
-			}
-		}
+		// for (size_t i = 0; i < state->orthoPointers.size(); i++)
+		// {
+		// 	if (layer < (*state->orthoPointers[i]).layer)
+		// 	{
+		// 		state->orthoPointers.insert(state->orthoPointers.begin() + i, this);
+		// 		inserted = true;
+		// 	}
+		// }
 
-		if (!inserted)
-		{
-			state->orthoPointers.push_back(this);
-		}
+		// if (!inserted)
+		// {
+		// 	state->orthoPointers.push_back(this);
+		// }
+		state->orthoPointers.push_back(this);
 	}
 
 	void OrthoDraw::onStateRemove()
@@ -387,8 +388,6 @@ namespace sc
 		this->color = color;
 	}
 
-	void DrawRectangle::test() { LOG_D << "Test DrawRectangle"; }
-
 	void DrawRectangle::calculateTransform()
 	{
 		if (state != NULL)
@@ -412,6 +411,7 @@ namespace sc
 		}
 	}
 
+	/*
 	void DrawRectangle::render(ID cameraId)
 	{
 		if (state != NULL)
@@ -442,6 +442,7 @@ namespace sc
 			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawRectangle";
 		}
 	}
+	*/
 
 
 	/*
@@ -460,8 +461,6 @@ namespace sc
 		this->sprite = assets.getSprite(spriteId);
 		this->isVisible = isVisible;
 	}
-
-	void DrawSprite::test() { LOG_D << "Test DrawSprite"; }
 
 	void DrawSprite::calculateTransform()
 	{
@@ -486,6 +485,7 @@ namespace sc
 		}
 	}
 
+	/*
 	void DrawSprite::render(ID cameraId)
 	{
 		if (state != NULL)
@@ -517,6 +517,7 @@ namespace sc
 			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawSprite";
 		}
 	}
+	*/
 
 
 	/*
@@ -541,8 +542,6 @@ namespace sc
 		calculateWidth();
 		calculateHeight();
 	}
-
-	void DrawText::test() { LOG_D << "Test DrawText"; }
 
 	void DrawText::setText(std::string text)
 	{
@@ -683,6 +682,7 @@ namespace sc
 		return 0.0f;
 	}
 
+	/*
 	void DrawText::render(ID cameraId)
 	{
 		if (state != NULL)
@@ -758,6 +758,7 @@ namespace sc
 		else
 		{
 			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawSprite";
-		}		
+		}
 	}
+	*/
 }

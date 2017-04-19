@@ -35,9 +35,27 @@ namespace sc
 
 		for (auto drawIt = state->orthoPointers.begin(); drawIt != state->orthoPointers.end(); drawIt++) 
 		{
+			//This happens because in this one case virtual functions don't work. Gave up on finding the
+			//reason why.
 			LOG_D << (*drawIt)->entityId.get(); LOG_FLUSH;
-			// (*drawIt)->render(renderCameraEntityId);
-			(*drawIt)->test();
+			(*drawIt)->render(renderCameraEntityId);
+
+			/*
+			if ((*drawIt)->isType(ID("DRAWRECTANGLE")))
+			{
+				DrawRectangle* dr = static_cast<DrawRectangle*>(*drawIt);
+				dr->render(renderCameraEntityId);
+			}
+			else if ((*drawIt)->isType(ID("DRAWSPRITE")))
+			{
+				DrawSprite* ds = static_cast<DrawSprite*>(*drawIt);
+				ds->render(renderCameraEntityId);
+			}
+			else if ((*drawIt)->isType(ID("DRAWTEXT")))
+			{
+				DrawText* dt = static_cast<DrawText*>(*drawIt);
+				dt->render(renderCameraEntityId);
+			}*/
 		}
 
 		glDepthFunc(GL_LESS);
