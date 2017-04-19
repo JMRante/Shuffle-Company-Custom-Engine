@@ -218,13 +218,13 @@ namespace sc
 			}
 		}
 
-		assets.loadTexture(ID("TX_STAGE"), SIMPLE_TEXTURE_DIM, SIMPLE_TEXTURE_DIM, dataArray);
+		assets.textureStack.pushWorld(new Texture((ID("TX_STAGE"), SIMPLE_TEXTURE_DIM, SIMPLE_TEXTURE_DIM, dataArray)));
 		ilDeleteImages(MAX_SIMPLE_TEXTURES, texIds);
 
 		std::vector<ID> tempString;
 		tempString.push_back(ID("TX_STAGE"));
 		
-		return assets.loadMaterial(ID("MA_STAGE"), NULL, NULL, NULL, &tempString, ID("SH_STAGE"));
+		return assets.materialStack.pushWorld(new Material(ID("MA_STAGE"), NULL, NULL, NULL, &tempString, ID("SH_STAGE")));
 	}
 
 	bool Stage::buildStageMesh()
@@ -440,12 +440,12 @@ namespace sc
 			}
 		}
 
-		return assets.loadMesh(ID("ME_STAGE"), &stageVertices, &stageIndices);
+		return assets.meshStack.pushWorld(new Mesh(ID("ME_STAGE"), &stageVertices, &stageIndices));
 	}
 
 	bool Stage::createStageModel()
 	{
-		return assets.loadModel(ID("MO_STAGE"), ID("ME_STAGE"), ID("MA_STAGE"));
+		return assets.modelStack.pushWorld(new Model(ID("MO_STAGE"), ID("ME_STAGE"), ID("MA_STAGE")));
 	}
 
 	int Stage::getTextureX(unsigned char textureNum)

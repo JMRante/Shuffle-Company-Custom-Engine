@@ -60,11 +60,10 @@ namespace sc
 
 		int indexCount;
 
-		Mesh(ID id);
-		bool loadToGPU(std::string filepath);
-		bool loadToGPU(std::vector<Vertex> *vertices, std::vector<int> *indices);
-		bool loadToGPU(std::vector<StageVertex> *vertices, std::vector<int> *indices);
-		void removeFromGPU();
+		Mesh(ID id, std::string filepath);
+		Mesh(ID id, std::vector<Vertex> *vertices, std::vector<int> *indices);
+		Mesh(ID id, std::vector<StageVertex> *vertices, std::vector<int> *indices);
+		~Mesh();
 	};
 
 	class Texture
@@ -77,11 +76,10 @@ namespace sc
 		GLuint height;
 		bool array;
 
-		Texture(ID id);
-		bool loadToGPU(std::string filepath);
-		bool loadToGPU(GLuint width, GLuint height, GLuint* data);
-		bool loadToGPU(GLuint width, GLuint height, std::vector<GLuint*> dataArray);
-		void removeFromGPU();
+		Texture(ID id, std::string filepath);
+		Texture(ID id, GLuint width, GLuint height, GLuint* data);
+		Texture(ID id, GLuint width, GLuint height, std::vector<GLuint*> dataArray);
+		~Texture();
 	};
 
 	class Sprite
@@ -95,9 +93,8 @@ namespace sc
 		float texCoordX;
 		float texCoordY;
 
-		Sprite(ID id);
-		bool loadToGPU(std::string filepath);
-		void removeFromGPU();		
+		Sprite(ID id, std::string filepath);
+		~Sprite();
 	};
 
 	struct FontCharacter
@@ -127,10 +124,10 @@ namespace sc
 		static GLuint VAOid;
 		static GLuint VBOid;
 
-		Font(ID id);
+		Font(ID id, std::string filepath, int height);
+		~Font();
+
 		static void loadFontQuadToGPU();
-		bool loadToGPU(std::string filepath, int height);
-		void removeFromGPU();
 		static void clearFontQuadFromGPU();
 	};
 
@@ -140,9 +137,8 @@ namespace sc
 		ID id;
 		GLuint GLid;
 
-		Shader(ID id);
-		bool loadToGPU(std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
-		void removeFromGPU();
+		Shader(ID id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath);
+		~Shader();
 	};
 
 	class Material
@@ -155,9 +151,10 @@ namespace sc
 		std::vector<glm::vec4> vec4MaterialArguments;
 		std::vector<Texture*> textureMaterialArguments;
 
-		Shader *shader;
+		Shader* shader;
 
 		Material(ID id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<ID> *tma, ID shaderId);
+		~Material();
 	};
 
 	class Model
@@ -165,8 +162,8 @@ namespace sc
 	public:
 		ID id;
 
-		Mesh *mesh;
-		Material *material;
+		Mesh* mesh;
+		Material* material;
 		std::vector<Model*> subModels;
 
 		glm::vec3 relativePosition;
@@ -174,51 +171,155 @@ namespace sc
 		glm::vec3 relativeScale;
 
 		Model(ID id, ID meshId, ID materialId);
+		~Model();
 		Model* addSubModel(Model* model);
 		Model* getSubModel(ID id);
 	}; 
 
+	template <class T>
+	class AssetStack
+	{
+	private:
+		std::vector<T*> stack;
+		size_t baseAssetCount;
+		bool baseLocked;
+
+	public:
+		AssetStack()
+		{
+			baseAssetCount = 0;
+			baseLocked = false;
+		}
+
+		bool areWorldAssetsLoaded()
+		{
+			if (stack.size() > baseAssetCount)
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+		T* pushBase(T* t)
+		{
+			if (!baseLocked)
+			{
+				if (t->id.is(ID("ERROR")))
+				{
+					LOG_E << "Tried to load broken asset";
+					return NULL;
+				}
+
+				for (auto ai = stack.begin(); ai != stack.end(); ai++)
+				{
+					if ((*ai)->id.is(t->id))
+					{
+						LOG_E << "There already exists a " << t->id.get();
+						return NULL;
+					}
+				}
+
+				stack.push_back(t);
+				return stack.back();
+			}
+			else
+			{
+				LOG_E << "Cannot currently load asset to base, load to world if needed";
+			}
+		}
+
+		T* pushWorld(T* t)
+		{
+			if (t->id.is(ID("ERROR")))
+			{
+				LOG_E << "Tried to load broken asset";
+				return NULL;
+			}
+
+			if (!baseLocked)
+			{
+				baseLocked = true;
+				baseAssetCount = stack.size();
+			}
+
+			for (auto ai = stack.begin(); ai != stack.end(); ai++)
+			{
+				if ((*ai)->id.is(t->id))
+				{
+					LOG_E << "There already exists a " << t->id.get();
+					return NULL;
+				}
+			}
+
+			stack.push_back(t);
+			return stack.back();
+		}
+
+		T* clearBase()
+		{
+			while (!stack.empty())
+			{
+				delete stack.back(); 
+				stack.pop_back();
+			}
+		}
+
+		T* clearWorld()
+		{
+			while (!stack.size() > baseAssetCount)
+			{
+				delete stack.back(); 
+				stack.pop_back();
+			}
+
+			baseLocked = false;
+		}
+
+		T* get(ID id)
+		{
+			for (auto ai = stack.begin(); ai != stack.end(); ai++)
+			{
+				if ((*ai)->id.is(id))
+				{
+					return *ai;
+				}
+			}
+		}
+
+		typename std::vector<T>::iterator begin()
+		{
+			return stack.begin();
+		}
+
+		typename std::vector<T>::iterator end()
+		{
+			return stack.end();
+		}
+	};
+
+
 	class Assets
 	{
 	private:
-		std::vector<Mesh*> meshPool;
-		std::vector<Texture*> texturePool;
-		std::vector<Sprite*> spritePool;
-		std::vector<Font*> fontPool;
-		std::vector<Shader*> shaderPool;
-		std::vector<Material*> materialPool;
-		std::vector<Model*> modelPool;
-
-		int worldMeshStart;
-		int worldTextureStart;
-		int worldSpriteStart;
-		int worldShaderStart;
-		int worldMaterialStart;
-		int worldModelStart;
+		AssetStack<Mesh> meshStack;
+		AssetStack<Texture> textureStack;
+		AssetStack<Sprite> spriteStack;
+		AssetStack<Font> fontStack;
+		AssetStack<Shader> shaderStack;
+		AssetStack<Material> materialStack;
+		AssetStack<Model> modelStack;
 
 	public:
 		FT_Library fontLibrary;
 
 		Assets();
 
-		void loadDefaults();
-		void clearDefaults();
+		bool areWorldAssetsLoaded();
 
-		bool loadMesh(ID id, Mesh* mesh);
-		bool loadTexture(ID id, Texture* texture);
-		bool loadSprite(ID id, Sprite* sprite);
-		bool loadFont(ID id, Font* font);
-		bool loadShader(ID id, Shader* shader);
-		bool loadMaterial(ID id, Material* material);
-		bool loadModel(ID id, Model* model);
-
-		Mesh* getMesh(ID id);
-		Texture* getTexture(ID id);
-		Sprite* getSprite(ID id);
-		Font* getFont(ID id);
-		Shader* getShader(ID id);
-		Material* getMaterial(ID id);
-		Model* getModel(ID id);
+		void loadBaseAssets();
+		void clearBaseAssets();
+		void clearWorldAssets();
 	};
 
 	extern Assets assets;

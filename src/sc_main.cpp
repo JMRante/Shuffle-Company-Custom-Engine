@@ -142,6 +142,8 @@ bool initiate()
 
 void closeout()
 {
+	sc::assets.clearWorldAssets();
+	sc::assets.clearBaseAssets();
 	sc::closeLog();
 	SDL_Quit();	
 }
