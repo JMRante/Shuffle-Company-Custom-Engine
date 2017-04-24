@@ -24,7 +24,7 @@ namespace sc
 	/*
 		Mesh
 				*/
-	Mesh::Mesh(ID id)
+	Mesh::Mesh(ID id, std::string filepath)
 	{
 		this->id = id;
 		VAOid = 0;
@@ -32,10 +32,7 @@ namespace sc
 		EBOid = 0;
 
 		indexCount = 0;
-	}
 
-	bool Mesh::loadToGPU(std::string filepath)
-	{
 		std::vector<Vertex> currentVertices;
 		std::vector<int> currentIndices;
 
@@ -53,7 +50,9 @@ namespace sc
 
 		if (!ret) 
 		{
-			return false;
+			LOG_E << "There was an error loading the mesh file " << filepath;
+			this->id = ID("ERROR");
+			return;
 		}
 		
 		//Iterate through faces of object
@@ -108,11 +107,50 @@ namespace sc
 			index_offset += fv;
 		}
 
-		return loadToGPU(&currentVertices, &currentIndices);
+		glGenVertexArrays(1, &VAOid);
+		glGenBuffers(1, &VBOid);
+		glGenBuffers(1, &EBOid);
+
+		glBindVertexArray(VAOid);
+			glBindBuffer(GL_ARRAY_BUFFER, VBOid);
+			glBufferData(GL_ARRAY_BUFFER, currentVertices.size() * sizeof(Vertex), &(currentVertices[0]), GL_STATIC_DRAW);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOid);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, currentIndices.size() * sizeof(GLuint), &(currentIndices[0]), GL_STATIC_DRAW);
+
+			//Position
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+
+			//Normal
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat)));
+
+			//UV
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(6 * sizeof(GLfloat)));
+		glBindVertexArray(0);
+
+		indexCount = currentIndices.size();
+
+		GLenum error = glGetError();
+
+		if (error != GL_NO_ERROR)
+		{
+			LOG_E << "Error loading mesh: " << gluErrorString(error);
+			this->id = ID("ERROR");
+		}
 	}
 
-	bool Mesh::loadToGPU(std::vector<Vertex> *vertices, std::vector<int> *indices)
+	Mesh::Mesh(ID id, std::vector<Vertex> *vertices, std::vector<int> *indices)
 	{
+		this->id = id;
+		VAOid = 0;
+		VBOid = 0;
+		EBOid = 0;
+
+		indexCount = 0;
+
 		glGenVertexArrays(1, &VAOid);
 		glGenBuffers(1, &VBOid);
 		glGenBuffers(1, &EBOid);
@@ -144,16 +182,19 @@ namespace sc
 		if (error != GL_NO_ERROR)
 		{
 			LOG_E << "Error loading mesh: " << gluErrorString(error);
-			return false;
-		}
-		else
-		{
-			return true;
+			this->id = ID("ERROR");
 		}
 	}
 
-	bool Mesh::loadToGPU(std::vector<StageVertex> *vertices, std::vector<int> *indices)
+	Mesh::Mesh(ID id, std::vector<StageVertex> *vertices, std::vector<int> *indices)
 	{
+		this->id = id;
+		VAOid = 0;
+		VBOid = 0;
+		EBOid = 0;
+
+		indexCount = 0;
+
 		glGenVertexArrays(1, &VAOid);
 		glGenBuffers(1, &VBOid);
 		glGenBuffers(1, &EBOid);
@@ -189,15 +230,11 @@ namespace sc
 		if (error != GL_NO_ERROR)
 		{
 			LOG_E << "Error loading mesh: " << gluErrorString(error);
-			return false;
-		}
-		else
-		{
-			return true;
+			this->id = ID("ERROR");
 		}
 	}
 
-	void Mesh::removeFromGPU()
+	Mesh::~Mesh()
 	{
 		if (VAOid != 0)
 		{
@@ -214,15 +251,12 @@ namespace sc
 	/*
 		Texture
 				*/
-	Texture::Texture(ID id)
+	Texture::Texture(ID id, std::string filepath)
 	{
 		this->id = id;
 		GLid = 0;
 		array = false;
-	}
 
-	bool Texture::loadToGPU(std::string filepath)
-	{
 		bool success = false;
 
 		//Load image with DevIL
@@ -239,8 +273,6 @@ namespace sc
 
 			if (ilSuccess == IL_TRUE)
 			{
-				this->removeFromGPU();
-
 				width = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
 				height = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
 
@@ -276,14 +308,15 @@ namespace sc
 		if(!success)
 		{
 			LOG_E << "Unable to load the texture " << filepath;
+			this->id = ID("ERROR");
 		}
-
-		return success;
 	}
 
-	bool Texture::loadToGPU(GLuint width, GLuint height, GLuint* data)
+	Texture::Texture(ID id, GLuint width, GLuint height, GLuint* data)
 	{
-		this->removeFromGPU();
+		this->id = id;
+		GLid = 0;
+		array = false;
 
 		//Generate texture ID
 		glGenTextures(1, &GLid);
@@ -302,15 +335,15 @@ namespace sc
 		if(error != GL_NO_ERROR)
 		{
 			LOG_E << "Error loading texture: " << gluErrorString(error);
-			return false;
+			this->id = ID("ERROR");
 		}
-
-		return true;
 	}
 
-	bool Texture::loadToGPU(GLuint width, GLuint height, std::vector<GLuint*> dataArray)
+	Texture::Texture(ID id, GLuint width, GLuint height, std::vector<GLuint*> dataArray)
 	{
-		this->removeFromGPU();
+		this->id = id;
+		GLid = 0;
+		array = false;
 
 		//Generate texture ID
 		glGenTextures(1, &GLid);
@@ -336,14 +369,13 @@ namespace sc
 		if(error != GL_NO_ERROR)
 		{
 			LOG_E << "Error loading texture: " << gluErrorString(error);
-			return false;
+			this->id = ID("ERROR");
 		}
 
 		array = true;
-		return true;
 	}
 
-	void Texture::removeFromGPU()
+	Texture::~Texture()
 	{
 		if (GLid != 0)
 		{
@@ -356,14 +388,11 @@ namespace sc
 	/*
 		Sprite
 				*/
-	Sprite::Sprite(ID id)
+	Sprite::Sprite(ID id, std::string filepath)
 	{
 		this->id = id;
 		GLid = 0;
-	}
 
-	bool Sprite::loadToGPU(std::string filepath)
-	{
 		bool success = false;
 
 		//Load image with DevIL
@@ -380,8 +409,6 @@ namespace sc
 
 			if (ilSuccess == IL_TRUE)
 			{
-				this->removeFromGPU();
-
 				width = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
 				height = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
 
@@ -430,12 +457,11 @@ namespace sc
 		if(!success)
 		{
 			LOG_E << "Unable to load the sprite " << filepath;
-		}
-
-		return success;		
+			this->id = ID("ERROR");
+		}		
 	}
 
-	void Sprite::removeFromGPU()
+	Sprite::~Sprite()
 	{
 		if (GLid != 0)
 		{
@@ -451,39 +477,17 @@ namespace sc
 	GLuint Font::VAOid = 0;
 	GLuint Font::VBOid = 0;
 
-	Font::Font(ID id)
+	Font::Font(ID id, std::string filepath, int height)
 	{
 		this->id = id;
 		textureGLid = 0;
-	}
 
-	void Font::loadFontQuadToGPU()
-	{
-		glGenVertexArrays(1, &VAOid);
-		glGenBuffers(1, &VBOid);
-
-		glBindVertexArray(VAOid);
-			glBindBuffer(GL_ARRAY_BUFFER, VBOid);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 5, NULL, GL_DYNAMIC_DRAW);
-
-				//Position
-				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-
-				//UV
-				glEnableVertexAttribArray(1);
-				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
-
-	bool Font::loadToGPU(std::string filepath, int height)
-	{
 		//Load face
 		if (FT_New_Face(assets.fontLibrary, filepath.c_str(), 0, &face))
 		{
 			LOG_E << "Failed to load font face from " << filepath;
-			return false;
+			this->id = ID("ERROR");
+			return;
 		}
 
 		FT_Set_Pixel_Sizes(face, 0, height);
@@ -565,18 +569,36 @@ namespace sc
 			glBindTexture(GL_TEXTURE_2D, 0);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-		FT_Done_Face(face);
-
-		return true;
+		FT_Done_Face(face);		
 	}
 
-	void Font::removeFromGPU()
+	Font::~Font()
 	{
 		if (textureGLid != 0)
 		{
 			glDeleteTextures(1, &textureGLid);
 			textureGLid = 0;
 		}
+	}
+
+	void Font::loadFontQuadToGPU()
+	{
+		glGenVertexArrays(1, &VAOid);
+		glGenBuffers(1, &VBOid);
+
+		glBindVertexArray(VAOid);
+			glBindBuffer(GL_ARRAY_BUFFER, VBOid);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 5, NULL, GL_DYNAMIC_DRAW);
+
+				//Position
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+
+				//UV
+				glEnableVertexAttribArray(1);
+				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 	}
 
 	void Font::clearFontQuadFromGPU()
@@ -594,19 +616,17 @@ namespace sc
 	/*
 		Shader
 				*/
-	Shader::Shader(ID id)
+	Shader::Shader(ID id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
 	{
 		this->id = id;
 		GLid = 0;
-	}
 
-	bool Shader::loadToGPU(std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
-	{
 		//Has shader already been built?
 		if (GLid != 0)
 		{
-			LOG_E << "Shader already built";		
-			return false;		
+			LOG_E << "Shader already built";
+			this->id = ID("ERROR");
+			return;	
 		}
 
 		//Load Shader
@@ -619,7 +639,8 @@ namespace sc
 		if (vertexShaderSource == NULL)
 		{
 			LOG_E << "Failed to open vertex shader";		
-			return false;
+			this->id = ID("ERROR");
+			return;	
 		}
 
 		const GLchar* fragmentShaderSource = sc::fileRead(fragmentShaderFilepath.c_str());
@@ -627,7 +648,8 @@ namespace sc
 		if (fragmentShaderSource == NULL)
 		{
 			LOG_E << "Failed to open fragment shader";		
-			return false;
+			this->id = ID("ERROR");
+			return;
 		}
 
 		//Compile Vertex Shader
@@ -643,7 +665,8 @@ namespace sc
 		{
 			glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
 			LOG_E << "Vertex Shader Compile Error: " << infoLog;
-			return false;
+			this->id = ID("ERROR");
+			return;
 		}
 
 		//Compile Fragment Shader
@@ -659,7 +682,8 @@ namespace sc
 		{
 			glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
 			LOG_E << "Fragment Shader Compile Error: " << infoLog;
-			return false;
+			this->id = ID("ERROR");
+			return;
 		}
 
 		//Link shaders into program
@@ -675,17 +699,17 @@ namespace sc
 		{
 			glGetProgramInfoLog(GLid, 512, NULL, infoLog);
 			LOG_E << "Shader Program Linking Error: " << infoLog;
-			return false;		
+			this->id = ID("ERROR");
+			return;		
 		}
 
 		//Clean-up Shader Code from memory
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
 
-		return true;
 	}
 
-	void Shader::removeFromGPU()
+	Shader::~Shader()
 	{
 		if (GLid != 0)
 		{
@@ -730,12 +754,14 @@ namespace sc
 		{
 			for (size_t i = 0; i < tma->size(); i++)
 			{
-				textureMaterialArguments.push_back(assets.getTexture((*tma)[i]));
+				textureMaterialArguments.push_back(assets.textureStack.get((*tma)[i]));
 			}
 		}
 
-		shader = assets.getShader(shaderId);
+		shader = assets.shaderStack.get(shaderId);
 	}
+
+	Material::~Material() {}
 
 
 	/*
@@ -745,27 +771,43 @@ namespace sc
 	{
 		this->id = id;
 
-		mesh = assets.getMesh(meshId);
-		material = assets.getMaterial(materialId);
+		mesh = assets.meshStack.get(meshId);
+		material = assets.materialStack.get(materialId);
 
 		relativePosition = glm::vec3(0.0f, 0.0f, 0.0f);
 		relativeRotation = glm::vec3(0.0f, 0.0f, 0.0f);
 		relativeScale = glm::vec3(1.0f, 1.0f, 1.0f);
 	}
 
-	Model* Model::addSubModel(ID id, ID meshId, ID materialId)
+	Model::~Model()
 	{
-		subModels.push_back(Model(id, meshId, materialId));
-		return &subModels.back();
+		if (subModels.size() == 0)
+		{
+			return;
+		}
+		else
+		{
+			while (!subModels.empty())
+			{
+				delete subModels.back();
+				subModels.pop_back();
+			}
+		}
+	}
+
+	Model* Model::addSubModel(Model* model)
+	{
+		subModels.push_back(model);
+		return subModels.back();
 	}
 
 	Model* Model::getSubModel(ID id)
 	{
 		for (size_t i = 0; i < subModels.size(); i++)
 		{
-			if (subModels[i].id.is(id))
+			if (subModels[i]->id.is(id))
 			{
-				return &subModels[i];
+				return subModels[i];
 			}
 		}
 
@@ -786,174 +828,23 @@ namespace sc
 		}
 	}
 
-	bool Assets::loadMesh(ID id, std::string filepath)
+	bool Assets::areWorldAssetsLoaded()
 	{
-		for (auto ai = meshPool.begin(); ai != meshPool.end(); ai++)
+		if (meshStack.areWorldAssetsLoaded()
+			|| textureStack.areWorldAssetsLoaded()
+			|| spriteStack.areWorldAssetsLoaded()
+			|| fontStack.areWorldAssetsLoaded()
+			|| shaderStack.areWorldAssetsLoaded()
+			|| materialStack.areWorldAssetsLoaded()
+			|| modelStack.areWorldAssetsLoaded())
 		{
-			if (ai->id.is(id))
-			{
-				LOG_E << "There already exists a " << id.get();
-				return false;
-			}
+			return true;
 		}
 
-		meshPool.push_back(Mesh(id));
-		return meshPool.back().loadToGPU(filepath);
+		return false;
 	}
 
-	bool Assets::loadMesh(ID id, std::vector<Vertex> *vertices, std::vector<int> *indices)
-	{
-		for (auto ai = meshPool.begin(); ai != meshPool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				LOG_E << "There already exists a " << id.get();
-				return false;
-			}
-		}
-		
-		meshPool.push_back(Mesh(id));
-		return meshPool.back().loadToGPU(vertices, indices);
-	}
-
-	bool Assets::loadMesh(ID id, std::vector<StageVertex> *vertices, std::vector<int> *indices)
-	{
-		for (auto ai = meshPool.begin(); ai != meshPool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				LOG_E << "There already exists a " << id.get();
-				return false;
-			}
-		}
-		
-		meshPool.push_back(Mesh(id));
-		return meshPool.back().loadToGPU(vertices, indices);
-	}
-
-
-	bool Assets::loadTexture(ID id, std::string filepath)
-	{
-		for (auto ai = texturePool.begin(); ai != texturePool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				LOG_E << "There already exists a " << id.get();
-				return false;
-			}
-		}
-
-		texturePool.push_back(Texture(id));
-		return texturePool.back().loadToGPU(filepath);
-	}
-
-	bool Assets::loadTexture(ID id, GLuint width, GLuint height, GLuint* data)
-	{
-		for (auto ai = texturePool.begin(); ai != texturePool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				LOG_E << "There already exists a " << id.get();
-				return false;
-			}
-		}
-		
-		texturePool.push_back(Texture(id));
-		return texturePool.back().loadToGPU(width, height, data);
-	}
-
-	bool Assets::loadTexture(ID id, GLuint width, GLuint height, std::vector<GLuint*> dataArray)
-	{
-		for (auto ai = texturePool.begin(); ai != texturePool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				LOG_E << "There already exists a " << id.get();
-				return false;
-			}
-		}
-		
-		texturePool.push_back(Texture(id));
-		return texturePool.back().loadToGPU(width, height, dataArray);
-	}
-
-
-	bool Assets::loadSprite(ID id, std::string filepath)
-	{
-		for (auto ai = spritePool.begin(); ai != spritePool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				LOG_E << "There already exists a " << id.get();
-				return false;
-			}
-		}
-		
-		spritePool.push_back(Sprite(id));
-		return spritePool.back().loadToGPU(filepath);
-	}
-
-	bool Assets::loadFont(ID id, std::string filepath, int height)
-	{
-		for (auto ai = fontPool.begin(); ai != fontPool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				LOG_E << "There already exists a " << id.get();
-				return false;
-			}
-		}
-		
-		fontPool.push_back(Font(id));
-		return fontPool.back().loadToGPU(filepath, height);
-	}
-
-	bool Assets::loadShader(ID id, std::string vertexShaderFilepath, std::string fragmentShaderFilepath)
-	{
-		for (auto ai = shaderPool.begin(); ai != shaderPool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				LOG_E << "There already exists a " << id.get();
-				return false;
-			}
-		}
-		
-		shaderPool.push_back(Shader(id));
-		return shaderPool.back().loadToGPU(vertexShaderFilepath, fragmentShaderFilepath);
-	}
-
-	bool Assets::loadMaterial(ID id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<ID> *tma, ID shaderId)
-	{
-		for (auto ai = materialPool.begin(); ai != materialPool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				LOG_E << "There already exists a " << id.get();
-				return false;
-			}
-		}
-		
-		materialPool.push_back(Material(id, ima, fma, vma, tma, shaderId));
-		return true;
-	}
-
-	bool Assets::loadModel(ID id, ID meshId, ID materialId)
-	{
-		for (auto ai = modelPool.begin(); ai != modelPool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				LOG_E << "There already exists a " << id.get();
-				return false;
-			}
-		}
-		
-		modelPool.push_back(Model(id, meshId, materialId));
-		return true;
-	}
-
-	void Assets::loadDefaults()
+	void Assets::loadBaseAssets()
 	{
 		//Load default assets
 		//Quad
@@ -980,161 +871,70 @@ namespace sc
 		static const int ind[] = {0, 1, 3, 0, 3, 2};
 		std::vector<int> vecInd(ind, ind + sizeof(ind) / sizeof(ind[0]));
 
-		loadMesh(ID("ME_QUAD"), &vecVert, &vecInd);
-		loadMesh(ID("ME_SPHERE"), "Resources/Meshes/ME_SPHERE.obj");
+		meshStack.pushBase(new Mesh(ID("ME_QUAD"), &vecVert, &vecInd));
+		meshStack.pushBase(new Mesh(ID("ME_SPHERE"), "Resources/Meshes/ME_SPHERE.obj"));
 
 		//Load Sprites
-		loadSprite(ID("ERROR"), "Resources/Textures/ERROR.png");
-		loadSprite(ID("SP_TEST"), "Resources/Textures/testSprite.png");
+		spriteStack.pushBase(new Sprite(ID("SP_ERROR"), "Resources/Textures/ERROR.png"));
+		spriteStack.pushBase(new Sprite(ID("SP_TEST"), "Resources/Textures/testSprite.png"));
 
-		loadSprite(ID("SP_CLICKCUR"), "Resources/Textures/Cursor/SP_CLICKCUR.png");
-		loadSprite(ID("SP_DRAGCUR"), "Resources/Textures/Cursor/SP_DRAGCUR.png");
-		loadSprite(ID("SP_HOVERCUR"), "Resources/Textures/Cursor/SP_HOVERCUR.png");
-		loadSprite(ID("SP_POINTCUR"), "Resources/Textures/Cursor/SP_POINTCUR.png");
+		spriteStack.pushBase(new Sprite(ID("SP_CLICKCUR"), "Resources/Textures/Cursor/SP_CLICKCUR.png"));
+		spriteStack.pushBase(new Sprite(ID("SP_DRAGCUR"), "Resources/Textures/Cursor/SP_DRAGCUR.png"));
+		spriteStack.pushBase(new Sprite(ID("SP_HOVERCUR"), "Resources/Textures/Cursor/SP_HOVERCUR.png"));
+		spriteStack.pushBase(new Sprite(ID("SP_POINTCUR"), "Resources/Textures/Cursor/SP_POINTCUR.png"));
 
 		//Load Fonts
-		Font::loadFontQuadToGPU();
-		loadFont(ID("FT_TEST"), "Resources/Fonts/OpenSans-Regular.ttf", 28);
-		loadFont(ID("FT_MONO"), "Resources/Fonts/RobotoMono-Regular.ttf", 16);
+		fontStack.pushBase(new Font(ID("FT_TEST"), "Resources/Fonts/OpenSans-Regular.ttf", 28));
+		fontStack.pushBase(new Font(ID("FT_MONO"), "Resources/Fonts/RobotoMono-Regular.ttf", 16));
 
 		//Load Shaders
-		loadShader(ID("SH_PASS"), "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl");
-		loadShader(ID("SH_TEX"), "Resources/Shaders/sc_shader_testTextureVertex.glsl", "Resources/Shaders/sc_shader_testTextureFragment.glsl");
-		loadShader(ID("SH_STAGE"), "Resources/Shaders/sc_shader_stageVertex.glsl", "Resources/Shaders/sc_shader_stageFragment.glsl");
-		loadShader(ID("SH_COLOR"), "Resources/Shaders/sc_shader_flatColorVertex.glsl", "Resources/Shaders/sc_shader_flatColorFragment.glsl");
-		loadShader(ID("SH_SPRITE"), "Resources/Shaders/sc_shader_spriteVertex.glsl", "Resources/Shaders/sc_shader_spriteFragment.glsl");
-		loadShader(ID("SH_FONT"), "Resources/Shaders/sc_shader_fontVertex.glsl", "Resources/Shaders/sc_shader_fontFragment.glsl");
+		shaderStack.pushBase(new Shader(ID("SH_PASS"), "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl"));
+		shaderStack.pushBase(new Shader(ID("SH_TEX"), "Resources/Shaders/sc_shader_testTextureVertex.glsl", "Resources/Shaders/sc_shader_testTextureFragment.glsl"));
+		shaderStack.pushBase(new Shader(ID("SH_STAGE"), "Resources/Shaders/sc_shader_stageVertex.glsl", "Resources/Shaders/sc_shader_stageFragment.glsl"));
+		shaderStack.pushBase(new Shader(ID("SH_COLOR"), "Resources/Shaders/sc_shader_flatColorVertex.glsl", "Resources/Shaders/sc_shader_flatColorFragment.glsl"));
+		shaderStack.pushBase(new Shader(ID("SH_SPRITE"), "Resources/Shaders/sc_shader_spriteVertex.glsl", "Resources/Shaders/sc_shader_spriteFragment.glsl"));
+		shaderStack.pushBase(new Shader(ID("SH_FONT"), "Resources/Shaders/sc_shader_fontVertex.glsl", "Resources/Shaders/sc_shader_fontFragment.glsl"));
 
 		std::vector<glm::vec4> tempVec4;
 		tempVec4.push_back(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		loadMaterial(ID("MA_RED"), NULL, NULL, &tempVec4, NULL, ID("SH_PASS"));
+		materialStack.pushBase(new Material(ID("MA_RED"), NULL, NULL, &tempVec4, NULL, ID("SH_PASS")));
 		tempVec4.clear();
 		tempVec4.push_back(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-		loadMaterial(ID("MA_BLUE"), NULL, NULL, &tempVec4, NULL, ID("SH_PASS"));
+		materialStack.pushBase(new Material(ID("MA_BLUE"), NULL, NULL, &tempVec4, NULL, ID("SH_PASS")));
 
-		loadModel(ID("MO_TESTA"), ID("ME_QUAD"), ID("MA_RED"));
-		loadModel(ID("MO_TESTB"), ID("ME_SPHERE"), ID("MA_BLUE"));
+		modelStack.pushBase(new Model(ID("MO_TESTA"), ID("ME_QUAD"), ID("MA_RED")));
+		modelStack.pushBase(new Model(ID("MO_TESTB"), ID("ME_SPHERE"), ID("MA_BLUE")));
 
+		Font::loadFontQuadToGPU();
 		FT_Done_FreeType(fontLibrary);
 	}
 
-	// Someday template these get functions
-	Mesh* Assets::getMesh(ID id)
+	void Assets::clearBaseAssets()
 	{
-		for (auto ai = meshPool.begin(); ai != meshPool.end(); ai++)
+		if (areWorldAssetsLoaded())
 		{
-			if (ai->id.is(id))
-			{
-				return &(*ai);
-			}
+			LOG_E << "World assets haven't been properly cleared, they are going to be wiped out along with base assets";
 		}
 
-		//Eventually should return a default object preloaded.
-		LOG_E << "Failed to get mesh resource " << id.get();
+		meshStack.clearBase();
+		textureStack.clearBase();
+		spriteStack.clearBase();
+		fontStack.clearBase();
+		shaderStack.clearBase();
+		materialStack.clearBase();
+		modelStack.clearBase();
 
-		return NULL;
+		Font::clearFontQuadFromGPU();
 	}
 
-	Texture* Assets::getTexture(ID id)
+	void Assets::clearWorldAssets()
 	{
-		for (auto ai = texturePool.begin(); ai != texturePool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				return &(*ai);
-			}
-		}
-
-		//Eventually should return a default object preloaded.
-		LOG_E << "Failed to get texture resource " << id.get();
-
-		return NULL;
-	}
-
-	Sprite* Assets::getSprite(ID id)
-	{
-		for (auto ai = spritePool.begin(); ai != spritePool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				return &(*ai);
-			}
-		}
-
-		LOG_E << "Failed to get sprite resource " << id.get();
-
-		for (auto ai = spritePool.begin(); ai != spritePool.end(); ai++)
-		{
-			if (ai->id.is(ID("ERROR")))
-			{
-				return &(*ai);
-			}
-		}
-
-		return NULL;
-	}
-
-	Font* Assets::getFont(ID id)
-	{
-		for (auto ai = fontPool.begin(); ai != fontPool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				return &(*ai);
-			}
-		}
-
-		//Eventually should return a default object preloaded.
-		LOG_E << "Failed to get font resource " << id.get();
-
-		return NULL;		
-	}
-
-	Shader* Assets::getShader(ID id)
-	{
-		for (auto ai = shaderPool.begin(); ai != shaderPool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				return &(*ai);
-			}
-		}
-
-		//Eventually should return a default object preloaded.
-		LOG_E << "Failed to get shader resource " << id.get();
-
-		return NULL;
-	}
-
-	Material* Assets::getMaterial(ID id)
-	{
-		for (auto ai = materialPool.begin(); ai != materialPool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				return &(*ai);
-			}
-		}
-
-		//Eventually should return a default object preloaded.
-		LOG_E << "Failed to get material resource " << id.get();
-
-		return NULL;
-	}
-
-	Model* Assets::getModel(ID id)
-	{
-		for (auto ai = modelPool.begin(); ai != modelPool.end(); ai++)
-		{
-			if (ai->id.is(id))
-			{
-				return &(*ai);
-			}
-		}
-
-		//Eventually should return a default object preloaded.
-		LOG_E << "Failed to get model resource " << id.get();
-
-		return NULL;
+		meshStack.clearWorld();
+		textureStack.clearWorld();
+		spriteStack.clearWorld();
+		fontStack.clearWorld();
+		shaderStack.clearWorld();
+		materialStack.clearWorld();
+		modelStack.clearWorld();
 	}
 }

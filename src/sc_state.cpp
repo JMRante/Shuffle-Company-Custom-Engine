@@ -13,49 +13,15 @@
 
 namespace sc
 {
-	State::State() 
-	{
-		transformPool.state = this;
-		cameraPool.state = this;
-		drawModelPool.state = this;
-		drawRectanglePool.state = this;
-		drawSpritePool.state = this;
-		drawTextPool.state = this;
-
-		//Natures
-		debugCameraPool.state = this;
-		editorCameraPool.state = this;
-		cursorPool.state = this;
-		framerateCounterPool.state = this;
-	}
-
-	void State::copy(State* otherState)
-	{
-		entities = otherState->entities;
-
-		transformPool.copy(otherState->transformPool);
-		cameraPool.copy(otherState->cameraPool);
-		drawModelPool.copy(otherState->drawModelPool);
-		drawRectanglePool.copy(otherState->drawRectanglePool);
-		drawSpritePool.copy(otherState->drawSpritePool);
-		drawTextPool.copy(otherState->drawTextPool);
-
-		debugCameraPool.copy(otherState->debugCameraPool);
-		editorCameraPool.copy(otherState->editorCameraPool);
-		cursorPool.copy(otherState->cursorPool);
-		framerateCounterPool.copy(otherState->framerateCounterPool);
-
-		stage = otherState->stage;
-
-		naturePointers = otherState->naturePointers;
-		orthoPointers = otherState->orthoPointers;
-	}
+	State::State() {}
 
 	bool State::addEntity(ID id)
 	{
 		if (!entityExists(id))
 		{
-			entities.push_back(id);
+			std::vector<Component*> components;
+			componentMap.insert(std::pair<ID, std::vector<Component*>>(id, components));
+
 			return true;
 		}
 
@@ -65,12 +31,9 @@ namespace sc
 
 	bool State::entityExists(ID id)
 	{
-		for (auto ei = entities.begin(); ei != entities.end(); ei++)
+		if (componentMap.find(id) != componentMap.end())
 		{
-			if (ei->is(id))
-			{
-				return true;
-			}
+			return true;
 		}
 
 		return false;
@@ -78,28 +41,41 @@ namespace sc
 
 	bool State::removeEntity(ID id)
 	{
-		for (auto ei = entities.begin(); ei != entities.end(); ei++)
+		auto it = componentMap.find(id);
+
+		if (it != componentMap.end())
 		{
-			if (ei->is(id))
-			{
-				transformPool.remove(id);
-				cameraPool.remove(id);
-				drawModelPool.remove(id);
-				drawRectanglePool.remove(id);
-				drawSpritePool.remove(id);
-				drawTextPool.remove(id);
+			removeAllComponents(id);
+			componentMap.erase(it);
 
-				debugCameraPool.remove(id);
-				editorCameraPool.remove(id);
-				cursorPool.remove(id);
-				framerateCounterPool.remove(id);
-
-				entities.erase(ei);
-				return true;
-			}
+			return true;
 		}
 
 		LOG_E << "Cannot remove non-existing entity " << id.get();
 		return false;
+	}
+
+	void State::removeAllEntities(ID id)
+	{
+		for (auto et = componentMap.begin(); et != componentMap.end(); et++)
+		{
+			removeAllComponents(et->first);
+			componentMap.erase(et);
+		}
+	}
+
+	void State::removeAllComponents(ID entityId)
+	{
+		std::vector<Component*>* coms = &componentMap[entityId];
+
+		if (coms != NULL)
+		{
+			for (auto ci = coms->begin(); ci != coms->end(); ci++)
+			{
+				(*ci)->onStateRemove();
+				delete *ci;
+				coms->erase(ci);
+			}	
+		}		
 	}
 }

@@ -20,6 +20,8 @@
 #include <sstream>
 #include <string>
 
+#include "sc_log.h"
+
 #define ID_SIZE 32
 
 namespace sc
@@ -37,10 +39,13 @@ namespace sc
 	public:
 		ID();
 		ID(const char* id);
-		bool is(const char* id);
-		bool is(ID id);
-		char* get();
+		bool is(const char* id) const;
+		bool is(ID id) const;
+		const char* get() const;
+		char get(int i) const;
 	};
+
+	bool operator<(const ID& l, const ID& r);
 }
 
 #endif

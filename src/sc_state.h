@@ -15,6 +15,8 @@
 #include <typeinfo>
 #include <algorithm>
 #include <vector>
+#include <map>
+#include <utility>
 
 #include "sc_log.h"
 #include "sc_component.h"
@@ -24,112 +26,88 @@
 
 namespace sc
 {
-	template <class T>
-	class ComponentPool
+	class State
 	{
 	private:
-		std::vector<T> pool;
+		std::map<ID, std::vector<Component*>> componentMap;
 
 	public:
-		State* state;
+		Stage stage;
 
-		T* add(ID entityId, T component)
+		std::vector<Nature*> naturePointers;
+		std::vector<DrawModel*> modelPointers;
+		std::vector<DrawOrtho*> orthoPointers;
+
+		State();
+
+		bool addEntity(ID id);
+		bool entityExists(ID id);
+		bool removeEntity(ID id);
+		void removeAllEntities(ID id);
+
+		template <class T>
+		T* addComponent(ID entityId, T* component)
 		{
-			if (get(entityId) != NULL)
+			if (getComponent<T>(entityId) != NULL)
 			{
 				LOG_E << "Cannot add " << typeid(T).name() << ", entity " << entityId.get() << " already has one";
 				return NULL;
 			}
 
-			component.entityId = entityId;
-			component.state = state;
-			pool.push_back(component);
-			T* cPointer = &pool[pool.size() - 1];
+			component->entityId = entityId;
+			component->state = this;
 
-			cPointer->onStateInsert();
+			component->onStateInsert();
+			
+			componentMap[entityId].push_back((Component*) component);
 
-			return cPointer;
+			return component;
 		}
 
-		bool remove(ID entityId)
+		template <class T>
+		T* getComponent(ID entityId)
 		{
-			for (auto ci = pool.begin(); ci != pool.end(); ci++)
+			std::vector<Component*>* coms = &componentMap[entityId];
+
+			if (coms != NULL)
 			{
-				if (ci->entityId.is(entityId))
+				for (auto ci = coms->begin(); ci != coms->end(); ci++)
 				{
-					ci->onStateRemove();
-
-					pool.erase(ci);
-					return true;
-				}
-			}
-
-			LOG_E << "Cannot remove " << typeid(T).name() << ", entity " << entityId.get() << " doesn't have one";
-			return false;
-		}
-
-		T* get(ID entityId)
-		{
-			for (auto ci = pool.begin(); ci != pool.end(); ci++)
-			{
-				if (ci->entityId.is(entityId))
-				{
-					return &(*ci);
+					if (typeid(T) == typeid(**ci))
+					{
+						return static_cast<T*>(*ci);
+					}
 				}
 			}
 
 			return NULL;
 		}
 
-		typename std::vector<T>::iterator begin()
+		template <class T>
+		bool removeComponent(ID entityId)
 		{
-			return pool.begin();
+			std::vector<Component*>* coms = &componentMap[entityId];
+
+			if (coms != NULL)
+			{
+				for (auto ci = coms->begin(); ci != coms->end(); ci++)
+				{
+					if (typeid(T) == typeid(**ci))
+					{
+						(*ci)->onStateRemove();
+						delete *ci;
+						coms->erase(ci);
+
+						return true;
+					}
+				}	
+			}
+
+			LOG_E << "Cannot remove " << typeid(T).name() << ", entity " << entityId.get() << " doesn't have one";
+			return false;
 		}
 
-		typename std::vector<T>::iterator end()
-		{
-			return pool.end();
-		}
-
-		void copy(ComponentPool<T> otherPool)
-		{
-			state = otherPool.state;
-			pool = otherPool.pool;
-		}
-	};
-
-	class State
-	{
-	private:
-		std::vector<ID> entities;
-
-	public:
-		//Components
-		ComponentPool<Transform> transformPool;
-		ComponentPool<Camera> cameraPool;
-		ComponentPool<DrawModel> drawModelPool;
-		ComponentPool<DrawRectangle> drawRectanglePool;
-		ComponentPool<DrawSprite> drawSpritePool;
-		ComponentPool<DrawText> drawTextPool;
-
-		//Natures
-		ComponentPool<DebugCamera> debugCameraPool;
-		ComponentPool<EditorCamera> editorCameraPool;
-		ComponentPool<Cursor> cursorPool;
-		ComponentPool<FramerateCounter> framerateCounterPool;
-
-		//Singletons
-		Stage stage;
-
-		//Pointer Lists
-		std::vector<Nature*> naturePointers;
-		std::vector<OrthoDraw*> orthoPointers;
-
-		State();
-		void copy(State* otherEM);
-		bool addEntity(ID id);
-		bool entityExists(ID id);
-		bool removeEntity(ID id);
+		void removeAllComponents(ID entityId);
 	};
 }
 

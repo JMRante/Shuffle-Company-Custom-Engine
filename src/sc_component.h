@@ -13,6 +13,7 @@
 #define SC_COMPONENT
 
 #include <vector>
+#include <algorithm>
 #include <string>
 
 #include <GL/glew.h>
@@ -43,12 +44,13 @@ namespace sc
 		State* state;
 
 		Component();
+		virtual ~Component() {}
 		bool isType(ID id);
 		bool sameTypes(Component* comp);
 		void addType(ID id);
 
-		void onStateInsert();
-		void onStateRemove();
+		virtual void onStateInsert();
+		virtual void onStateRemove();
 	};
 
 	class Transform : public Component
@@ -111,24 +113,28 @@ namespace sc
 		DrawModel();
 		DrawModel(ID modelId, bool isVisible);
 		void render(ID cameraId);
-	};
-
-	class OrthoDraw : public Component
-	{
-	protected:
-		int layer;
-
-	public:
-		OrthoDraw();
-		virtual void render(ID cameraId) = 0;
-		void test();
-		void setLayer(int i);
 
 		void onStateInsert();
 		void onStateRemove();
 	};
 
-	class DrawRectangle : public OrthoDraw
+	class DrawOrtho : public Component
+	{
+	protected:
+		int layer;
+
+	public:
+		DrawOrtho();
+		virtual void render(ID cameraId);
+		void setLayer(int layer);
+
+		void onStateInsert();
+		void onStateRemove();
+
+		static bool compare(DrawOrtho* l, DrawOrtho* r);
+	};
+
+	class DrawRectangle : public DrawOrtho
 	{
 	public:
 		float x;
@@ -143,11 +149,10 @@ namespace sc
 
 		DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color, bool isVisible);
 		void render(ID cameraId);
-		void test();
 		void calculateTransform();
 	};
 
-	class DrawSprite : public OrthoDraw
+	class DrawSprite : public DrawOrtho
 	{
 	public:
 		float x;
@@ -162,13 +167,12 @@ namespace sc
 
 		DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId, bool isVisible);
 		void render(ID cameraId);
-		void test();
 		void calculateTransform();
 	};
 
 	enum TextHAlign {left, center, right};
 	enum TextVAlign {top, middle, bottom};
-	class DrawText : public OrthoDraw
+	class DrawText : public DrawOrtho
 	{
 	private:
 		std::string text;
@@ -191,7 +195,6 @@ namespace sc
 
 		DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId);
 		void render(ID cameraId);
-		void test();
 		void setText(std::string text);
 		std::string getText();
 		float getWidth();

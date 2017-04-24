@@ -24,22 +24,18 @@ namespace sc
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Render each Model
-		for (auto drawIt = state->drawModelPool.begin(); drawIt != state->drawModelPool.end(); drawIt++)
+		for (auto drawIt = state->modelPointers.begin(); drawIt != state->modelPointers.end(); drawIt++)
 		{
-			drawIt->render(renderCameraEntityId);
+			(*drawIt)->render(renderCameraEntityId);
 		}
 
 		//Render 2D, orthographic elements
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glDepthFunc(GL_ALWAYS);
-
-		for (auto drawIt = state->orthoPointers.begin(); drawIt != state->orthoPointers.end(); drawIt++) 
-		{
-			LOG_D << (*drawIt)->entityId.get(); LOG_FLUSH;
-			// (*drawIt)->render(renderCameraEntityId);
-			(*drawIt)->test();
-		}
-
+			for (auto drawIt = state->orthoPointers.begin(); drawIt != state->orthoPointers.end(); drawIt++) 
+			{
+				(*drawIt)->render(renderCameraEntityId);
+			}
 		glDepthFunc(GL_LESS);
 
 		SDL_GL_SwapWindow(window);
