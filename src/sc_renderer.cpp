@@ -24,40 +24,18 @@ namespace sc
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Render each Model
-		for (auto drawIt = state->drawModelPool.begin(); drawIt != state->drawModelPool.end(); drawIt++)
+		for (auto drawIt = state->modelPointers.begin(); drawIt != state->modelPointers.end(); drawIt++)
 		{
-			drawIt->render(renderCameraEntityId);
+			(*drawIt)->render(renderCameraEntityId);
 		}
 
 		//Render 2D, orthographic elements
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glDepthFunc(GL_ALWAYS);
-
-		for (auto drawIt = state->orthoPointers.begin(); drawIt != state->orthoPointers.end(); drawIt++) 
-		{
-			//This happens because in this one case virtual functions don't work. Gave up on finding the
-			//reason why.
-			LOG_D << (*drawIt)->entityId.get(); LOG_FLUSH;
-			(*drawIt)->render(renderCameraEntityId);
-
-			/*
-			if ((*drawIt)->isType(ID("DRAWRECTANGLE")))
+			for (auto drawIt = state->orthoPointers.begin(); drawIt != state->orthoPointers.end(); drawIt++) 
 			{
-				DrawRectangle* dr = static_cast<DrawRectangle*>(*drawIt);
-				dr->render(renderCameraEntityId);
+				(*drawIt)->render(renderCameraEntityId);
 			}
-			else if ((*drawIt)->isType(ID("DRAWSPRITE")))
-			{
-				DrawSprite* ds = static_cast<DrawSprite*>(*drawIt);
-				ds->render(renderCameraEntityId);
-			}
-			else if ((*drawIt)->isType(ID("DRAWTEXT")))
-			{
-				DrawText* dt = static_cast<DrawText*>(*drawIt);
-				dt->render(renderCameraEntityId);
-			}*/
-		}
-
 		glDepthFunc(GL_LESS);
 
 		SDL_GL_SwapWindow(window);

@@ -223,10 +223,9 @@ namespace sc
 				stack.push_back(t);
 				return stack.back();
 			}
-			else
-			{
-				LOG_E << "Cannot currently load asset to base, load to world if needed";
-			}
+
+			LOG_E << "Cannot currently load asset to base, load to world if needed";
+			return NULL;
 		}
 
 		T* pushWorld(T* t)
@@ -256,7 +255,7 @@ namespace sc
 			return stack.back();
 		}
 
-		T* clearBase()
+		void clearBase()
 		{
 			while (!stack.empty())
 			{
@@ -265,9 +264,9 @@ namespace sc
 			}
 		}
 
-		T* clearWorld()
+		void clearWorld()
 		{
-			while (!stack.size() > baseAssetCount)
+			while (stack.size() > baseAssetCount)
 			{
 				delete stack.back(); 
 				stack.pop_back();
@@ -285,6 +284,8 @@ namespace sc
 					return *ai;
 				}
 			}
+
+			return NULL;
 		}
 
 		typename std::vector<T>::iterator begin()
@@ -301,7 +302,7 @@ namespace sc
 
 	class Assets
 	{
-	private:
+	public:
 		AssetStack<Mesh> meshStack;
 		AssetStack<Texture> textureStack;
 		AssetStack<Sprite> spriteStack;
@@ -310,7 +311,6 @@ namespace sc
 		AssetStack<Material> materialStack;
 		AssetStack<Model> modelStack;
 
-	public:
 		FT_Library fontLibrary;
 
 		Assets();

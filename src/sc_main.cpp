@@ -137,6 +137,8 @@ bool initiate()
 		return false;
 	}
 
+	sc::assets.loadBaseAssets();
+
 	return true;
 }
 
@@ -168,7 +170,7 @@ int main(int argc, char **argv)
 			startTime = SDL_GetTicks();
 
 			hasQuit = game.update();
-			renderer.render(game.currentState);
+			renderer.render(game.state);
 
 			delay = startTime + MS_PER_FRAME - SDL_GetTicks();
 			if (delay >= 0)

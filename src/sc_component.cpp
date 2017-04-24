@@ -169,7 +169,7 @@ namespace sc
 	{
 		if (state != NULL)
 		{
-			Transform* transform = state->transformPool.get(entityId);
+			Transform* transform = state->getComponent<Transform>(entityId);
 
 			if (transform != NULL)
 			{
@@ -231,7 +231,7 @@ namespace sc
 	{
 		addType(ID("DRAWMODEL"));
 
-		model = assets.getModel("MO_ERR");
+		model = assets.modelStack.get("MO_ERROR");
 		this->isVisible = false;
 	}
 
@@ -239,7 +239,7 @@ namespace sc
 	{
 		addType(ID("DRAWMODEL"));
 
-		model = assets.getModel(modelId);
+		model = assets.modelStack.get(modelId);
 		this->isVisible = isVisible;
 	}
 
@@ -292,8 +292,9 @@ namespace sc
 			}
 
 			//Bind transform to shader
-			Camera* cam = state->cameraPool.get(cameraId);
-			glm::mat4 pvw = cam->getProjectionMatrix() * cam->getViewMatrix() * state->transformPool.get(entityId)->getWorldMatrix();
+			Camera* cam = state->getComponent<Camera>(cameraId);
+
+			glm::mat4 pvw = cam->getProjectionMatrix() * cam->getViewMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
 			glUniformMatrix4fv(glGetUniformLocation(model->material->shader->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
 
 			glBindVertexArray(model->mesh->VAOid);
@@ -302,65 +303,47 @@ namespace sc
 		}
 	}
 
-	/*
-		OrthoDraw
-					*/
-	OrthoDraw::OrthoDraw() : Component()
+	void DrawModel::onStateInsert()
 	{
-		addType(ID("ORTHODRAW"));
+		state->modelPointers.push_back(this);
+	}
+
+	void DrawModel::onStateRemove()
+	{
+		for (auto ni = state->modelPointers.begin(); ni != state->modelPointers.end(); ni++)
+		{
+			if ((*ni)->entityId.is(entityId) && (*ni)->sameTypes((Component*) this))
+			{
+				state->modelPointers.erase(ni);
+			}
+		}
+	}
+
+
+	/*
+		DrawOrtho
+					*/
+	DrawOrtho::DrawOrtho() : Component()
+	{
+		addType(ID("DrawOrtho"));
 		layer = 0;
 	}
 
-	void OrthoDraw::render(ID cameraId) {}
+	void DrawOrtho::render(ID cameraId) {}
 
-	void OrthoDraw::setLayer(int i)
+	void DrawOrtho::setLayer(int layer)
 	{
-		// for (size_t i = 0; i < state->orthoPointers.size(); i++)
-		// {
-		// 	if ((*state->orthoPointers[i]).entityId.is(entityId) && (*state->orthoPointers[i]).sameTypes((Component*) this))
-		// 	{
-		// 		state->orthoPointers.erase(state->orthoPointers.begin() + i);
-		// 	}
-		// }
-
-		// bool inserted = false;
-
-		// for (size_t i = 0; i < state->orthoPointers.size(); i++)
-		// {
-		// 	if (layer < (*state->orthoPointers[i]).layer)
-		// 	{
-		// 		state->orthoPointers.insert(state->orthoPointers.begin() + i, this);
-		// 		inserted = true;
-		// 	}
-		// }
-
-		// if (!inserted)
-		// {
-		// 	state->orthoPointers.push_back(this);
-		// }
+		this->layer = layer;
+		std::sort(state->orthoPointers.begin(), state->orthoPointers.end(), DrawOrtho::compare);
 	}
 
-	void OrthoDraw::onStateInsert()
+	void DrawOrtho::onStateInsert()
 	{
-		// bool inserted = false;
-
-		// for (size_t i = 0; i < state->orthoPointers.size(); i++)
-		// {
-		// 	if (layer < (*state->orthoPointers[i]).layer)
-		// 	{
-		// 		state->orthoPointers.insert(state->orthoPointers.begin() + i, this);
-		// 		inserted = true;
-		// 	}
-		// }
-
-		// if (!inserted)
-		// {
-		// 	state->orthoPointers.push_back(this);
-		// }
 		state->orthoPointers.push_back(this);
+		std::sort(state->orthoPointers.begin(), state->orthoPointers.end(), DrawOrtho::compare);
 	}
 
-	void OrthoDraw::onStateRemove()
+	void DrawOrtho::onStateRemove()
 	{
 		for (auto oi = state->orthoPointers.begin(); oi != state->orthoPointers.end(); oi++)
 		{
@@ -371,11 +354,16 @@ namespace sc
 		}
 	}
 
+	bool DrawOrtho::compare(DrawOrtho* l, DrawOrtho* r)
+	{
+		return (l->layer < r->layer);
+	}
+
 
 	/*
 		DrawRectangle
 						*/
-	DrawRectangle::DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color, bool isVisible) : OrthoDraw()
+	DrawRectangle::DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color, bool isVisible) : DrawOrtho()
 	{
 		addType(ID("DRAWRECTANGLE"));
 
@@ -392,7 +380,7 @@ namespace sc
 	{
 		if (state != NULL)
 		{
-			Transform* transform = state->transformPool.get(entityId);
+			Transform* transform = state->getComponent<Transform>(entityId);
 
 			if (transform != NULL)
 			{
@@ -411,15 +399,14 @@ namespace sc
 		}
 	}
 
-	/*
 	void DrawRectangle::render(ID cameraId)
 	{
 		if (state != NULL)
 		{
 			if (isVisible)
 			{
-				Mesh* mesh = assets.getMesh(ID("ME_QUAD"));
-				Shader* shad = assets.getShader(ID("SH_COLOR"));
+				Mesh* mesh = assets.meshStack.get(ID("ME_QUAD"));
+				Shader* shad = assets.shaderStack.get(ID("SH_COLOR"));
 				glUseProgram(shad->GLid);
 
 				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"flatColor"), 
@@ -429,7 +416,7 @@ namespace sc
 					color[3]);
 
 				//Bind transform to shader
-				glm::mat4 pvw = state->cameraPool.get(cameraId)->getOrthoMatrix() * state->transformPool.get(entityId)->getWorldMatrix();
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);
@@ -442,13 +429,12 @@ namespace sc
 			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawRectangle";
 		}
 	}
-	*/
 
 
 	/*
 		DrawSprite
 					*/
-	DrawSprite::DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId, bool isVisible) : OrthoDraw()
+	DrawSprite::DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId, bool isVisible) : DrawOrtho()
 	{
 		addType(ID("DRAWSPRITE"));
 
@@ -458,7 +444,7 @@ namespace sc
 		this->scaleY = scaleY;
 		this->pivotX = pivotX;
 		this->pivotY = pivotY;
-		this->sprite = assets.getSprite(spriteId);
+		this->sprite = assets.spriteStack.get(spriteId);
 		this->isVisible = isVisible;
 	}
 
@@ -466,7 +452,7 @@ namespace sc
 	{
 		if (state != NULL)
 		{
-			Transform* transform = state->transformPool.get(entityId);
+			Transform* transform = state->getComponent<Transform>(entityId);
 
 			if (transform != NULL)
 			{
@@ -485,15 +471,14 @@ namespace sc
 		}
 	}
 
-	/*
 	void DrawSprite::render(ID cameraId)
 	{
 		if (state != NULL)
 		{
 			if (isVisible)
 			{
-				Mesh* mesh = assets.getMesh(ID("ME_QUAD"));
-				Shader* shad = assets.getShader(ID("SH_SPRITE"));
+				Mesh* mesh = assets.meshStack.get(ID("ME_QUAD"));
+				Shader* shad = assets.shaderStack.get(ID("SH_SPRITE"));
 				glUseProgram(shad->GLid);
 
 				glUniform1f(glGetUniformLocation(shad->GLid, (const GLchar*)"texCoordScaleX"), sprite->texCoordX);
@@ -504,7 +489,7 @@ namespace sc
 				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"sprite"), 0);
 
 				//Bind transform to shader
-				glm::mat4 pvw = state->cameraPool.get(cameraId)->getOrthoMatrix() * state->transformPool.get(entityId)->getWorldMatrix();
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);
@@ -517,13 +502,12 @@ namespace sc
 			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawSprite";
 		}
 	}
-	*/
 
 
 	/*
 		DrawText
 				*/
-	DrawText::DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId) : OrthoDraw()
+	DrawText::DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId) : DrawOrtho()
 	{
 		addType(ID("DRAWTEXT"));
 
@@ -531,7 +515,7 @@ namespace sc
 		this->y = y;
 		this->text = text;
 		this->color = color;
-		this->font = assets.getFont(fontId);
+		this->font = assets.fontStack.get(fontId);
 
 		isVisible = true;
 		hAlignment = TextHAlign::left;
@@ -682,14 +666,13 @@ namespace sc
 		return 0.0f;
 	}
 
-	/*
 	void DrawText::render(ID cameraId)
 	{
 		if (state != NULL)
 		{
 			if (isVisible)
 			{
-				Shader* shad = assets.getShader(ID("SH_FONT"));
+				Shader* shad = assets.shaderStack.get(ID("SH_FONT"));
 				glUseProgram(shad->GLid);
 
 				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"fontColor"), 
@@ -702,7 +685,7 @@ namespace sc
 				glBindTexture(GL_TEXTURE_2D, font->textureGLid);
 				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"fontTexture"), 0);
 
-				glm::mat4 pvw = state->cameraPool.get(cameraId)->getOrthoMatrix();
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
 
 				int currentLine = 0;
@@ -757,8 +740,7 @@ namespace sc
 		}
 		else
 		{
-			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawSprite";
+			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawText";
 		}
 	}
-	*/
 }

@@ -113,10 +113,10 @@ namespace sc
 
 		glBindVertexArray(VAOid);
 			glBindBuffer(GL_ARRAY_BUFFER, VBOid);
-			glBufferData(GL_ARRAY_BUFFER, currentVertices->size() * sizeof(Vertex), &((*currentVertices)[0]), GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, currentVertices.size() * sizeof(Vertex), &(currentVertices[0]), GL_STATIC_DRAW);
 
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOid);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, currentIndices->size() * sizeof(GLuint), &((*currentIndices)[0]), GL_STATIC_DRAW);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, currentIndices.size() * sizeof(GLuint), &(currentIndices[0]), GL_STATIC_DRAW);
 
 			//Position
 			glEnableVertexAttribArray(0);
@@ -131,7 +131,7 @@ namespace sc
 			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(6 * sizeof(GLfloat)));
 		glBindVertexArray(0);
 
-		indexCount = currentIndices->size();
+		indexCount = currentIndices.size();
 
 		GLenum error = glGetError();
 
@@ -273,8 +273,6 @@ namespace sc
 
 			if (ilSuccess == IL_TRUE)
 			{
-				this->removeFromGPU();
-
 				width = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
 				height = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
 
@@ -411,8 +409,6 @@ namespace sc
 
 			if (ilSuccess == IL_TRUE)
 			{
-				this->removeFromGPU();
-
 				width = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
 				height = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
 
@@ -481,7 +477,7 @@ namespace sc
 	GLuint Font::VAOid = 0;
 	GLuint Font::VBOid = 0;
 
-	Font::Font(ID id)
+	Font::Font(ID id, std::string filepath, int height)
 	{
 		this->id = id;
 		textureGLid = 0;
@@ -758,11 +754,11 @@ namespace sc
 		{
 			for (size_t i = 0; i < tma->size(); i++)
 			{
-				textureMaterialArguments.push_back(assets.getTexture((*tma)[i]));
+				textureMaterialArguments.push_back(assets.textureStack.get((*tma)[i]));
 			}
 		}
 
-		shader = assets.getShader(shaderId);
+		shader = assets.shaderStack.get(shaderId);
 	}
 
 	Material::~Material() {}
@@ -775,8 +771,8 @@ namespace sc
 	{
 		this->id = id;
 
-		mesh = assets.getMesh(meshId);
-		material = assets.getMaterial(materialId);
+		mesh = assets.meshStack.get(meshId);
+		material = assets.materialStack.get(materialId);
 
 		relativePosition = glm::vec3(0.0f, 0.0f, 0.0f);
 		relativeRotation = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -809,9 +805,9 @@ namespace sc
 	{
 		for (size_t i = 0; i < subModels.size(); i++)
 		{
-			if (subModels[i].id.is(id))
+			if (subModels[i]->id.is(id))
 			{
-				return &subModels[i];
+				return subModels[i];
 			}
 		}
 
@@ -913,7 +909,7 @@ namespace sc
 		FT_Done_FreeType(fontLibrary);
 	}
 
-	void clearBaseAssets()
+	void Assets::clearBaseAssets()
 	{
 		if (areWorldAssetsLoaded())
 		{
@@ -931,7 +927,7 @@ namespace sc
 		Font::clearFontQuadFromGPU();
 	}
 
-	void clearWorldAssets()
+	void Assets::clearWorldAssets()
 	{
 		meshStack.clearWorld();
 		textureStack.clearWorld();

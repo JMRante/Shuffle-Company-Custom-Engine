@@ -49,13 +49,10 @@ namespace sc
 		pitch = 0.0f;
 	}
 
-	void DebugCamera::update(State* readState, State* writeState)
+	void DebugCamera::update()
 	{
-		Transform* currentTrans = readState->transformPool.get(entityId);
-		Transform* nextTrans = writeState->transformPool.get(entityId);
-		Camera* currentCamera = readState->cameraPool.get(entityId);
-		Camera* nextCamera = writeState->cameraPool.get(entityId);
-		DebugCamera* next = writeState->debugCameraPool.get(entityId);
+		Transform* trans = state->getComponent<Transform>(entityId);
+		Camera* camera = state->getComponent<Camera>(entityId);
 
 		//Rotation
 		float mouseXDelta = (float)input.getMouseXDelta();
@@ -66,39 +63,37 @@ namespace sc
 		yaw = glm::mod(yaw, 360.0f);
 		pitch = glm::clamp(pitch, -89.0f, 89.0f);
 		
-		next->yaw = yaw;
-		next->pitch = pitch;
-		nextTrans->rotation = glm::vec3(glm::radians(pitch), glm::radians(yaw), 0.0f);
+		trans->rotation = glm::vec3(glm::radians(pitch), glm::radians(yaw), 0.0f);
 
 		//Translation
-		glm::vec3 currentPosition = currentTrans->position;
+		glm::vec3 currentPosition = trans->position;
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		if (input.keyHeld(SDLK_w))
 		{
-			translate += currentCamera->getForward();
+			translate += camera->getForward();
 		}
 
 		if (input.keyHeld(SDLK_d))
 		{
-			translate += currentCamera->getSide();
+			translate += camera->getSide();
 		}
 
 		if (input.keyHeld(SDLK_s))
 		{
-			translate -= currentCamera->getForward();
+			translate -= camera->getForward();
 		}
 
 		if (input.keyHeld(SDLK_a))
 		{
-			translate -= currentCamera->getSide();
+			translate -= camera->getSide();
 		}
 
 		if (translate != glm::vec3(0.0f, 0.0f, 0.0f))
 		{
 			translate = moveSpeed * glm::normalize(translate);
-			nextTrans->position = currentPosition + translate;
-			nextCamera->calculateViewMatrix();	
+			trans->position = currentPosition + translate;
+			camera->calculateViewMatrix();	
 		}
 	}
 
@@ -112,13 +107,12 @@ namespace sc
 		this->mouseMoveSpeed = mouseMoveSpeed;
 	}
 
-	void EditorCamera::update(State* readState, State* writeState)
+	void EditorCamera::update()
 	{
-		Transform* currentTrans = readState->transformPool.get(entityId);
-		Transform* nextTrans = writeState->transformPool.get(entityId);
-		Camera* nextCamera = writeState->cameraPool.get(entityId);
+		Transform* trans = state->getComponent<Transform>(entityId);
+		Camera* camera = state->getComponent<Camera>(entityId);
 
-		glm::vec3 currentPosition = currentTrans->position;
+		glm::vec3 currentPosition = trans->position;
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		//Mouse Control
@@ -158,8 +152,8 @@ namespace sc
 			}
 		}
 
-		nextTrans->position = currentPosition + translate;
-		nextCamera->calculateViewMatrix();
+		trans->position = currentPosition + translate;
+		camera->calculateViewMatrix();
 	}
 
 
@@ -170,22 +164,22 @@ namespace sc
 	{
 		cursorState = CursorState::point;
 
-		pointSprite = assets.getSprite(ID("SP_POINTCUR"));
-		hoverSprite = assets.getSprite(ID("SP_HOVERCUR"));
-		clickSprite = assets.getSprite(ID("SP_CLICKCUR"));
-		dragSprite = assets.getSprite(ID("SP_DRAGCUR"));
+		pointSprite = assets.spriteStack.get(ID("SP_POINTCUR"));
+		hoverSprite = assets.spriteStack.get(ID("SP_HOVERCUR"));
+		clickSprite = assets.spriteStack.get(ID("SP_CLICKCUR"));
+		dragSprite = assets.spriteStack.get(ID("SP_DRAGCUR"));
 	}
 
-	void Cursor::update(State* readState, State* writeState)
+	void Cursor::update()
 	{
-		DrawSprite* nextSprite = writeState->drawSpritePool.get(entityId);
+		DrawSprite* sprite = state->getComponent<DrawSprite>(entityId);
 
 		int mouseX = input.getMouseX();
 		int mouseY = input.getMouseY();
 
-		nextSprite->x = mouseX;
-		nextSprite->y = mouseY;
-		nextSprite->calculateTransform();
+		sprite->x = mouseX;
+		sprite->y = mouseY;
+		sprite->calculateTransform();
 
 		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE))
 		{
@@ -199,16 +193,16 @@ namespace sc
 		switch (cursorState)
 		{
 		case CursorState::point:
-			nextSprite->sprite = pointSprite;
+			sprite->sprite = pointSprite;
 			break;
 		case CursorState::hover:
-			nextSprite->sprite = hoverSprite;
+			sprite->sprite = hoverSprite;
 			break;	
 		case CursorState::click:
-			nextSprite->sprite = clickSprite;
+			sprite->sprite = clickSprite;
 			break;
 		case CursorState::drag:
-			nextSprite->sprite = dragSprite;
+			sprite->sprite = dragSprite;
 			break;
 		}
 	}
@@ -223,7 +217,7 @@ namespace sc
 		framerateAverage = 0;
 	}
 
-	void FramerateCounter::update(State* readState, State* writeState)
+	void FramerateCounter::update()
 	{
 		//Calculate
 		float currentFramerate;
@@ -269,7 +263,7 @@ namespace sc
 		framerateAverage = sum / 60.0f;
 
 		//Update draw
-		DrawText* dt = writeState->drawTextPool.get(entityId);
+		DrawText* dt = state->getComponent<DrawText>(entityId);
 
 		if (dt == NULL)
 		{

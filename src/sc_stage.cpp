@@ -218,7 +218,7 @@ namespace sc
 			}
 		}
 
-		assets.textureStack.pushWorld(new Texture((ID("TX_STAGE"), SIMPLE_TEXTURE_DIM, SIMPLE_TEXTURE_DIM, dataArray)));
+		assets.textureStack.pushWorld(new Texture(ID("TX_STAGE"), SIMPLE_TEXTURE_DIM, SIMPLE_TEXTURE_DIM, dataArray));
 		ilDeleteImages(MAX_SIMPLE_TEXTURES, texIds);
 
 		std::vector<ID> tempString;
