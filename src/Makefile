@@ -26,7 +26,7 @@ EXE = ShuffleCompany.exe
 
 all: $(EXE)
 
-$(EXE): sc_main.o sc_config.o sc_log.o sc_utility.o sc_game.o sc_input.o sc_renderer.o sc_assets.o sc_state.o sc_component.o sc_nature.o sc_stage.o sc_tokenizer.o sc_prefabs.o
+$(EXE): sc_main.o sc_config.o sc_log.o sc_utility.o sc_game.o sc_component.o sc_input.o sc_renderer.o sc_assets.o sc_state.o sc_nature.o sc_stage.o sc_tokenizer.o sc_prefabs.o
 		$(COMPILER) $^ $(LD_FLAGS) -o $@ $(VERSION)
 
 sc_main.o: sc_main.cpp

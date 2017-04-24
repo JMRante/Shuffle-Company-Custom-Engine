@@ -15,11 +15,32 @@
 
 namespace sc
 {
-	Nature::Nature() : sc::Component() 
+	Nature::Nature() : Component() 
 	{
+		addType(ID("NATURE"));
 		isActive = true;
 	}
 
+	void Nature::onStateInsert()
+	{
+		state->naturePointers.push_back(this);
+	}
+
+	void Nature::onStateRemove()
+	{
+		for (auto ni = state->naturePointers.begin(); ni != state->naturePointers.end(); ni++)
+		{
+			if ((*ni)->entityId.is(entityId) && (*ni)->sameTypes((Component*) this))
+			{
+				state->naturePointers.erase(ni);
+			}
+		}
+	}
+
+
+	/*
+		DebugCamera
+					*/
 	DebugCamera::DebugCamera(float moveSpeed, float mouseSpeed) : Nature()
 	{
 		this->moveSpeed = moveSpeed;
@@ -30,11 +51,8 @@ namespace sc
 
 	void DebugCamera::update()
 	{
-		Transform* currentTrans = game.currentState->transformPool.get(entityId);
-		Transform* nextTrans = game.nextState->transformPool.get(entityId);
-		Camera* currentCamera = game.currentState->cameraPool.get(entityId);
-		Camera* nextCamera = game.nextState->cameraPool.get(entityId);
-		DebugCamera* next = game.nextState->debugCameraPool.get(entityId);
+		Transform* trans = state->getComponent<Transform>(entityId);
+		Camera* camera = state->getComponent<Camera>(entityId);
 
 		//Rotation
 		float mouseXDelta = (float)input.getMouseXDelta();
@@ -45,43 +63,154 @@ namespace sc
 		yaw = glm::mod(yaw, 360.0f);
 		pitch = glm::clamp(pitch, -89.0f, 89.0f);
 		
-		next->yaw = yaw;
-		next->pitch = pitch;
-		nextTrans->rotation = glm::vec3(glm::radians(pitch), glm::radians(yaw), 0.0f);
+		trans->rotation = glm::vec3(glm::radians(pitch), glm::radians(yaw), 0.0f);
 
 		//Translation
-		glm::vec3 currentPosition = currentTrans->position;
+		glm::vec3 currentPosition = trans->position;
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
-
-		if (input.keyHeld(SDLK_d))
-		{
-			translate += currentCamera->getSide();
-		}
 
 		if (input.keyHeld(SDLK_w))
 		{
-			translate += currentCamera->getForward();
+			translate += camera->getForward();
 		}
 
-		if (input.keyHeld(SDLK_a))
+		if (input.keyHeld(SDLK_d))
 		{
-			translate -= currentCamera->getSide();
+			translate += camera->getSide();
 		}
 
 		if (input.keyHeld(SDLK_s))
 		{
-			translate -= currentCamera->getForward();
+			translate -= camera->getForward();
+		}
+
+		if (input.keyHeld(SDLK_a))
+		{
+			translate -= camera->getSide();
 		}
 
 		if (translate != glm::vec3(0.0f, 0.0f, 0.0f))
 		{
-			translate = moveSpeed * glm::normalize(translate);			
+			translate = moveSpeed * glm::normalize(translate);
+			trans->position = currentPosition + translate;
+			camera->calculateViewMatrix();	
 		}
-
-		nextTrans->position = currentPosition + translate;
-		nextCamera->calculateViewMatrix();
 	}
 
+
+	/*
+		EditorCamera
+						*/
+	EditorCamera::EditorCamera(float keyMoveSpeed, float mouseMoveSpeed)
+	{
+		this->keyMoveSpeed = keyMoveSpeed;
+		this->mouseMoveSpeed = mouseMoveSpeed;
+	}
+
+	void EditorCamera::update()
+	{
+		Transform* trans = state->getComponent<Transform>(entityId);
+		Camera* camera = state->getComponent<Camera>(entityId);
+
+		glm::vec3 currentPosition = trans->position;
+		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
+
+		//Mouse Control
+		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE))
+		{
+			float mouseXDelta = (float)input.getMouseXDelta();
+			float mouseYDelta = (float)input.getMouseYDelta();
+
+			translate = mouseMoveSpeed * glm::vec3(mouseXDelta, 0.0f, mouseYDelta);
+		}
+		else
+		{
+			//Keyboard Control
+			if (input.keyHeld(SDLK_UP))
+			{
+				translate -= glm::vec3(0.0f, 0.0f, 1.0f);
+			}
+
+			if (input.keyHeld(SDLK_RIGHT))
+			{
+				translate += glm::vec3(1.0f, 0.0f, 0.0f);
+			}
+
+			if (input.keyHeld(SDLK_DOWN))
+			{
+				translate += glm::vec3(0.0f, 0.0f, 1.0f);
+			}
+
+			if (input.keyHeld(SDLK_LEFT))
+			{
+				translate -= glm::vec3(1.0f, 0.0f, 0.0f);
+			}
+
+			if (translate != glm::vec3(0.0f, 0.0f, 0.0f))
+			{
+				translate = keyMoveSpeed * glm::normalize(translate);
+			}
+		}
+
+		trans->position = currentPosition + translate;
+		camera->calculateViewMatrix();
+	}
+
+
+	/*
+		Cursor
+				*/
+	Cursor::Cursor()
+	{
+		cursorState = CursorState::point;
+
+		pointSprite = assets.spriteStack.get(ID("SP_POINTCUR"));
+		hoverSprite = assets.spriteStack.get(ID("SP_HOVERCUR"));
+		clickSprite = assets.spriteStack.get(ID("SP_CLICKCUR"));
+		dragSprite = assets.spriteStack.get(ID("SP_DRAGCUR"));
+	}
+
+	void Cursor::update()
+	{
+		DrawSprite* sprite = state->getComponent<DrawSprite>(entityId);
+
+		int mouseX = input.getMouseX();
+		int mouseY = input.getMouseY();
+
+		sprite->x = mouseX;
+		sprite->y = mouseY;
+		sprite->calculateTransform();
+
+		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE))
+		{
+			cursorState = CursorState::drag;
+		}
+		else
+		{
+			cursorState = CursorState::point;
+		}
+
+		switch (cursorState)
+		{
+		case CursorState::point:
+			sprite->sprite = pointSprite;
+			break;
+		case CursorState::hover:
+			sprite->sprite = hoverSprite;
+			break;	
+		case CursorState::click:
+			sprite->sprite = clickSprite;
+			break;
+		case CursorState::drag:
+			sprite->sprite = dragSprite;
+			break;
+		}
+	}
+
+
+	/*
+		FramerateCounter
+						*/
 	FramerateCounter::FramerateCounter()
 	{
 		framerateHistoryCount = -1;
@@ -134,7 +263,7 @@ namespace sc
 		framerateAverage = sum / 60.0f;
 
 		//Update draw
-		DrawText* dt = game.nextState->drawTextPool.get(entityId);
+		DrawText* dt = state->getComponent<DrawText>(entityId);
 
 		if (dt == NULL)
 		{
@@ -142,7 +271,7 @@ namespace sc
 		}
 		else
 		{
-			dt->text = fToS(framerateAverage);
+			dt->setText(fToS(framerateAverage));
 		}
 	}
 }

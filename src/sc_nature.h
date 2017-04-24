@@ -36,9 +36,12 @@ namespace sc
 		bool isActive;
 
 		Nature();
-		// virtual void create() = 0;
+		//virtual void create() = 0;
 		virtual void update() = 0;
-		// virtual void destory() = 0;
+		//virtual void destory() = 0;
+		
+		void onStateInsert();
+		void onStateRemove();
 	};
 
 	class DebugCamera : public Nature
@@ -51,6 +54,33 @@ namespace sc
 
 	public:
 		DebugCamera(float moveSpeed, float mouseSpeed);
+		void update();
+	};
+
+	class EditorCamera : public Nature
+	{
+	private:
+		float keyMoveSpeed;
+		float mouseMoveSpeed;
+
+	public:
+		EditorCamera(float keyMoveSpeed, float mouseMoveSpeed);
+		void update();
+	};
+
+	enum CursorState {point, hover, click, drag};
+	class Cursor : public Nature
+	{
+	private:
+		Sprite* pointSprite;
+		Sprite* hoverSprite;
+		Sprite* clickSprite;
+		Sprite* dragSprite;
+
+	public:
+		CursorState cursorState;
+
+		Cursor();
 		void update();
 	};
 

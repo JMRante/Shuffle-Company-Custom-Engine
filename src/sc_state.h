@@ -15,6 +15,8 @@
 #include <typeinfo>
 #include <algorithm>
 #include <vector>
+#include <map>
+#include <utility>
 
 #include "sc_log.h"
 #include "sc_component.h"
@@ -24,188 +26,88 @@
 
 namespace sc
 {
-	template <class T>
-	class ComponentPool
-	{
-	private:
-		std::vector<T> pool;
-
-	public:
-		T* add(ID entityId, T component)
-		{
-			if (get(entityId) != NULL)
-			{
-				LOG_E << "Cannot add " << typeid(T).name() << ", entity " << entityId.get() << " already has one";
-				return NULL;
-			}
-
-			component.entityId = entityId;
-			pool.push_back(component);
-
-			return &pool[pool.size() - 1];
-		}
-
-		bool remove(ID entityId)
-		{
-			for (auto ci = pool.begin(); ci != pool.end(); ci++)
-			{
-				if (ci->entityId.is(entityId))
-				{
-					pool.erase(ci);
-					return true;
-				}
-			}
-
-			LOG_E << "Cannot remove " << typeid(T).name() << ", entity " << entityId.get() << " doesn't have one";
-			return false;
-		}
-
-		T* get(ID entityId)
-		{
-			for (auto ci = pool.begin(); ci != pool.end(); ci++)
-			{
-				if (ci->entityId.is(entityId))
-				{
-					return &(*ci);
-				}
-			}
-
-			return NULL;
-		}
-
-		typename std::vector<T>::iterator begin()
-		{
-			return pool.begin();
-		}
-
-		typename std::vector<T>::iterator end()
-		{
-			return pool.end();
-		}
-
-		void copy(ComponentPool<T> otherPool)
-		{
-			pool = otherPool.pool;
-		}
-	};
-
-	class NaturePoolBase
-	{
-	private:
-		static std::vector<Nature*> pointers;
-
-	public:
-		static std::vector<Nature*>::iterator begin()
-		{
-			return pointers.begin();
-		}
-
-		static std::vector<Nature*>::iterator end()
-		{
-			return pointers.end();
-		}		
-	};
-
-	template <class T>
-	class NaturePool : public NaturePoolBase
-	{
-	private:
-
-		std::vector<T> pool;
-
-	public:
-		T* add(ID entityId, T nature)
-		{
-			if (get(entityId) != NULL)
-			{
-				LOG_E << "Cannot add " << typeid(T).name() << ", entity " << entityId.get() << " already has one";
-				return NULL;
-			}
-
-			nature.entityId = entityId;
-			pool.push_back(nature);
-
-			T* naturePointer = &pool[pool.size() - 1];
-			pointers.push_back(naturePointer);
-
-			return naturePointer;
-		}
-
-		bool remove(ID entityId)
-		{
-			int poolDepth = 0;
-
-			for (auto ni = pool.begin(); ni != pool.end(); ni++)
-			{
-				if (ni->entityId.is(entityId))
-				{
-					pool.erase(ni);
-					pointers.erase(pointers.begin() + poolDepth);
-					return true;
-				}
-
-				poolDepth++;
-			}
-
-			LOG_E << "Cannot remove " << typeid(T).name() << ", entity " << entityId.get() << " doesn't have one";
-			return false;
-		}
-
-		T* get(ID entityId)
-		{
-			for (auto ni = pool.begin(); ni != pool.end(); ni++)
-			{
-				if (ni->entityId.is(entityId))
-				{
-					return &(*ni);
-				}
-			}
-
-			return NULL;
-		}
-
-		typename std::vector<T>::iterator begin()
-		{
-			return pool.begin();
-		}
-
-		typename std::vector<T>::iterator end()
-		{
-			return pool.end();
-		}
-
-		void copy(NaturePool<T> otherPool)
-		{
-			pool = otherPool.pool;
-		}
-	};
-
 	class State
 	{
 	private:
-		std::vector<ID> entities;
+		std::map<ID, std::vector<Component*>> componentMap;
 
 	public:
-		//Components
-		ComponentPool<Transform> transformPool;
-		ComponentPool<Camera> cameraPool;
-		ComponentPool<DrawModel> drawModelPool;
-		ComponentPool<DrawRectangle> drawRectanglePool;
-		ComponentPool<DrawSprite> drawSpritePool;
-		ComponentPool<DrawText> drawTextPool;
-
-		//Natures
-		NaturePool<DebugCamera> debugCameraPool;
-		NaturePool<FramerateCounter> framerateCounterPool;
-
-		//Singletons
 		Stage stage;
 
+		std::vector<Nature*> naturePointers;
+		std::vector<DrawModel*> modelPointers;
+		std::vector<DrawOrtho*> orthoPointers;
+
 		State();
-		void copy(State* otherEM);
+
 		bool addEntity(ID id);
 		bool entityExists(ID id);
 		bool removeEntity(ID id);
+		void removeAllEntities(ID id);
+
+		template <class T>
+		T* addComponent(ID entityId, T* component)
+		{
+			if (getComponent<T>(entityId) != NULL)
+			{
+				LOG_E << "Cannot add " << typeid(T).name() << ", entity " << entityId.get() << " already has one";
+				return NULL;
+			}
+
+			component->entityId = entityId;
+			component->state = this;
+
+			component->onStateInsert();
+			
+			componentMap[entityId].push_back((Component*) component);
+
+			return component;
+		}
+
+		template <class T>
+		T* getComponent(ID entityId)
+		{
+			std::vector<Component*>* coms = &componentMap[entityId];
+
+			if (coms != NULL)
+			{
+				for (auto ci = coms->begin(); ci != coms->end(); ci++)
+				{
+					if (typeid(T) == typeid(**ci))
+					{
+						return static_cast<T*>(*ci);
+					}
+				}
+			}
+
+			return NULL;
+		}
+
+		template <class T>
+		bool removeComponent(ID entityId)
+		{
+			std::vector<Component*>* coms = &componentMap[entityId];
+
+			if (coms != NULL)
+			{
+				for (auto ci = coms->begin(); ci != coms->end(); ci++)
+				{
+					if (typeid(T) == typeid(**ci))
+					{
+						(*ci)->onStateRemove();
+						delete *ci;
+						coms->erase(ci);
+
+						return true;
+					}
+				}	
+			}
+
+			LOG_E << "Cannot remove " << typeid(T).name() << ", entity " << entityId.get() << " doesn't have one";
+			return false;
+		}
+
+		void removeAllComponents(ID entityId);
 	};
 }
 

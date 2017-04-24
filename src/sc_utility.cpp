@@ -104,7 +104,7 @@ namespace sc
         }
     }
 
-    bool ID::is(const char* id)
+    bool ID::is(const char* id) const
     {
         int i = 0;
         bool end = false;
@@ -127,7 +127,7 @@ namespace sc
         return true;
     }
 
-    bool ID::is(ID id)
+    bool ID::is(ID id) const
     {
         int i = 0;
         bool end = false;
@@ -150,8 +150,52 @@ namespace sc
         return true;
     }
 
-    char* ID::get()
+    const char* ID::get() const
     {
-        return id;
+        return (const char*)id;
+    }
+
+    char ID::get(int i) const
+    {
+        if (i >= 0 && i < ID_SIZE) 
+        {
+            return (const char)id[i];
+        }
+
+        return (const char)id[i];
+    }
+
+    bool operator<(const ID& l, const ID& r)
+    {
+        for (int i = 0; i < ID_SIZE; i++)
+        {
+            if (l.get(i) == '\0')
+            {
+                if (r.get(i) != '\0')
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            if (r.get(i) == '\0')
+            {
+                return false;
+            }
+
+            if (l.get(i) < r.get(i))
+            {
+                return true;
+            }
+            else if (l.get(i) > r.get(i))
+            {
+                return false;
+            }
+        }
+
+        return false;
     }
 }

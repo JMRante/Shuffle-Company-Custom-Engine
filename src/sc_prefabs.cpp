@@ -13,68 +13,114 @@
 
 namespace sc
 {
-	ID createStage(std::string filepath)
+	PrefabFactory::PrefabFactory(State* targetState)
 	{
-		game.nextState->stage.loadStage(filepath);
-		game.nextState->addEntity(ID("E_STAGE"));
-		game.nextState->transformPool.add(ID("E_STAGE"), Transform());
-		game.nextState->drawModelPool.add(ID("E_STAGE"), DrawModel(ID("MO_STAGE"), true));
-
-		return ID("E_STAGE");
+		this->targetState = targetState;
 	}
 
-	ID createDebugCamera(ID id, glm::vec3 position, glm::vec3 rotation, float near, float far, float moveSpeed, float turnSpeed)
+	ID PrefabFactory::createStage(std::string filepath)
 	{
-		game.nextState->addEntity(id);
+		ID id = ID("E_STAGE");
+		targetState->stage.loadStage(filepath);
+		targetState->addEntity(id);
+		targetState->addComponent<Transform>(id, new Transform());
+		targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_STAGE"), true));
 
-		Transform* tran = game.nextState->transformPool.add(id, Transform());
+		return id;
+	}
+
+	ID PrefabFactory::createDebugCamera(ID id, glm::vec3 position, glm::vec3 rotation, float near, float far, float moveSpeed, float turnSpeed)
+	{
+		targetState->addEntity(id);
+
+		Transform* tran = targetState->addComponent<Transform>(id, new Transform());
 		tran->position = position;
 		tran->rotation = rotation;
 		tran->calculateWorldMatrix();
 
-		Camera* camera = game.nextState->cameraPool.add(id, Camera(near, far));
+		Camera* camera = targetState->addComponent<Camera>(id, new Camera(near, far));
 		camera->calculateViewMatrix();
 
-		game.nextState->debugCameraPool.add(id, DebugCamera(moveSpeed, turnSpeed));
+		targetState->addComponent<DebugCamera>(id, new DebugCamera(moveSpeed, turnSpeed));
 
 		return id;
 	}
 
-	ID createFramerateCounter(ID id, glm::vec2 position, glm::vec4 color, ID fontId)
+	ID PrefabFactory::createEditorCamera(ID id, glm::vec3 position, float pitch, float near, float far, float keyMoveSpeed, float mouseMoveSpeed)
 	{
-		game.nextState->addEntity(id);
-		game.nextState->transformPool.add(id, Transform());
-		game.nextState->drawTextPool.add(id, DrawText(position.x, position.y, "", color, fontId, true));
-		game.nextState->framerateCounterPool.add(id, FramerateCounter());
+		targetState->addEntity(id);
+
+		Transform* tran = targetState->addComponent<Transform>(id,new Transform());
+		tran->position = position;
+		tran->rotation = glm::vec3(glm::radians(pitch), glm::radians(180.0f), 0.0f);
+		tran->calculateWorldMatrix();
+
+		Camera* camera = targetState->addComponent<Camera>(id, new Camera(near, far));
+		camera->calculateViewMatrix();
+
+		targetState->addComponent<EditorCamera>(id, new EditorCamera(keyMoveSpeed, mouseMoveSpeed));
 
 		return id;
 	}
 
-	ID createUIRectangle(ID id, glm::vec2 position, glm::vec2 size, glm::vec2 pivot, glm::vec4 color)
+	ID PrefabFactory::createFramerateCounter(ID id, glm::vec2 position, glm::vec4 color, ID fontId)
 	{
-		game.nextState->addEntity(id);
-		game.nextState->transformPool.add(id, Transform());
-		DrawRectangle* dr = game.nextState->drawRectanglePool.add(id, DrawRectangle(position.x, position.y, size.x, size.y, pivot.x, pivot.y, color, true));
+		targetState->addEntity(id);
+		targetState->addComponent<Transform>(id, new Transform());
+		targetState->addComponent<DrawText>(id, new DrawText(position.x, position.y, "", color, fontId));
+		targetState->addComponent<FramerateCounter>(id, new FramerateCounter());
+
+		return id;
+	}
+
+	ID PrefabFactory::createUIRectangle(ID id, glm::vec2 position, glm::vec2 size, glm::vec2 pivot, glm::vec4 color)
+	{
+		targetState->addEntity(id);
+		targetState->addComponent<Transform>(id, new Transform());
+		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(position.x, position.y, size.x, size.y, pivot.x, pivot.y, color, true));
 		dr->calculateTransform();
 
 		return id;
 	}
 
-	ID createUISprite(ID id, glm::vec2 position, glm::vec2 scale, glm::vec2 pivot, ID spriteId)
+	ID PrefabFactory::createUISprite(ID id, glm::vec2 position, glm::vec2 scale, glm::vec2 pivot, ID spriteId)
 	{
-		game.nextState->addEntity(id);
-		game.nextState->transformPool.add(id, Transform());
-		DrawSprite* ds = game.nextState->drawSpritePool.add(id, DrawSprite(position.x, position.y, scale.x, scale.y, pivot.x, pivot.y, spriteId, true));
+		targetState->addEntity(id);
+		targetState->addComponent<Transform>(id, new Transform());
+		DrawSprite* ds = targetState->addComponent<DrawSprite>(id, new DrawSprite(position.x, position.y, scale.x, scale.y, pivot.x, pivot.y, spriteId, true));
 		ds->calculateTransform();
 
 		return id;
 	}
 
-	ID createUIText(ID id, glm::vec2 position, std::string text, ID fontId, glm::vec4 color)
+	ID PrefabFactory::createUIText(ID id, glm::vec2 position, std::string text, glm::vec4 color, ID fontId, TextHAlign ha, TextVAlign va, TextHAlign just)
 	{
-		game.nextState->addEntity(id);
-		game.nextState->transformPool.add(id, Transform());
-		game.nextState->drawTextPool.add(id, DrawText(position.x, position.y, text, color, fontId, true));
+		targetState->addEntity(id);
+		targetState->addComponent<Transform>(id, new Transform());
+		DrawText* dt = targetState->addComponent<DrawText>(id, new DrawText(position.x, position.y, text, color, fontId));
+		dt->hAlignment = ha;
+		dt->vAlignment = va;
+		dt->justification = just;
+
+		return id;
+	}
+
+	ID PrefabFactory::createCursor()
+	{
+		ID id = ID("E_CURSOR");
+
+		if (!targetState->entityExists(id))
+		{
+			targetState->addEntity(id);
+			targetState->addComponent<Transform>(id, new Transform());
+			DrawSprite* ds = targetState->addComponent<DrawSprite>(id, new DrawSprite(input.getMouseX(), input.getMouseY(), 1.0, 1.0, 0.0f, 32.0f, ID("SP_POINTCUR"), true));
+			ds->calculateTransform();
+			targetState->addComponent<Cursor>(id, new Cursor());			
+		}
+		else
+		{
+			LOG_E << "Cursor already created";
+		}
 
 		return id;
 	}

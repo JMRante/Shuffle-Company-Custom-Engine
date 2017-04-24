@@ -32,15 +32,11 @@ namespace sc
 	class Game
 	{
 	public:
-		State* currentState;
-		State* nextState;
+		State* state;
 
 		void start();
 		bool update();
-		void updateState();
 	};
-
-	extern Game game;
 }
 
 #endif

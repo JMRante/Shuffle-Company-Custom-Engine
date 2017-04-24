@@ -122,7 +122,8 @@ bool initiate()
 
 	//Initiate SDL options
 	SDL_GL_SetSwapInterval(1);
-	SDL_SetRelativeMouseMode(SDL_TRUE);
+	SDL_SetRelativeMouseMode(SDL_FALSE);
+	SDL_ShowCursor(SDL_DISABLE);
 
 	//Initiate DevIL
 	ilInit();
@@ -136,11 +137,15 @@ bool initiate()
 		return false;
 	}
 
+	sc::assets.loadBaseAssets();
+
 	return true;
 }
 
 void closeout()
 {
+	sc::assets.clearWorldAssets();
+	sc::assets.clearBaseAssets();
 	sc::closeLog();
 	SDL_Quit();	
 }
@@ -154,17 +159,18 @@ int main(int argc, char **argv)
 		LOG_D << "Debug mode set to " << sc::config.get("LOG_DEBUG");
 		LOG_D << "Info mode set to " << sc::config.get("LOG_INFO");
 
+		sc::Game game;
 		sc::Renderer renderer(window);
 
-		sc::game.start();
+		game.start();
 		renderer.setCameraEntity(sc::ID("E_CAMERA"));
 
 		while (!hasQuit)
 		{
 			startTime = SDL_GetTicks();
 
-			hasQuit = sc::game.update();
-			renderer.render();
+			hasQuit = game.update();
+			renderer.render(game.state);
 
 			delay = startTime + MS_PER_FRAME - SDL_GetTicks();
 			if (delay >= 0)
