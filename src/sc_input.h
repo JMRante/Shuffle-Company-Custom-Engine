@@ -38,6 +38,7 @@ namespace sc
 		int mouseYDelta;
 		int mouseXLocal;
 		int mouseYLocal;
+		int mouseWheelDelta;
 		bool firstMouseInput;
 
 		bool eventExists(std::vector<SDL_EventType>* eventInput, SDL_EventType event);
@@ -59,6 +60,7 @@ namespace sc
 		int getMouseYDelta();
 		int getMouseX();
 		int getMouseY();
+		int getMouseWheelDelta();
 		
 		bool quitEvent();
 	};

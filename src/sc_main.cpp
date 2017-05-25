@@ -118,6 +118,7 @@ bool initiate()
 	glEnable(GL_CULL_FACE);
 
 	glEnable(GL_BLEND); 
+	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//Initiate SDL options
@@ -161,6 +162,7 @@ int main(int argc, char **argv)
 
 		sc::Game game;
 		sc::Renderer renderer(window);
+		
 
 		game.start();
 		renderer.setCameraEntity(sc::ID("E_CAMERA"));

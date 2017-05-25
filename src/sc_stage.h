@@ -26,6 +26,7 @@
 #include "sc_assets.h"
 #include "sc_tokenizer.h"
 #include "sc_utility.h"
+#include "sc_component.h"
 
 #define STAGE_WIDTH 200
 #define STAGE_DEPTH 200
@@ -52,14 +53,19 @@ namespace sc
 		Brush(unsigned char texNum);
 	};
 
-	class Stage
+	class Stage : public Component
 	{
 	private:
 		std::vector<std::string> textures;
 		std::vector<Brush> brushes;
 		unsigned char stage[STAGE_WIDTH][STAGE_DEPTH][STAGE_HEIGHT] = {};
+		int width;
+		int depth;
+		int height;
 
 	public:
+		Stage();
+
 		bool loadStage(std::string filepath);
 		bool readStageFile(std::string filepath);
 		bool loadStageTextures();

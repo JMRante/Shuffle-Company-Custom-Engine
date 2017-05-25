@@ -44,6 +44,8 @@ namespace sc
 		ID createUISprite(ID id, glm::vec2 position, glm::vec2 scale, glm::vec2 pivot, ID spriteId);
 		ID createUIText(ID id, glm::vec2 position, std::string text, glm::vec4 color, ID fontId, TextHAlign ha, TextVAlign va, TextHAlign just);
 
+		ID createButton(ID id, glm::vec2 position, glm::vec2 size, glm::vec2 pivot, glm::vec4 staticColor, glm::vec4 hoverColor, glm::vec4 clickColor, std::string text, ID event);
+
 		ID createCursor();
 	};
 }

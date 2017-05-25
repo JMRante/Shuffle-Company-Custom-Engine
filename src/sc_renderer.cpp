@@ -23,8 +23,14 @@ namespace sc
 		//Render 3D, perspective elements
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//Render each Model
+		//Render each opaque model
 		for (auto drawIt = state->modelPointers.begin(); drawIt != state->modelPointers.end(); drawIt++)
+		{
+			(*drawIt)->render(renderCameraEntityId);
+		}
+
+		//Render each transparent model
+		for (auto drawIt = state->transparentModelPointers.begin(); drawIt != state->transparentModelPointers.end(); drawIt++)
 		{
 			(*drawIt)->render(renderCameraEntityId);
 		}

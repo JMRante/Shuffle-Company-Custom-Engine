@@ -32,10 +32,9 @@ namespace sc
 		std::map<ID, std::vector<Component*>> componentMap;
 
 	public:
-		Stage stage;
-
 		std::vector<Nature*> naturePointers;
 		std::vector<DrawModel*> modelPointers;
+		std::vector<DrawModel*> transparentModelPointers;
 		std::vector<DrawOrtho*> orthoPointers;
 
 		State();

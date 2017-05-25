@@ -21,8 +21,10 @@ namespace sc
 	ID PrefabFactory::createStage(std::string filepath)
 	{
 		ID id = ID("E_STAGE");
-		targetState->stage.loadStage(filepath);
+
 		targetState->addEntity(id);
+		Stage* stage = targetState->addComponent<Stage>(id, new Stage());
+		stage->loadStage(filepath);
 		targetState->addComponent<Transform>(id, new Transform());
 		targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_STAGE"), true));
 

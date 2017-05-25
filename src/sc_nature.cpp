@@ -115,6 +115,7 @@ namespace sc
 		glm::vec3 currentPosition = trans->position;
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
 
+		//Scroll horizontally
 		//Mouse Control
 		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE))
 		{
@@ -149,6 +150,32 @@ namespace sc
 			if (translate != glm::vec3(0.0f, 0.0f, 0.0f))
 			{
 				translate = keyMoveSpeed * glm::normalize(translate);
+			}
+		}
+
+		//Change layer vertically
+		//Mouse Control
+		if (input.getMouseWheelDelta() != 0)
+		{
+			if (input.getMouseWheelDelta() > 0)
+			{
+				translate += glm::vec3(0.0f, 1.0f, 0.0f);
+			}
+			else if (input.getMouseWheelDelta() < 0)
+			{
+				translate -= glm::vec3(0.0f, 1.0f, 0.0f);
+			}
+		}
+		else 
+		{
+			//Keyboard Control
+			if (input.keyPressed(SDLK_q))
+			{
+				translate += glm::vec3(0.0f, 1.0f, 0.0f);
+			}
+			else if (input.keyPressed(SDLK_a))
+			{
+				translate -= glm::vec3(0.0f, 1.0f, 0.0f);
 			}
 		}
 

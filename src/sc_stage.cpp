@@ -26,6 +26,8 @@ namespace sc
 		tex_B = texNum;		
 	}
 
+	Stage::Stage() : Component() {}
+
 	bool Stage::loadStage(std::string filepath)
 	{
 		if (!readStageFile(filepath))

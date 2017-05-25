@@ -21,6 +21,7 @@ namespace sc
 		mouseYDelta = 0;		
 		mouseXLocal = 0;
 		mouseYLocal = 0;
+		mouseWheelDelta = 0;
 		firstMouseInput = true;
 	}
 
@@ -62,6 +63,7 @@ namespace sc
 		keysReleased.clear();
 
 		SDL_Event event;
+		bool hasMouseWheelEvent = false;
 		while (SDL_PollEvent(&event) != 0)
 		{
 			if (event.type == SDL_QUIT)
@@ -94,6 +96,16 @@ namespace sc
 				mouseReleased.push_back(event.button.button);
 				mouseHeld.erase(std::remove(mouseHeld.begin(), mouseHeld.end(), event.button.button), mouseHeld.end());
 			}
+			else if (event.type == SDL_MOUSEWHEEL)
+			{
+				mouseWheelDelta = event.wheel.y;
+				hasMouseWheelEvent = true;
+			}
+		}
+
+		if (!hasMouseWheelEvent)
+		{
+			mouseWheelDelta = 0;
 		}
 
 		if (!firstMouseInput)
@@ -159,6 +171,11 @@ namespace sc
 	int Input::getMouseY()
 	{
 		return sc::config.get("WINDOW_HEIGHT") - mouseYLocal;
+	}
+
+	int Input::getMouseWheelDelta()
+	{
+		return mouseWheelDelta;
 	}
 
 
