@@ -74,11 +74,17 @@ namespace sc
 
 		int getTextureX(unsigned char textureNum);
 		int getTextureY(unsigned char textureNum);
+
 		float getTextureUMin(unsigned char textureNum);
 		float getTextureVMin(unsigned char textureNum);
 		float getTextureUMax(unsigned char textureNum);
 		float getTextureVMax(unsigned char textureNum);
+
 		unsigned char getTextureNum(std::string textureName);
+
+		int getWidth();
+		int getDepth();
+		int getHeight();
 	};
 }
 

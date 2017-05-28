@@ -874,6 +874,31 @@ namespace sc
 		meshStack.pushBase(new Mesh(ID("ME_QUAD"), &vecVert, &vecInd));
 		meshStack.pushBase(new Mesh(ID("ME_SPHERE"), "Resources/Meshes/ME_SPHERE.obj"));
 
+		//Flat Quad
+		vecVert.clear();
+
+		tempVert.position = glm::vec3(0.0f, 0.0f, 0.0f);
+		tempVert.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+		tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
+		vecVert.push_back(tempVert);
+
+		tempVert.position = glm::vec3(1.0f, 0.0f, 0.0f);
+		tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+		vecVert.push_back(tempVert);
+
+		tempVert.position = glm::vec3(0.0f, 0.0f, 1.0f);
+		tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
+		vecVert.push_back(tempVert);
+
+		tempVert.position = glm::vec3(1.0f, 0.0f, 1.0f);
+		tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
+		vecVert.push_back(tempVert);
+
+		static const int ind2[] = {0, 2, 1, 3, 1, 2};
+		std::vector<int> vecInd2(ind2, ind2 + sizeof(ind2) / sizeof(ind2[0]));
+
+		meshStack.pushBase(new Mesh(ID("ME_FLATQUAD"), &vecVert, &vecInd2));
+
 		//Load Sprites
 		spriteStack.pushBase(new Sprite(ID("SP_ERROR"), "Resources/Textures/ERROR.png"));
 		spriteStack.pushBase(new Sprite(ID("SP_TEST"), "Resources/Textures/testSprite.png"));
@@ -886,6 +911,9 @@ namespace sc
 		//Load Fonts
 		fontStack.pushBase(new Font(ID("FT_TEST"), "Resources/Fonts/OpenSans-Regular.ttf", 28));
 		fontStack.pushBase(new Font(ID("FT_MONO"), "Resources/Fonts/RobotoMono-Regular.ttf", 16));
+
+		//Load textures
+		textureStack.pushBase(new Texture(ID("TX_EDITSLOT"), "Resources/Textures/editorEmptySlot.png"));
 
 		//Load Shaders
 		shaderStack.pushBase(new Shader(ID("SH_PASS"), "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl"));
@@ -902,8 +930,14 @@ namespace sc
 		tempVec4.push_back(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 		materialStack.pushBase(new Material(ID("MA_BLUE"), NULL, NULL, &tempVec4, NULL, ID("SH_PASS")));
 
+		std::vector<ID> tempTex;
+		tempTex.push_back(ID("TX_EDITSLOT"));
+		materialStack.pushBase(new Material(ID("MA_EDITSLOT"), NULL, NULL, NULL, &tempTex, ID("SH_TEX")));
+
 		modelStack.pushBase(new Model(ID("MO_TESTA"), ID("ME_QUAD"), ID("MA_RED")));
 		modelStack.pushBase(new Model(ID("MO_TESTB"), ID("ME_SPHERE"), ID("MA_BLUE")));
+
+		modelStack.pushBase(new Model(ID("MO_EDITSLOT"), ID("ME_FLATQUAD"), ID("MA_EDITSLOT")));
 
 		Font::loadFontQuadToGPU();
 		FT_Done_FreeType(fontLibrary);

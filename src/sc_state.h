@@ -30,6 +30,7 @@ namespace sc
 	{
 	private:
 		std::map<ID, std::vector<Component*>> componentMap;
+		std::map<ID, std::vector<ID>> tagMap;
 
 	public:
 		std::vector<Nature*> naturePointers;
@@ -43,6 +44,8 @@ namespace sc
 		bool entityExists(ID id);
 		bool removeEntity(ID id);
 		void removeAllEntities(ID id);
+		void addEntityTag(ID id);
+		void removeEntityTag(ID id);
 
 		template <class T>
 		T* addComponent(ID entityId, T* component)

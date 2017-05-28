@@ -105,12 +105,14 @@ namespace sc
 	{
 		this->keyMoveSpeed = keyMoveSpeed;
 		this->mouseMoveSpeed = mouseMoveSpeed;
+		this->cameraLayer = 0;
 	}
 
 	void EditorCamera::update()
 	{
 		Transform* trans = state->getComponent<Transform>(entityId);
 		Camera* camera = state->getComponent<Camera>(entityId);
+		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
 
 		glm::vec3 currentPosition = trans->position;
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -155,27 +157,33 @@ namespace sc
 
 		//Change layer vertically
 		//Mouse Control
+		int stageHeight = stage->getHeight();
+
 		if (input.getMouseWheelDelta() != 0)
 		{
-			if (input.getMouseWheelDelta() > 0)
+			if (input.getMouseWheelDelta() > 0 && cameraLayer < (stageHeight - 1))
 			{
 				translate += glm::vec3(0.0f, 1.0f, 0.0f);
+				cameraLayer++;
 			}
-			else if (input.getMouseWheelDelta() < 0)
+			else if (input.getMouseWheelDelta() < 0 && cameraLayer > 0)
 			{
 				translate -= glm::vec3(0.0f, 1.0f, 0.0f);
+				cameraLayer--;
 			}
 		}
 		else 
 		{
 			//Keyboard Control
-			if (input.keyPressed(SDLK_q))
+			if (input.keyPressed(SDLK_q) && cameraLayer < (stageHeight - 1))
 			{
 				translate += glm::vec3(0.0f, 1.0f, 0.0f);
+				cameraLayer++;
 			}
-			else if (input.keyPressed(SDLK_a))
+			else if (input.keyPressed(SDLK_a) && cameraLayer > 0)
 			{
 				translate -= glm::vec3(0.0f, 1.0f, 0.0f);
+				cameraLayer--;
 			}
 		}
 

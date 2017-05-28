@@ -62,6 +62,7 @@ namespace sc
 	private:
 		float keyMoveSpeed;
 		float mouseMoveSpeed;
+		int cameraLayer;
 
 	public:
 		EditorCamera(float keyMoveSpeed, float mouseMoveSpeed);

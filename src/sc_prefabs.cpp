@@ -106,6 +106,19 @@ namespace sc
 
 		return id;
 	}
+	
+	ID PrefabFactory::createEditorSlot(ID id, glm::vec3 position)
+	{
+		targetState->addEntity(id);
+		
+		Transform* tran = targetState->addComponent<Transform>(id, new Transform());
+		tran->position = position;
+		tran->calculateWorldMatrix();
+
+		targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_EDITSLOT"), true));
+
+		return id;
+	}
 
 	ID PrefabFactory::createCursor()
 	{

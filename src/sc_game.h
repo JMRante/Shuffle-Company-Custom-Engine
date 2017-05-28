@@ -24,6 +24,7 @@
 #include "sc_prefabs.h"
 #include "sc_assets.h"
 #include "sc_config.h"
+#include "sc_utility.h"
 
 namespace sc
 {

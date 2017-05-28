@@ -26,7 +26,12 @@ namespace sc
 		tex_B = texNum;		
 	}
 
-	Stage::Stage() : Component() {}
+	Stage::Stage() : Component() 
+	{
+		width = 10;
+		depth = 10;
+		height = 10;
+	}
 
 	bool Stage::loadStage(std::string filepath)
 	{
@@ -533,5 +538,20 @@ namespace sc
 		}
 
 		return 255;
+	}
+
+	int Stage::getWidth()
+	{
+		return width;
+	}
+
+	int Stage::getDepth()
+	{
+		return depth;
+	}
+
+	int Stage::getHeight()
+	{
+		return height;
 	}
 }
