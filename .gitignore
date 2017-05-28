@@ -1,5 +1,6 @@
 *.exe
 *.o
+shuffleLog.txt
 
 /Logo/*
 /src/Custom/*

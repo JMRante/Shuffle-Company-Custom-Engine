@@ -44,8 +44,10 @@ namespace sc
 		bool entityExists(ID id);
 		bool removeEntity(ID id);
 		void removeAllEntities(ID id);
-		void addEntityTag(ID id);
-		void removeEntityTag(ID id);
+
+		void addEntityTag(ID entityId, ID tagId);
+		bool entityHasTag(ID entityId, ID tagId);
+		void removeEntityTag(ID entityId, ID tagId);
 
 		template <class T>
 		T* addComponent(ID entityId, T* component)
@@ -109,7 +111,67 @@ namespace sc
 			return false;
 		}
 
+		template <class T>
+		std::vector<T*> addComponentToTagged(ID tagId, T* component)
+		{
+			std::vector<T*> components;
+
+			for (auto ei = tagMap.begin(); ei != tagMap.end(); ei++)
+			{
+				if (entityHasTag(ei->first, tagId))
+				{
+					components.push_back(addComponent<T>(ei->first, component));
+				}
+			}
+
+			return components;
+		}
+
+		template <class T>
+		std::vector<T*> getComponentFromTagged(ID tagId)
+		{
+			std::vector<T*> components;
+
+			for (auto ei = tagMap.begin(); ei != tagMap.end(); ei++)
+			{
+				if (entityHasTag(ei->first, tagId))
+				{
+					components.push_back(getComponent<T>(ei->first));
+				}
+			}
+
+			return components;
+		}
+
+		template <class T>
+		bool removeComponentFromTagged(ID tagId)
+		{
+			bool success = true;
+
+			for (auto ei = tagMap.begin(); ei != tagMap.end(); ei++)
+			{
+				if (entityHasTag(ei->first, tagId))
+				{
+					if (!removeComponent<T>(ei->first))
+					{
+						success = false;
+					}
+				}
+			}
+
+			if (success)
+			{
+				return true;
+			}
+			else
+			{
+				LOG_E << "Cannot remove " << typeid(T).name() << " from all tagged entities";
+				return false;
+			}
+		}
+
 		void removeAllComponents(ID entityId);
+		void removeAllComponentsFromTagged(ID tagId);
 	};
 }
 

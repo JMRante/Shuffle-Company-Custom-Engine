@@ -63,6 +63,7 @@ namespace sc
 		float keyMoveSpeed;
 		float mouseMoveSpeed;
 		int cameraLayer;
+		std::vector<Transform*> editSlotTransforms;
 
 	public:
 		EditorCamera(float keyMoveSpeed, float mouseMoveSpeed);

@@ -110,7 +110,8 @@ namespace sc
 	ID PrefabFactory::createEditorSlot(ID id, glm::vec3 position)
 	{
 		targetState->addEntity(id);
-		
+		targetState->addEntityTag(id, ID("T_EDITSLOT"));
+
 		Transform* tran = targetState->addComponent<Transform>(id, new Transform());
 		tran->position = position;
 		tran->calculateWorldMatrix();

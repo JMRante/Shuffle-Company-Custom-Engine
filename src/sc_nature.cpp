@@ -114,6 +114,11 @@ namespace sc
 		Camera* camera = state->getComponent<Camera>(entityId);
 		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
 
+		if (editSlotTransforms.size() == 0)
+		{
+			editSlotTransforms = state->getComponentFromTagged<Transform>(ID("T_EDITSLOT"));
+		}
+
 		glm::vec3 currentPosition = trans->position;
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -165,11 +170,23 @@ namespace sc
 			{
 				translate += glm::vec3(0.0f, 1.0f, 0.0f);
 				cameraLayer++;
+
+				for (size_t i = 0; i < editSlotTransforms.size(); i++)
+				{
+					editSlotTransforms[i]->position += glm::vec3(0.0f, 1.0f, 0.0f);
+					editSlotTransforms[i]->calculateWorldMatrix();
+				}
 			}
 			else if (input.getMouseWheelDelta() < 0 && cameraLayer > 0)
 			{
 				translate -= glm::vec3(0.0f, 1.0f, 0.0f);
 				cameraLayer--;
+
+				for (size_t i = 0; i < editSlotTransforms.size(); i++)
+				{
+					editSlotTransforms[i]->position -= glm::vec3(0.0f, 1.0f, 0.0f);
+					editSlotTransforms[i]->calculateWorldMatrix();
+				}
 			}
 		}
 		else 
@@ -179,11 +196,23 @@ namespace sc
 			{
 				translate += glm::vec3(0.0f, 1.0f, 0.0f);
 				cameraLayer++;
+
+				for (size_t i = 0; i < editSlotTransforms.size(); i++)
+				{
+					editSlotTransforms[i]->position += glm::vec3(0.0f, 1.0f, 0.0f);
+					editSlotTransforms[i]->calculateWorldMatrix();
+				}
 			}
 			else if (input.keyPressed(SDLK_a) && cameraLayer > 0)
 			{
 				translate -= glm::vec3(0.0f, 1.0f, 0.0f);
 				cameraLayer--;
+
+				for (size_t i = 0; i < editSlotTransforms.size(); i++)
+				{
+					editSlotTransforms[i]->position -= glm::vec3(0.0f, 1.0f, 0.0f);
+					editSlotTransforms[i]->calculateWorldMatrix();
+				}
 			}
 		}
 
