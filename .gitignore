@@ -1,0 +1,11 @@
+*.exe
+*.o
+
+/Logo/*
+/src/Custom/*
+/src/Resources/Fonts*
+/src/Resources/Materials*
+/src/Resources/Meshes*
+/src/Resources/Models*
+/src/Resources/StageTextures*
+/src/Resources/Textures*
