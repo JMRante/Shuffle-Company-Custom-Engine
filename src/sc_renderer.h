@@ -29,6 +29,7 @@
 #include "sc_state.h"
 #include "sc_component.h"
 #include "sc_assets.h"
+#include "sc_input.h"
 
 namespace sc
 {
@@ -39,10 +40,12 @@ namespace sc
 		ID renderCameraEntityId;
 
 	public:
+		glm::vec4 clearColor;
+
 		Renderer(SDL_Window* window);
 		void render(State* state);
+		ID renderForMouseSelect(State* state);
 		void setCameraEntity(ID cameraEntityId);
-		void setClearColor(glm::vec4 rgba);
 	};
 }
 

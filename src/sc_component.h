@@ -104,21 +104,38 @@ namespace sc
 		glm::vec3 getSide();
 	};	
 
-	class DrawModel : public Component
+	class Draw : public Component
+	{
+	protected:
+		bool isMouseSelectable;
+
+	public:
+		bool isVisible;
+
+		Draw();
+
+		virtual void addToMouseSelectable();
+		virtual void removeFromMouseSelectable();
+	};
+
+	class DrawModel : public Draw
 	{
 	public:
 		Model* model;
-		bool isVisible;
 
 		DrawModel();
 		DrawModel(ID modelId, bool isVisible);
 		void render(ID cameraId);
+		void mouseRender(ID cameraId, unsigned int index);
 
 		void onStateInsert();
 		void onStateRemove();
+
+		void addToMouseSelectable();
+		void removeFromMouseSelectable();
 	};
 
-	class DrawOrtho : public Component
+	class DrawOrtho : public Draw
 	{
 	protected:
 		int layer;
@@ -126,10 +143,14 @@ namespace sc
 	public:
 		DrawOrtho();
 		virtual void render(ID cameraId);
+		virtual void mouseRender(ID cameraId, unsigned int index);
 		void setLayer(int layer);
 
 		void onStateInsert();
 		void onStateRemove();
+
+		void addToMouseSelectable();
+		void removeFromMouseSelectable();
 
 		static bool compare(DrawOrtho* l, DrawOrtho* r);
 	};
@@ -145,10 +166,10 @@ namespace sc
 		float pivotY;
 
 		glm::vec4 color;
-		bool isVisible;
 
 		DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color, bool isVisible);
 		void render(ID cameraId);
+		void mouseRender(ID cameraId, unsigned int index);
 		void calculateTransform();
 	};
 
@@ -163,10 +184,10 @@ namespace sc
 		float pivotY;
 
 		Sprite* sprite;
-		bool isVisible;
 
 		DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId, bool isVisible);
 		void render(ID cameraId);
+		void mouseRender(ID cameraId, unsigned int index);
 		void calculateTransform();
 	};
 
@@ -191,10 +212,10 @@ namespace sc
 
 		glm::vec4 color;
 		Font* font;
-		bool isVisible;
 
 		DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId);
 		void render(ID cameraId);
+		void mouseRender(ID cameraId, unsigned int index);
 		void setText(std::string text);
 		std::string getText();
 		float getWidth();

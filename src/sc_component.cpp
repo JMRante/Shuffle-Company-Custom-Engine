@@ -225,9 +225,22 @@ namespace sc
 
 
 	/*
+		Draw
+			*/
+	Draw::Draw() : Component()
+	{
+		isMouseSelectable = false;
+		isVisible = false;
+	}
+
+	void Draw::addToMouseSelectable() {}
+	void Draw::removeFromMouseSelectable() {}
+
+
+	/*
 		DrawModel
 					*/
-	DrawModel::DrawModel() : Component()
+	DrawModel::DrawModel() : Draw()
 	{
 		addType(ID("DRAWMODEL"));
 
@@ -235,7 +248,7 @@ namespace sc
 		this->isVisible = false;
 	}
 
-	DrawModel::DrawModel(ID modelId, bool isVisible) : Component()
+	DrawModel::DrawModel(ID modelId, bool isVisible) : Draw()
 	{
 		addType(ID("DRAWMODEL"));
 
@@ -303,6 +316,35 @@ namespace sc
 		}
 	}
 
+	void DrawModel::mouseRender(ID cameraId, unsigned int index)
+	{
+		if (isVisible)
+		{
+			glm::vec4 indexColor = glm::vec4((float)((index >> 16) & 0xff)/255.0,
+											 (float)((index >> 8) & 0xff)/255.0,
+											 (float)((index >> 0) & 0xff)/255.0,
+											 1.0);
+
+			Shader* shad = assets.shaderStack.get(ID("SH_COLOR"));
+			glUseProgram(shad->GLid);
+
+			glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"flatColor"), 
+				indexColor[0],
+				indexColor[1],
+				indexColor[2],
+				indexColor[3]);
+
+			Camera* cam = state->getComponent<Camera>(cameraId);
+
+			glm::mat4 pvw = cam->getProjectionMatrix() * cam->getViewMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
+			glUniformMatrix4fv(glGetUniformLocation(model->material->shader->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
+
+			glBindVertexArray(model->mesh->VAOid);
+				glDrawElements(GL_TRIANGLES, model->mesh->indexCount, GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+		}
+	}
+
 	void DrawModel::onStateInsert()
 	{
 		state->modelPointers.push_back(this);
@@ -319,17 +361,43 @@ namespace sc
 		}
 	}
 
+	void DrawModel::addToMouseSelectable()
+	{
+		if (!isMouseSelectable)
+		{
+			state->mouseSelectModels.push_back(this);
+			isMouseSelectable = true;	
+		}
+	}
+	
+	void DrawModel::removeFromMouseSelectable()
+	{
+		if (isMouseSelectable)
+		{
+			for (auto ni = state->mouseSelectModels.begin(); ni != state->mouseSelectModels.end(); ni++)
+			{
+				if ((*ni)->entityId.is(entityId) && (*ni)->sameTypes((Component*) this))
+				{
+					state->mouseSelectModels.erase(ni);
+				}
+			}
+
+			isMouseSelectable = false;
+		}
+	}
+
 
 	/*
 		DrawOrtho
 					*/
-	DrawOrtho::DrawOrtho() : Component()
+	DrawOrtho::DrawOrtho() : Draw()
 	{
 		addType(ID("DrawOrtho"));
 		layer = 0;
 	}
 
 	void DrawOrtho::render(ID cameraId) {}
+	void DrawOrtho::mouseRender(ID cameraId, unsigned int index) {}
 
 	void DrawOrtho::setLayer(int layer)
 	{
@@ -359,6 +427,31 @@ namespace sc
 		return (l->layer < r->layer);
 	}
 
+	void DrawOrtho::addToMouseSelectable()
+	{
+		if (!isMouseSelectable)
+		{
+			state->mouseSelectOrthos.push_back(this);
+			std::sort(state->mouseSelectOrthos.begin(), state->mouseSelectOrthos.end(), DrawOrtho::compare);
+			isMouseSelectable = true;
+		}
+	}
+	
+	void DrawOrtho::removeFromMouseSelectable()
+	{
+		if (isMouseSelectable)
+		{
+			for (auto oi = state->mouseSelectOrthos.begin(); oi != state->mouseSelectOrthos.end(); oi++)
+			{
+				if ((*oi)->entityId.is(entityId) && (*oi)->sameTypes((Component*) this))
+				{
+					state->mouseSelectOrthos.erase(oi);
+				}
+			}
+
+			isMouseSelectable = false;
+		}
+	}
 
 	/*
 		DrawRectangle
@@ -414,6 +507,42 @@ namespace sc
 					color[1],
 					color[2],
 					color[3]);
+
+				//Bind transform to shader
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
+				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
+
+				glBindVertexArray(mesh->VAOid);
+					glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+				glBindVertexArray(0);
+			}
+		}
+		else
+		{
+			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawRectangle";
+		}
+	}
+
+	void DrawRectangle::mouseRender(ID cameraId, unsigned int index)
+	{
+		if (state != NULL)
+		{
+			if (isVisible)
+			{
+				glm::vec4 indexColor = glm::vec4((float)((index >> 16) & 0xff)/255.0,
+												 (float)((index >> 8) & 0xff)/255.0,
+												 (float)((index >> 0) & 0xff)/255.0,
+												 1.0);
+
+				Mesh* mesh = assets.meshStack.get(ID("ME_QUAD"));
+				Shader* shad = assets.shaderStack.get(ID("SH_COLOR"));
+				glUseProgram(shad->GLid);
+
+				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"flatColor"), 
+					indexColor[0],
+					indexColor[1],
+					indexColor[2],
+					indexColor[3]);
 
 				//Bind transform to shader
 				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
@@ -487,6 +616,42 @@ namespace sc
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, sprite->GLid);
 				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"sprite"), 0);
+
+				//Bind transform to shader
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
+				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
+
+				glBindVertexArray(mesh->VAOid);
+					glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+				glBindVertexArray(0);
+			}
+		}
+		else
+		{
+			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawSprite";
+		}
+	}
+
+	void DrawSprite::mouseRender(ID cameraId, unsigned int index)
+	{
+		if (state != NULL)
+		{
+			if (isVisible)
+			{
+				glm::vec4 indexColor = glm::vec4((float)((index >> 16) & 0xff)/255.0,
+												 (float)((index >> 8) & 0xff)/255.0,
+												 (float)((index >> 0) & 0xff)/255.0,
+												 1.0);
+
+				Mesh* mesh = assets.meshStack.get(ID("ME_QUAD"));
+				Shader* shad = assets.shaderStack.get(ID("SH_COLOR")); //Should really be a custom shader which culls transparent pixels of original sprite
+				glUseProgram(shad->GLid);
+
+				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"flatColor"), 
+					indexColor[0],
+					indexColor[1],
+					indexColor[2],
+					indexColor[3]);
 
 				//Bind transform to shader
 				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
@@ -684,6 +849,85 @@ namespace sc
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, font->textureGLid);
 				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"fontTexture"), 0);
+
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix();
+				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
+
+				int currentLine = 0;
+				GLfloat x = getDrawStartX(currentLine);
+				GLfloat y = getDrawStartY();
+
+				std::string::const_iterator cIt;
+
+				glBindVertexArray(font->VAOid);
+
+				for (cIt = text.begin(); cIt != text.end(); cIt++)
+				{
+					//New line
+					if ((*cIt) == '\n')
+					{
+						currentLine++;
+						x = getDrawStartX(currentLine);
+						y -= (font->maxCharHeight + lineSeperation);
+					}
+					else
+					{
+						FontCharacter* fontChar = &(font->characters[*cIt]);
+
+						GLfloat xpos = x + fontChar->bearing.x;
+						GLfloat ypos = y - (fontChar->size.y - fontChar->bearing.y);
+
+						GLfloat w = fontChar->size.x;
+						GLfloat h = fontChar->size.y;
+
+						GLfloat vertices[6][5] = {
+							{ xpos,     ypos + h, (float) layer,  fontChar->textureCoords.x, fontChar->textureCoords.z },
+							{ xpos,     ypos,     (float) layer,  fontChar->textureCoords.x, fontChar->textureCoords.w },
+							{ xpos + w, ypos,     (float) layer,  fontChar->textureCoords.y, fontChar->textureCoords.w },
+
+							{ xpos,     ypos + h, (float) layer,  fontChar->textureCoords.x, fontChar->textureCoords.z },
+							{ xpos + w, ypos,     (float) layer,  fontChar->textureCoords.y, fontChar->textureCoords.w },
+							{ xpos + w, ypos + h, (float) layer,  fontChar->textureCoords.y, fontChar->textureCoords.z }
+						};
+
+						glBindBuffer(GL_ARRAY_BUFFER, font->VBOid);
+							glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
+						glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+						glDrawArrays(GL_TRIANGLES, 0, 6);
+
+						x += (fontChar->advance >> 6);
+					}
+				}
+
+				glBindVertexArray(0);
+			}
+		}
+		else
+		{
+			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawText";
+		}
+	}
+
+	void DrawText::mouseRender(ID cameraId, unsigned int index)
+	{
+		if (state != NULL)
+		{
+			if (isVisible)
+			{
+				glm::vec4 indexColor = glm::vec4((float)((index >> 16) & 0xff)/255.0,
+												 (float)((index >> 8) & 0xff)/255.0,
+												 (float)((index >> 0) & 0xff)/255.0,
+												 1.0);
+
+				Shader* shad = assets.shaderStack.get(ID("SH_COLOR"));
+				glUseProgram(shad->GLid);
+
+				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"flatColor"), 
+					indexColor[0],
+					indexColor[1],
+					indexColor[2],
+					indexColor[3]);
 
 				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));

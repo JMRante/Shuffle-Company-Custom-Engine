@@ -78,8 +78,37 @@ namespace sc
 		{
 			return true;
 		}
-		else if (discriminant == 0)
+		else if (discriminant == 0) // == with a float, for shame...
 		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool SphereCollider::collidePoint(RayCollider* ray, glm::vec3 &point)
+	{
+		//This assumes that direction of the ray is normalized, which it is on construction
+		glm::vec3 l = ray->origin - center;
+		float b = 2 * glm::dot(ray->direction, l);
+		float c = glm::dot(l, l) - (radius * radius);
+
+		float discriminant = (b * b) - (4 * c);
+
+		if (discriminant > 0.0)
+		{
+			float t = (-b + (float)sqrt(discriminant)) / 2.0;
+			point = ray->origin + (ray->direction * t);
+
+			return true;
+		}
+		else if (discriminant == 0.0) // == with a float, for shame...
+		{
+			float t = -b / 2.0;
+			point = ray->origin + (ray->direction * t);
+
 			return true;
 		}
 		else
@@ -191,6 +220,76 @@ namespace sc
 		{
 			return false;
 		}
+
+		return true;
+	}
+
+	bool AABBCollider::collidePoint(RayCollider* ray, glm::vec3 &point)
+	{
+		glm::vec3 tMin;
+		glm::vec3 tMax;
+
+		tMin.x = (min.x - ray->origin.x) / ray->direction.x;
+		tMax.x = (max.x - ray->origin.x) / ray->direction.x;
+
+		if (tMin.x > tMax.x)
+		{
+			float temp = tMin.x;
+			tMin.x = tMax.x;
+			tMax.x = temp;
+		}
+
+		tMin.y = (min.y - ray->origin.y) / ray->direction.y;
+		tMax.y = (max.y - ray->origin.y) / ray->direction.y;
+
+		if (tMin.y > tMax.y)
+		{
+			float temp = tMin.y;
+			tMin.y = tMax.y;
+			tMax.y = temp;
+		}
+
+		if ((tMin.x > tMax.y) || (tMin.y > tMax.x))
+		{
+			return false;
+		}
+
+		if (tMin.y > tMin.x)
+		{
+			tMin.x = tMin.y;
+		}
+
+		if (tMax.y < tMax.x)
+		{
+			tMax.x = tMax.y;
+		}
+
+		tMin.z = (min.z - ray->origin.z) / ray->direction.z;
+		tMax.z = (max.z - ray->origin.z) / ray->direction.z;
+
+		if (tMin.z > tMax.z)
+		{
+			float temp = tMin.z;
+			tMin.z = tMax.z;
+			tMax.z = temp;
+		}
+
+		if ((tMin.x > tMax.z) || (tMin.z > tMax.x))
+		{
+			return false;
+		}
+
+		if (tMin.z > tMin.x)
+		{
+			tMin.x = tMin.z;
+		}
+
+		if (tMax.z < tMax.x)
+		{
+			tMax.x = tMax.z;		
+		}
+
+		point = tMin;
 
 		return true;
 	}
@@ -323,6 +422,105 @@ namespace sc
 			return false;
 		}
 		
+		return true;
+	}
+
+	bool RayCollider::collidePoint(SphereCollider* sc, glm::vec3 &point)
+	{
+		//This assumes that direction of the ray is normalized, which it is on construction
+		glm::vec3 l = origin - sc->center;
+		float b = 2 * glm::dot(direction, l);
+		float c = glm::dot(l, l) - (sc->radius * sc->radius);
+
+		float discriminant = (b * b) - (4 * c);
+
+		if (discriminant > 0.0)
+		{
+			float t = (-b + (float)sqrt(discriminant)) / 2.0;
+			point = origin + (direction * t);
+
+			return true;
+		}
+		else if (discriminant == 0.0) // == with a float, for shame...
+		{
+			float t = -b / 2.0;
+			point = origin + (direction * t);
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool RayCollider::collidePoint(AABBCollider* aabb, glm::vec3 &point)
+	{
+		glm::vec3 tMin;
+		glm::vec3 tMax;
+
+		tMin.x = (aabb->min.x - origin.x) / direction.x;
+		tMax.x = (aabb->max.x - origin.x) / direction.x;
+
+		if (tMin.x > tMax.x)
+		{
+			float temp = tMin.x;
+			tMin.x = tMax.x;
+			tMax.x = temp;
+		}
+
+		tMin.y = (aabb->min.y - origin.y) / direction.y;
+		tMax.y = (aabb->max.y - origin.y) / direction.y;
+
+		if (tMin.y > tMax.y)
+		{
+			float temp = tMin.y;
+			tMin.y = tMax.y;
+			tMax.y = temp;
+		}
+
+		if ((tMin.x > tMax.y) || (tMin.y > tMax.x))
+		{
+			return false;
+		}
+
+		if (tMin.y > tMin.x)
+		{
+			tMin.x = tMin.y;
+		}
+
+		if (tMax.y < tMax.x)
+		{
+			tMax.x = tMax.y;
+		}
+
+		tMin.z = (aabb->min.z - origin.z) / direction.z;
+		tMax.z = (aabb->max.z - origin.z) / direction.z;
+
+		if (tMin.z > tMax.z)
+		{
+			float temp = tMin.z;
+			tMin.z = tMax.z;
+			tMax.z = temp;
+		}
+
+		if ((tMin.x > tMax.z) || (tMin.z > tMax.x))
+		{
+			return false;
+		}
+
+		if (tMin.z > tMin.x)
+		{
+			tMin.x = tMin.z;
+		}
+
+		if (tMax.z < tMax.x)
+		{
+			tMax.x = tMax.z;		
+		}
+
+		point = tMin;
+
 		return true;
 	}
 }

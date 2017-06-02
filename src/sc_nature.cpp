@@ -222,6 +222,26 @@ namespace sc
 
 
 	/*
+		EditorSlot
+				*/
+	EditorSlot::EditorSlot() {}
+
+	void EditorSlot::update()
+	{
+		DrawModel* dm = state->getComponent<DrawModel>(entityId);
+
+		if (entityId.is(input.mouseSelectedEntity))
+		{
+			dm->model = assets.modelStack.get(ID("MO_EDITSLOTB"));
+		}
+		else
+		{
+			dm->model = assets.modelStack.get(ID("MO_EDITSLOTA"));
+		}
+	}
+
+
+	/*
 		Cursor
 				*/
 	Cursor::Cursor()

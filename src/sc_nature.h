@@ -70,6 +70,13 @@ namespace sc
 		void update();
 	};
 
+	class EditorSlot : public Nature
+	{
+	public:
+		EditorSlot();
+		void update();
+	};
+
 	enum CursorState {point, hover, click, drag};
 	class Cursor : public Nature
 	{

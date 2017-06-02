@@ -37,6 +37,7 @@ namespace sc
 		bool collide(AABBCollider* aabb);
 		bool collide(PointCollider* pc);
 		bool collide(RayCollider* ray);
+		bool collidePoint(RayCollider* ray, glm::vec3 &point);
 	};
 
 	class AABBCollider
@@ -50,6 +51,7 @@ namespace sc
 		bool collide(AABBCollider* aabb);
 		bool collide(PointCollider* pc);
 		bool collide(RayCollider* ray);
+		bool collidePoint(RayCollider* ray, glm::vec3 &point);
 	};
 
 	class PointCollider
@@ -72,6 +74,8 @@ namespace sc
 		RayCollider(glm::vec3 origin, glm::vec3 direction);
 		bool collide(SphereCollider* sc);
 		bool collide(AABBCollider* aabb);
+		bool collidePoint(SphereCollider* sc, glm::vec3 &point);
+		bool collidePoint(AABBCollider* aabb, glm::vec3 &point);
 	};
 }
 

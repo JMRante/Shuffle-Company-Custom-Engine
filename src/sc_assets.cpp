@@ -913,7 +913,8 @@ namespace sc
 		fontStack.pushBase(new Font(ID("FT_MONO"), "Resources/Fonts/RobotoMono-Regular.ttf", 16));
 
 		//Load textures
-		textureStack.pushBase(new Texture(ID("TX_EDITSLOT"), "Resources/Textures/editorEmptySlot.png"));
+		textureStack.pushBase(new Texture(ID("TX_EDITSLOTA"), "Resources/Textures/editorEmptySlot.png"));
+		textureStack.pushBase(new Texture(ID("TX_EDITSLOTB"), "Resources/Textures/editorEmptySlotSelected.png"));
 
 		//Load Shaders
 		shaderStack.pushBase(new Shader(ID("SH_PASS"), "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl"));
@@ -931,13 +932,18 @@ namespace sc
 		materialStack.pushBase(new Material(ID("MA_BLUE"), NULL, NULL, &tempVec4, NULL, ID("SH_PASS")));
 
 		std::vector<ID> tempTex;
-		tempTex.push_back(ID("TX_EDITSLOT"));
-		materialStack.pushBase(new Material(ID("MA_EDITSLOT"), NULL, NULL, NULL, &tempTex, ID("SH_TEX")));
+		tempTex.push_back(ID("TX_EDITSLOTA"));
+		materialStack.pushBase(new Material(ID("MA_EDITSLOTA"), NULL, NULL, NULL, &tempTex, ID("SH_TEX")));
+		tempTex.clear();
+		tempTex.push_back(ID("TX_EDITSLOTB"));
+		materialStack.pushBase(new Material(ID("MA_EDITSLOTB"), NULL, NULL, NULL, &tempTex, ID("SH_TEX")));
+		tempTex.clear();
 
 		modelStack.pushBase(new Model(ID("MO_TESTA"), ID("ME_QUAD"), ID("MA_RED")));
 		modelStack.pushBase(new Model(ID("MO_TESTB"), ID("ME_SPHERE"), ID("MA_BLUE")));
 
-		modelStack.pushBase(new Model(ID("MO_EDITSLOT"), ID("ME_FLATQUAD"), ID("MA_EDITSLOT")));
+		modelStack.pushBase(new Model(ID("MO_EDITSLOTA"), ID("ME_FLATQUAD"), ID("MA_EDITSLOTA")));
+		modelStack.pushBase(new Model(ID("MO_EDITSLOTB"), ID("ME_FLATQUAD"), ID("MA_EDITSLOTB")));
 
 		Font::loadFontQuadToGPU();
 		FT_Done_FreeType(fontLibrary);

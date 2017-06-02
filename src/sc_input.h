@@ -19,6 +19,7 @@
 
 #include "sc_log.h"
 #include "sc_config.h"
+#include "sc_utility.h"
 
 namespace sc
 {
@@ -46,6 +47,8 @@ namespace sc
 		bool mouseInputExists(std::vector<Uint8>* mouseInput, Uint8 button);
 
 	public:
+		ID mouseSelectedEntity;
+
 		Input();
 		void update();
 

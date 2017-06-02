@@ -116,7 +116,10 @@ namespace sc
 		tran->position = position;
 		tran->calculateWorldMatrix();
 
-		targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_EDITSLOT"), true));
+		DrawModel* dm = targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_EDITSLOTA"), true));
+		dm->addToMouseSelectable();
+
+		targetState->addComponent<EditorSlot>(id, new EditorSlot());
 
 		return id;
 	}

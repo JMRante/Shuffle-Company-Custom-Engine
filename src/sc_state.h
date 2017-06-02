@@ -38,6 +38,9 @@ namespace sc
 		std::vector<DrawModel*> transparentModelPointers;
 		std::vector<DrawOrtho*> orthoPointers;
 
+		std::vector<DrawModel*> mouseSelectModels;
+		std::vector<DrawOrtho*> mouseSelectOrthos;
+
 		State();
 
 		bool addEntity(ID id);

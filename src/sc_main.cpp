@@ -37,6 +37,7 @@
 #include "sc_log.h"
 #include "sc_game.h"
 #include "sc_renderer.h"
+#include "sc_input.h"
 
 //Function Foward Declarations
 bool initiate();
@@ -173,6 +174,7 @@ int main(int argc, char **argv)
 
 			hasQuit = game.update();
 			renderer.render(game.state);
+			sc::input.mouseSelectedEntity = renderer.renderForMouseSelect(game.state);
 
 			delay = startTime + MS_PER_FRAME - SDL_GetTicks();
 			if (delay >= 0)
