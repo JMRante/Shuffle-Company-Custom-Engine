@@ -16,7 +16,7 @@
 
 namespace sc
 {
-	Brush::Brush(unsigned char texNum)
+	Brush::Brush(int texNum)
 	{
 		tex_E = texNum;
 		tex_N = texNum;
@@ -31,6 +31,7 @@ namespace sc
 		width = 10;
 		depth = 10;
 		height = 10;
+		stageMesh = NULL;
 	}
 
 	bool Stage::loadStage(std::string filepath)
@@ -47,7 +48,7 @@ namespace sc
 			return false;
 		}
 
-		if (!buildStageMesh())
+		if (!createStageMesh())
 		{
 			LOG_E << "Error: Could not build the stage mesh";
 			return false;
@@ -88,7 +89,7 @@ namespace sc
 					{
 						while (t.checkType("word") && !t.checkToken("stage"))
 						{
-							unsigned char textureNum = getTextureNum(t.getToken());
+							int textureNum = getTextureNum(t.getToken());
 
 							if (textureNum == 255)
 							{
@@ -99,7 +100,7 @@ namespace sc
 								}
 
 								textures.push_back(t.getToken());
-								textureNum = (unsigned char)(textures.size() - 1);
+								textureNum = (int)(textures.size() - 1);
 							}
 
 							brushes.push_back(Brush(textureNum));
@@ -117,7 +118,7 @@ namespace sc
 						{
 							LOG_I << "Reading stage";
 
-							unsigned char brush;
+							int brush;
 							int x = 0;
 							int y = 0;
 							int z = 0;
@@ -127,7 +128,7 @@ namespace sc
 							{
 								while (t.checkType("int"))
 								{
-									brush = (unsigned char)(atoi(t.getToken().c_str()));
+									brush = atoi(t.getToken().c_str());
 									brush += 1;
 									LOG_I << "Brush: " << brush;
 									t.next();
@@ -234,23 +235,41 @@ namespace sc
 		return assets.materialStack.pushWorld(new Material(ID("MA_STAGE"), NULL, NULL, NULL, &tempString, ID("SH_STAGE")));
 	}
 
-	bool Stage::buildStageMesh()
+	bool Stage::createStageMesh()
 	{
 		std::vector<StageVertex> stageVertices;
 		std::vector<int> stageIndices;
+
+		buildStageMesh(stageVertices, stageIndices);
+
+		stageMesh = assets.meshStack.pushWorld(new Mesh(ID("ME_STAGE"), &stageVertices, &stageIndices));
+
+		if (stageMesh != NULL)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	void Stage::buildStageMesh(std::vector<StageVertex> &stageVertices, std::vector<int> &stageIndices)
+	{
 		int vertCount = 0;
 		StageVertex tempVert;
 
+		LOG_D; LOG_D << "Building Stage Mesh";
+
 		for (int i = 0; i < STAGE_WIDTH; i++)
 		{
-			for (int j = 0; j < STAGE_DEPTH; j++)
+			for (int j = 0; j < STAGE_HEIGHT; j++)
 			{
-				for (int k = 0; k < STAGE_HEIGHT; k++)
+				for (int k = 0; k < STAGE_DEPTH; k++)
 				{
 					if (stage[i][j][k] != 0)
 					{
+						LOG_D << "(" << i << ", " << j << ", " << k << ") = " << stage[i][j][k];
 						Brush* brush = &(brushes[stage[i][j][k] - 1]);
-
+						
 						//E
 						if (i + 1 >= STAGE_WIDTH || stage[i + 1][j][k] == 0)
 						{
@@ -315,89 +334,25 @@ namespace sc
 							vertCount += 4;
 						}
 
-						//S
-						if (k + 1 >= STAGE_HEIGHT || stage[i][j][k + 1] == 0)
-						{
-							tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 1.0f);
-							tempVert.normal       = glm::vec3(0.0f, 0.0f, 1.0f);
-							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
-							tempVert.textureNum   = (float)brush->tex_T;
-							stageVertices.push_back(tempVert);
-
-							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 0.0f);
-							tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
-							stageVertices.push_back(tempVert);
-
-							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 1.0f);
-							tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
-							stageVertices.push_back(tempVert);
-
-							tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 0.0f);
-							tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
-							stageVertices.push_back(tempVert);
-
-							stageIndices.push_back(vertCount);
-							stageIndices.push_back(vertCount + 1);
-							stageIndices.push_back(vertCount + 2);
-
-							stageIndices.push_back(vertCount);
-							stageIndices.push_back(vertCount + 3);
-							stageIndices.push_back(vertCount + 1);
-
-							vertCount += 4;
-						}
-
-						//N
-						if (k - 1 <= -1 || stage[i][j][k - 1] == 0)
-						{
-							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 0.0f);
-							tempVert.normal       = glm::vec3(0.0f, 0.0f, -1.0f);
-							tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
-							tempVert.textureNum   = (float)brush->tex_B;
-							stageVertices.push_back(tempVert);
-
-							tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 0.0f);
-							tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
-							stageVertices.push_back(tempVert);
-
-							tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 0.0f);
-							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
-							stageVertices.push_back(tempVert);
-
-							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 0.0f);
-							tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
-							stageVertices.push_back(tempVert);
-
-							stageIndices.push_back(vertCount);
-							stageIndices.push_back(vertCount + 1);
-							stageIndices.push_back(vertCount + 2);
-
-							stageIndices.push_back(vertCount);
-							stageIndices.push_back(vertCount + 3);
-							stageIndices.push_back(vertCount + 1);
-
-							vertCount += 4;
-						}
-
 						//T
-						if (j + 1 >= STAGE_DEPTH || stage[i][j + 1][k] == 0)
+						if (j + 1 >= STAGE_HEIGHT || stage[i][j + 1][k] == 0)
 						{
-							tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 1.0f);
+							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 1.0f);
 							tempVert.normal       = glm::vec3(0.0f, 1.0f, 0.0f);
 							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
 							tempVert.textureNum   = (float)brush->tex_S;
 							stageVertices.push_back(tempVert);
 
-							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 1.0f);
+							tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 0.0f);
 							tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
 							stageVertices.push_back(tempVert);
 
-							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 1.0f);
-							tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
+							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 0.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
 							stageVertices.push_back(tempVert);
 
 							tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 1.0f);
-							tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
 							stageVertices.push_back(tempVert);
 
 							stageIndices.push_back(vertCount);
@@ -412,24 +367,56 @@ namespace sc
 						}
 
 						//B
-						if (j - 1 <= -1 || stage[i][j - 1][k] == 0)
+						// if (j - 1 <= -1 || stage[i][j - 1][k] == 0)
+						// {
+						// 	tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 0.0f);
+						// 	tempVert.normal       = glm::vec3(0.0f, -1.0f, 0.0f);
+						// 	tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
+						// 	tempVert.textureNum   = (float)brush->tex_N;
+						// 	stageVertices.push_back(tempVert);
+
+						// 	tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 1.0f);
+						// 	tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
+						// 	stageVertices.push_back(tempVert);
+
+						// 	tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 0.0f);
+						// 	tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
+						// 	stageVertices.push_back(tempVert);
+
+						// 	tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 1.0f);
+						// 	tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+						// 	stageVertices.push_back(tempVert);
+
+						// 	stageIndices.push_back(vertCount);
+						// 	stageIndices.push_back(vertCount + 1);
+						// 	stageIndices.push_back(vertCount + 2);
+
+						// 	stageIndices.push_back(vertCount);
+						// 	stageIndices.push_back(vertCount + 3);
+						// 	stageIndices.push_back(vertCount + 1);
+
+						// 	vertCount += 4;					
+						// }
+
+						//S
+						if (k + 1 >= STAGE_DEPTH || stage[i][j][k + 1] == 0)
 						{
-							tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 0.0f);
-							tempVert.normal       = glm::vec3(0.0f, -1.0f, 0.0f);
+							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 1.0f);
+							tempVert.normal       = glm::vec3(0.0f, 0.0f, 1.0f);
 							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
-							tempVert.textureNum   = (float)brush->tex_N;
+							tempVert.textureNum   = (float)brush->tex_T;
 							stageVertices.push_back(tempVert);
 
-							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 1.0f);
+							tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 1.0f);
 							tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
 							stageVertices.push_back(tempVert);
 
-							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 0.0f);
-							tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
+							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 1.0f);
+							tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
 							stageVertices.push_back(tempVert);
 
 							tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 1.0f);
-							tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+							tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
 							stageVertices.push_back(tempVert);
 
 							stageIndices.push_back(vertCount);
@@ -440,41 +427,84 @@ namespace sc
 							stageIndices.push_back(vertCount + 3);
 							stageIndices.push_back(vertCount + 1);
 
-							vertCount += 4;					
+							vertCount += 4;
 						}
+
+						//N
+						// if (k - 1 <= -1 || stage[i][j][k - 1] == 0)
+						// {
+						// 	tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 0.0f);
+						// 	tempVert.normal       = glm::vec3(0.0f, 0.0f, -1.0f);
+						// 	tempVert.textureCoord = glm::vec2(0.0f, 1.0f);
+						// 	tempVert.textureNum   = (float)brush->tex_B;
+						// 	stageVertices.push_back(tempVert);
+
+						// 	tempVert.position     = glm::vec3(i + 1.0f, j + 1.0f, k + 0.0f);
+						// 	tempVert.textureCoord = glm::vec2(1.0f, 0.0f);
+						// 	stageVertices.push_back(tempVert);
+
+						// 	tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 0.0f);
+						// 	tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
+						// 	stageVertices.push_back(tempVert);
+
+						// 	tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 0.0f);
+						// 	tempVert.textureCoord = glm::vec2(0.0f, 0.0f);
+						// 	stageVertices.push_back(tempVert);
+
+						// 	stageIndices.push_back(vertCount);
+						// 	stageIndices.push_back(vertCount + 1);
+						// 	stageIndices.push_back(vertCount + 2);
+
+						// 	stageIndices.push_back(vertCount);
+						// 	stageIndices.push_back(vertCount + 3);
+						// 	stageIndices.push_back(vertCount + 1);
+
+						// 	vertCount += 4;
+						// }
 					}
 				}
 			}
 		}
-
-		return assets.meshStack.pushWorld(new Mesh(ID("ME_STAGE"), &stageVertices, &stageIndices));
 	}
 
 	bool Stage::createStageModel()
 	{
-		return assets.modelStack.pushWorld(new Model(ID("MO_STAGE"), ID("ME_STAGE"), ID("MA_STAGE")));
+		if (assets.modelStack.pushWorld(new Model(ID("MO_STAGE"), ID("ME_STAGE"), ID("MA_STAGE"))) != NULL)
+		{
+			return true;			
+		}
+
+		return false;
 	}
 
-	int Stage::getTextureX(unsigned char textureNum)
+	void Stage::updateStageMesh()
 	{
-		int texNum = (int)textureNum;
+		std::vector<StageVertex> stageVertices;
+		std::vector<int> stageIndices;
 
-		if (texNum < 128)
+		buildStageMesh(stageVertices, stageIndices);
+
+		stageMesh->updateStage(&stageVertices, &stageIndices);		
+	}
+
+	int Stage::getTextureX(int textureNum)
+	{
+		if (textureNum < 128)
 		{
-			return (texNum * SIMPLE_TEXTURE_DIM) % STAGE_TEXTURE_DIM;
+			return (textureNum * SIMPLE_TEXTURE_DIM) % STAGE_TEXTURE_DIM;
 		}
 
-		if (texNum < 192)
+		if (textureNum < 192)
 		{
-			return (texNum * SIMPLE_TEXTURE_DIM) % (STAGE_TEXTURE_DIM / 2);
+			return (textureNum * SIMPLE_TEXTURE_DIM) % (STAGE_TEXTURE_DIM / 2);
 		}
 
-		if (texNum == 192)
+		if (textureNum == 192)
 		{
 			return 2186;
 		}
 
-		if (texNum == 193)
+		if (textureNum == 193)
 		{
 			return 3072;
 		}
@@ -482,16 +512,14 @@ namespace sc
 		return -1;
 	}
 
-	int Stage::getTextureY(unsigned char textureNum)
+	int Stage::getTextureY(int textureNum)
 	{
-		int texNum = (int)textureNum;
-
-		if (texNum < 192)
+		if (textureNum < 192)
 		{
-			return ((texNum * SIMPLE_TEXTURE_DIM) / STAGE_TEXTURE_DIM) * SIMPLE_TEXTURE_DIM;
+			return ((textureNum * SIMPLE_TEXTURE_DIM) / STAGE_TEXTURE_DIM) * SIMPLE_TEXTURE_DIM;
 		}
 
-		if (texNum == 192 || texNum == 193)
+		if (textureNum == 192 || textureNum == 193)
 		{
 			return 2048;
 		}
@@ -499,31 +527,31 @@ namespace sc
 		return -1;
 	}
 
-	float Stage::getTextureUMin(unsigned char textureNum)
+	float Stage::getTextureUMin(int textureNum)
 	{
 		// return (float)getTextureX(textureNum) / (float)STAGE_TEXTURE_DIM;
 		return 0.0f;
 	}
 
-	float Stage::getTextureVMin(unsigned char textureNum)
+	float Stage::getTextureVMin(int textureNum)
 	{
 		// return (float)getTextureY(textureNum) / (float)STAGE_TEXTURE_DIM;
 		return 0.0f;
 	}
 
-	float Stage::getTextureUMax(unsigned char textureNum)
+	float Stage::getTextureUMax(int textureNum)
 	{
 		// return getTextureUMin(textureNum) + ((float)SIMPLE_TEXTURE_DIM / (float)STAGE_TEXTURE_DIM);
 		return 0.5f;
 	}
 
-	float Stage::getTextureVMax(unsigned char textureNum)
+	float Stage::getTextureVMax(int textureNum)
 	{
 		// return getTextureVMin(textureNum) + ((float)SIMPLE_TEXTURE_DIM / (float)STAGE_TEXTURE_DIM);
 		return 0.5f;
 	}
 
-	unsigned char Stage::getTextureNum(std::string textureName)
+	int Stage::getTextureNum(std::string textureName)
 	{
 		size_t i = 0;
 
@@ -531,7 +559,7 @@ namespace sc
 		{
 			if (textures[i].compare(textureName) == 0)
 			{
-				return (unsigned char)i;
+				return (int)i;
 			}
 
 			i++;
@@ -553,5 +581,13 @@ namespace sc
 	int Stage::getHeight()
 	{
 		return height;
+	}
+
+	void Stage::drawBrush(std::vector<glm::ivec3>* slots, int brush)
+	{
+		for (auto it = slots->begin(); it != slots->end(); it++) 
+		{
+			stage[(*it).x][(*it).y][(*it).z] = brush + 1;
+		}
 	}
 }

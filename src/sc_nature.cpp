@@ -220,19 +220,38 @@ namespace sc
 		camera->calculateViewMatrix();
 	}
 
+	int EditorCamera::getCameraLayer()
+	{
+		return cameraLayer;
+	}
+
 
 	/*
 		EditorSlot
 				*/
-	EditorSlot::EditorSlot() {}
+	EditorSlot::EditorSlot(int x, int z) 
+	{
+		this->x = x;
+		this->z = z;
+	}
 
 	void EditorSlot::update()
 	{
+		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
 		DrawModel* dm = state->getComponent<DrawModel>(entityId);
+		EditorCamera* ec = state->getComponent<EditorCamera>(ID("E_CAMERA"));
 
 		if (entityId.is(input.mouseSelectedEntity))
 		{
 			dm->model = assets.modelStack.get(ID("MO_EDITSLOTB"));
+
+			if (input.mouseButtonHeld(SDL_BUTTON_LEFT))
+			{
+				std::vector<glm::ivec3> singleSlot;
+				singleSlot.push_back(glm::ivec3(x, ec->getCameraLayer(), z));
+				stage->drawBrush(&singleSlot, 0);
+				stage->updateStageMesh();
+			}
 		}
 		else
 		{

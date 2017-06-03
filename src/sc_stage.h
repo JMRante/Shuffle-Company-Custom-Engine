@@ -43,14 +43,14 @@ namespace sc
 	class Brush
 	{
 	public:
-		unsigned char tex_E;
-		unsigned char tex_N;
-		unsigned char tex_W;
-		unsigned char tex_S;
-		unsigned char tex_T;
-		unsigned char tex_B;
+		int tex_E;
+		int tex_N;
+		int tex_W;
+		int tex_S;
+		int tex_T;
+		int tex_B;
 
-		Brush(unsigned char texNum);
+		Brush(int texNum);
 	};
 
 	class Stage : public Component
@@ -58,10 +58,11 @@ namespace sc
 	private:
 		std::vector<std::string> textures;
 		std::vector<Brush> brushes;
-		unsigned char stage[STAGE_WIDTH][STAGE_DEPTH][STAGE_HEIGHT] = {};
+		int stage[STAGE_WIDTH][STAGE_HEIGHT][STAGE_DEPTH] = {};
 		int width;
 		int depth;
 		int height;
+		Mesh* stageMesh;
 
 	public:
 		Stage();
@@ -69,22 +70,27 @@ namespace sc
 		bool loadStage(std::string filepath);
 		bool readStageFile(std::string filepath);
 		bool loadStageTextures();
-		bool buildStageMesh();
+		bool createStageMesh();
+		void buildStageMesh(std::vector<StageVertex> &stageVertices, std::vector<int> &stageIndices);
 		bool createStageModel();
 
-		int getTextureX(unsigned char textureNum);
-		int getTextureY(unsigned char textureNum);
+		void updateStageMesh();
 
-		float getTextureUMin(unsigned char textureNum);
-		float getTextureVMin(unsigned char textureNum);
-		float getTextureUMax(unsigned char textureNum);
-		float getTextureVMax(unsigned char textureNum);
+		int getTextureX(int textureNum);
+		int getTextureY(int textureNum);
 
-		unsigned char getTextureNum(std::string textureName);
+		float getTextureUMin(int textureNum);
+		float getTextureVMin(int textureNum);
+		float getTextureUMax(int textureNum);
+		float getTextureVMax(int textureNum);
+
+		int getTextureNum(std::string textureName);
 
 		int getWidth();
 		int getDepth();
 		int getHeight();
+
+		void drawBrush(std::vector<glm::ivec3>* slots, int brush);
 	};
 }
 

@@ -247,6 +247,28 @@ namespace sc
 		}
 	}
 
+	void Mesh::updateStage(std::vector<StageVertex> *vertices, std::vector<int> *indices)
+	{
+		indexCount = 0;
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBOid);
+			glBufferData(GL_ARRAY_BUFFER, vertices->size() * sizeof(StageVertex), &((*vertices)[0]), GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOid);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices->size() * sizeof(GLuint), &((*indices)[0]), GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		indexCount = indices->size();
+
+		GLenum error = glGetError();
+
+		if (error != GL_NO_ERROR)
+		{
+			LOG_E << "Error updating mesh: " << gluErrorString(error);
+		}
+	}
+
 
 	/*
 		Texture

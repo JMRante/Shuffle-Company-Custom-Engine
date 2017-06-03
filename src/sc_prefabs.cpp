@@ -107,7 +107,7 @@ namespace sc
 		return id;
 	}
 	
-	ID PrefabFactory::createEditorSlot(ID id, glm::vec3 position)
+	ID PrefabFactory::createEditorSlot(ID id, glm::vec3 position, int x, int z)
 	{
 		targetState->addEntity(id);
 		targetState->addEntityTag(id, ID("T_EDITSLOT"));
@@ -119,7 +119,7 @@ namespace sc
 		DrawModel* dm = targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_EDITSLOTA"), true));
 		dm->addToMouseSelectable();
 
-		targetState->addComponent<EditorSlot>(id, new EditorSlot());
+		targetState->addComponent<EditorSlot>(id, new EditorSlot(x, z));
 
 		return id;
 	}

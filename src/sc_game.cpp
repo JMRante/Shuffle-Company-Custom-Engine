@@ -39,7 +39,7 @@ namespace sc
 		{
 			for (int j = 0; j < stageDepth; j++)
 			{
-				pf.createEditorSlot(ID(std::string("E_EDITSLOT" + iToS(i) + "_" + iToS(j)).c_str()), glm::vec3((float) i, 0.05f, (float) j));
+				pf.createEditorSlot(ID(std::string("E_EDITSLOT" + iToS(i) + "_" + iToS(j)).c_str()), glm::vec3((float) i, 0.05f, (float) j), i, j);
 			}
 		}
 
@@ -55,7 +55,6 @@ namespace sc
 	{
 		input.update();
 
-		LOG_I << "Update";
 		for (auto it = state->naturePointers.begin(); it != state->naturePointers.end(); it++) 
 		{
 			if ((*it)->isActive)

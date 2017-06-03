@@ -68,12 +68,17 @@ namespace sc
 	public:
 		EditorCamera(float keyMoveSpeed, float mouseMoveSpeed);
 		void update();
+		int getCameraLayer();
 	};
 
 	class EditorSlot : public Nature
 	{
+	private:
+		int x;
+		int z;
+
 	public:
-		EditorSlot();
+		EditorSlot(int x, int z);
 		void update();
 	};
 

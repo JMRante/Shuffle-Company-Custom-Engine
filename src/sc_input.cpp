@@ -61,6 +61,8 @@ namespace sc
 		events.clear();
 		keysPressed.clear();
 		keysReleased.clear();
+		mousePressed.clear();
+		mouseReleased.clear();
 
 		SDL_Event event;
 		bool hasMouseWheelEvent = false;

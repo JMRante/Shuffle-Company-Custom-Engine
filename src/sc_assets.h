@@ -64,6 +64,8 @@ namespace sc
 		Mesh(ID id, std::vector<Vertex> *vertices, std::vector<int> *indices);
 		Mesh(ID id, std::vector<StageVertex> *vertices, std::vector<int> *indices);
 		~Mesh();
+
+		void updateStage(std::vector<StageVertex> *vertices, std::vector<int> *indices);
 	};
 
 	class Texture
