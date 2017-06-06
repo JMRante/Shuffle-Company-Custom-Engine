@@ -24,9 +24,8 @@ namespace sc
 
 		targetState->addEntity(id);
 		Stage* stage = targetState->addComponent<Stage>(id, new Stage());
-		stage->loadStage(filepath);
 		targetState->addComponent<Transform>(id, new Transform());
-		targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_STAGE"), true));
+		targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_STAGE")));
 
 		return id;
 	}
@@ -79,7 +78,7 @@ namespace sc
 	{
 		targetState->addEntity(id);
 		targetState->addComponent<Transform>(id, new Transform());
-		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(position.x, position.y, size.x, size.y, pivot.x, pivot.y, color, true));
+		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(position.x, position.y, size.x, size.y, pivot.x, pivot.y, color));
 		dr->calculateTransform();
 
 		return id;
@@ -89,7 +88,7 @@ namespace sc
 	{
 		targetState->addEntity(id);
 		targetState->addComponent<Transform>(id, new Transform());
-		DrawSprite* ds = targetState->addComponent<DrawSprite>(id, new DrawSprite(position.x, position.y, scale.x, scale.y, pivot.x, pivot.y, spriteId, true));
+		DrawSprite* ds = targetState->addComponent<DrawSprite>(id, new DrawSprite(position.x, position.y, scale.x, scale.y, pivot.x, pivot.y, spriteId));
 		ds->calculateTransform();
 
 		return id;
@@ -116,10 +115,38 @@ namespace sc
 		tran->position = position;
 		tran->calculateWorldMatrix();
 
-		DrawModel* dm = targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_EDITSLOTA"), true));
+		DrawModel* dm = targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_EDITSLOTA")));
 		dm->addToMouseSelectable();
 
 		targetState->addComponent<EditorSlot>(id, new EditorSlot(x, z));
+
+		return id;
+	}
+
+	ID PrefabFactory::createSpriteButton(ID id, glm::vec2 position, glm::vec2 size, ID spriteId)
+	{
+		targetState->addEntity(id);
+		targetState->addEntityTag(id, ID("T_BUTTON"));
+
+		targetState->addComponent<Transform>(id, new Transform());
+		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(position.x, position.y, size.x, size.y, 0.0f, 0.0f, glm::vec4(74.0f/255.0f, 74.0f/255.0f, 79.0f/255.0f, 1.0f)));
+		dr->setLayer(1);
+		dr->calculateTransform();
+		dr->addToMouseSelectable();
+		
+		ID foreId = ID((std::string(id.get()) + std::string("FORE")).c_str());
+		targetState->addEntity(foreId);
+		targetState->addComponent<Transform>(foreId, new Transform());
+		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(foreId, new DrawRectangle(position.x + 2.0f, position.y + 2.0f, size.x - 4.0f, size.y - 4.0f, 0.0f, 0.0f, glm::vec4(45.0f/255.0f, 45.0f/255.0f, 46.0f/255.0f, 1.0f)));
+		dr2->setLayer(2);
+		dr2->calculateTransform();
+
+		ID foreSpriteId = ID((std::string(id.get()) + std::string("SP")).c_str());
+		targetState->addEntity(foreSpriteId);
+		targetState->addComponent<Transform>(foreSpriteId, new Transform());
+		DrawSprite* ds = targetState->addComponent<DrawSprite>(foreSpriteId, new DrawSprite(position.x, position.y, 1.0f, 1.0f, 0.0f, 0.0f, spriteId));
+		ds->setLayer(3);
+		ds->calculateTransform();
 
 		return id;
 	}
@@ -132,7 +159,7 @@ namespace sc
 		{
 			targetState->addEntity(id);
 			targetState->addComponent<Transform>(id, new Transform());
-			DrawSprite* ds = targetState->addComponent<DrawSprite>(id, new DrawSprite(input.getMouseX(), input.getMouseY(), 1.0, 1.0, 0.0f, 32.0f, ID("SP_POINTCUR"), true));
+			DrawSprite* ds = targetState->addComponent<DrawSprite>(id, new DrawSprite(input.getMouseX(), input.getMouseY(), 1.0, 1.0, 0.0f, 32.0f, ID("SP_POINTCUR")));
 			ds->calculateTransform();
 			targetState->addComponent<Cursor>(id, new Cursor());			
 		}

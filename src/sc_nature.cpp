@@ -293,6 +293,16 @@ namespace sc
 			cursorState = CursorState::point;
 		}
 
+		if (state->entityHasTag(input.mouseSelectedEntity, ID("T_BUTTON")))
+		{
+			cursorState = CursorState::hover;
+		}
+
+		if (input.mouseButtonHeld(SDL_BUTTON_LEFT))
+		{
+			cursorState = CursorState::click;
+		}
+
 		switch (cursorState)
 		{
 		case CursorState::point:

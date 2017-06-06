@@ -930,6 +930,9 @@ namespace sc
 		spriteStack.pushBase(new Sprite(ID("SP_HOVERCUR"), "Resources/Textures/Cursor/SP_HOVERCUR.png"));
 		spriteStack.pushBase(new Sprite(ID("SP_POINTCUR"), "Resources/Textures/Cursor/SP_POINTCUR.png"));
 
+		spriteStack.pushBase(new Sprite(ID("SP_SAVEICON"), "Resources/Textures/Icons/SP_SAVEICON.png"));
+		spriteStack.pushBase(new Sprite(ID("SP_LOADICON"), "Resources/Textures/Icons/SP_LOADICON.png"));
+
 		//Load Fonts
 		fontStack.pushBase(new Font(ID("FT_TEST"), "Resources/Fonts/OpenSans-Regular.ttf", 28));
 		fontStack.pushBase(new Font(ID("FT_MONO"), "Resources/Fonts/RobotoMono-Regular.ttf", 16));

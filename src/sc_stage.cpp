@@ -19,11 +19,25 @@ namespace sc
 	Brush::Brush(int texNum)
 	{
 		tex_E = texNum;
-		tex_N = texNum;
 		tex_W = texNum;
 		tex_S = texNum;
 		tex_T = texNum;
-		tex_B = texNum;		
+	}
+
+	Brush::Brush(int texTop, int texBottom)
+	{
+		tex_E = texBottom;
+		tex_W = texBottom;
+		tex_S = texBottom;
+		tex_T = texTop;
+	}
+
+	Brush::Brush(int texTop, int texSouth, int texWest, int texEast)
+	{
+		tex_E = texEast;
+		tex_W = texWest;
+		tex_S = texSouth;
+		tex_T = texTop;
 	}
 
 	Stage::Stage() : Component() 
@@ -32,35 +46,36 @@ namespace sc
 		depth = 10;
 		height = 10;
 		stageMesh = NULL;
-	}
 
-	bool Stage::loadStage(std::string filepath)
-	{
-		if (!readStageFile(filepath))
+		if (getDefaultStageTextures())
 		{
-			LOG_E << "Error: Could not open shuff file " << filepath;
-			return false;
+			if (loadStageTextures())
+			{
+				if (createStageMesh())
+				{
+					if (createStageModel())
+					{
+						brushes.push_back(new Brush(1));
+					}
+					else
+					{
+						LOG_E << "Error: Could not create stage model";
+					}
+				}
+				else
+				{
+					LOG_E << "Error: Could not build the stage mesh";
+				}
+			}
+			else
+			{
+				LOG_E << "Error: Could not load the stage textures to the GPU";
+			}
 		}
-
-		if (!loadStageTextures())
+		else
 		{
-			LOG_E << "Error: Could not load the stage textures";
-			return false;
+			LOG_E << "Error: Could not get the default stage textures";
 		}
-
-		if (!createStageMesh())
-		{
-			LOG_E << "Error: Could not build the stage mesh";
-			return false;
-		}
-
-		if (!createStageModel())
-		{
-			LOG_E << "Error: Could not create stage model";
-			return false;
-		}
-
-		return true;
 	}
 
 	bool Stage::readStageFile(std::string filepath)
@@ -71,101 +86,18 @@ namespace sc
 		if (file)
 		{
 			Tokenizer t(&file);
-			t.addDelimiter('\r');
-			t.addDelimiter('\n');
-			t.addDelimiter(' ');
 
-			t.next();
-
-			if (t.check("word", "shuff"))
+			if (parseName(t))
 			{
-				LOG_I << "Reading shuff file";
-				t.next();
-				if (t.check("word", "brushes"))
+				if (parseDimensions(t))
 				{
-					LOG_I << "Reading brushes";
-					t.next();
-					if (t.checkType("word"))
+					if (parseTextures(t))
 					{
-						while (t.checkType("word") && !t.checkToken("stage"))
+						if (parseBrushes(t))
 						{
-							int textureNum = getTextureNum(t.getToken());
-
-							if (textureNum == 255)
+							if (parseStage(t))
 							{
-								if (textures.size() >= MAX_SIMPLE_TEXTURES)
-								{
-									LOG_E << "Stage has too many simple textures";
-									return false;
-								}
-
-								textures.push_back(t.getToken());
-								textureNum = (int)(textures.size() - 1);
-							}
-
-							brushes.push_back(Brush(textureNum));
-							LOG_I << "Texture: " << t.getToken();
-							t.next();
-							if (t.checkType("statementEnd"))
-							{
-								LOG_I << "End Brush";
-							}
-							else break;
-							t.next();
-						}
-
-						if (t.check("word", "stage"))
-						{
-							LOG_I << "Reading stage";
-
-							int brush;
-							int x = 0;
-							int y = 0;
-							int z = 0;
-
-							t.next();
-							if (t.checkType("int"))
-							{
-								while (t.checkType("int"))
-								{
-									brush = atoi(t.getToken().c_str());
-									brush += 1;
-									LOG_I << "Brush: " << brush;
-									t.next();
-									if (t.checkType("int"))
-									{
-										x = atoi(t.getToken().c_str());
-										LOG_I << "X: " << x;
-										t.next();
-										if (t.checkType("int"))
-										{
-											y = atoi(t.getToken().c_str());
-											LOG_I << "Y: " << y;
-											t.next();
-											if (t.checkType("int"))
-											{
-												z = atoi(t.getToken().c_str());
-												LOG_I << "Z: " << z;
-												t.next();
-												if (t.checkType("statementEnd"))
-												{
-													LOG_I << "End Stage Chunk";
-													stage[x][y][z] = brush;
-													if (!t.next())
-													{
-														file.close();
-														LOG_I << "Read shuff file successfully";
-														return true;
-													}											
-												}
-												else break;
-											}
-											else break;
-										}
-										else break;
-									}
-									else break;
-								}
+								return true;
 							}
 						}
 					}
@@ -174,6 +106,7 @@ namespace sc
 		}
 		else
 		{
+			LOG_E << "Failed to load file " << filepath;
 			return false;
 		}
 
@@ -182,57 +115,300 @@ namespace sc
 		return false;
 	}
 
-	bool Stage::loadStageTextures()
+	bool Stage::parseName(Tokenizer &t)
 	{
-		std::vector<GLuint*> dataArray;
+		t.next();
 
-		ILuint texIds[MAX_SIMPLE_TEXTURES];
-		ilGenImages(MAX_SIMPLE_TEXTURES, texIds);
-
-		ILboolean success;
-
-		for (size_t i = 0; i < textures.size(); i++)
+		if (t.check(Token::word, "NAME"))
 		{
-			ilBindImage(texIds[i]);
+			t.next();
 
-			success = ilLoadImage(("Resources/StageTextures/Simple/Albedo/ST_" + textures[i] + ".png").c_str());
-
-			if (success == IL_TRUE)
+			if (t.check(Token::colon))
 			{
-				success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+				t.next();
 
-				if (success == IL_TRUE)
+				if (t.check(Token::string))
 				{
-					if (ilGetInteger(IL_IMAGE_WIDTH) == SIMPLE_TEXTURE_DIM && ilGetInteger(IL_IMAGE_HEIGHT) == SIMPLE_TEXTURE_DIM)
+					name = t.getToken();
+					t.next();
+
+					if (t.check(Token::semicolon))
 					{
-						dataArray.push_back((GLuint*)ilGetData());
-					}
-					else
-					{
-						LOG_E << "Simple stage texture has wrong dimensions. Should be 256x256";
-						return false;
+						return true;
 					}
 				}
-				else
-				{
-					LOG_E << "Error converting image to RGBA";
-					return false;
-				}
-			}
-			else
-			{
-				LOG_E << "Error loading simple stage texture";
-				return false;
 			}
 		}
 
-		assets.textureStack.pushWorld(new Texture(ID("TX_STAGE"), SIMPLE_TEXTURE_DIM, SIMPLE_TEXTURE_DIM, dataArray));
-		ilDeleteImages(MAX_SIMPLE_TEXTURES, texIds);
+		return false;
+	}
 
-		std::vector<ID> tempString;
-		tempString.push_back(ID("TX_STAGE"));
-		
-		return assets.materialStack.pushWorld(new Material(ID("MA_STAGE"), NULL, NULL, NULL, &tempString, ID("SH_STAGE")));
+	bool Stage::parseDimensions(Tokenizer &t)
+	{
+		t.next();
+
+		if (t.check(Token::word, "W"))
+		{
+			t.next();
+
+			if (t.check(Token::colon))
+			{
+				t.next();
+
+				if (t.check(Token::integer))
+				{
+					width = atoi(t.getToken().c_str());
+					t.next();
+
+					if (t.check(Token::semicolon));
+					{
+						t.next();
+
+						if (t.check(Token::word, "H"))
+						{
+							t.next();
+
+							if (t.check(Token::colon))
+							{
+								t.next();
+
+								if (t.check(Token::integer))
+								{
+									height = atoi(t.getToken().c_str());
+									t.next();
+
+									if (t.check(Token::semicolon));
+									{
+										t.next();
+
+										if (t.check(Token::word, "D"))
+										{
+											t.next();
+
+											if (t.check(Token::colon))
+											{
+												t.next();
+
+												if (t.check(Token::integer))
+												{
+													depth = atoi(t.getToken().c_str());
+													t.next();
+
+													if (t.check(Token::semicolon));
+													{
+														return true;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	bool Stage::parseTextures(Tokenizer &t)
+	{
+		textures.clear();
+		t.next();
+
+		if (t.check(Token::word, "TEX"))
+		{
+			t.next();
+
+			if (t.check(Token::colon))
+			{
+				t.next();
+
+				while (t.check(Token::word))
+				{
+					textures.push_back(t.getToken());
+					t.next();
+
+					if (t.check(Token::comma))
+					{
+						t.next();
+					}
+					else if (t.check(Token::semicolon))
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	bool Stage::parseBrushes(Tokenizer &t)
+	{
+		brushes.clear();
+		t.next();
+
+		if (t.check(Token::word, "BRUSH"))
+		{
+			t.next();
+
+			if (t.check(Token::colon))
+			{
+				t.next();
+
+				while (t.check(Token::paranl))
+				{
+					bool complete = false;
+					t.next();
+
+					if (t.check(Token::integer))
+					{
+						int top = atoi(t.getToken().c_str());
+						t.next();
+
+						if (t.check(Token::comma))
+						{
+							t.next();
+
+							if (t.check(Token::integer))
+							{
+								int bottom = atoi(t.getToken().c_str());
+								t.next();
+
+								if (t.check(Token::comma))
+								{
+									t.next();
+
+									if (t.check(Token::integer))
+									{
+										int west = atoi(t.getToken().c_str());
+										t.next();
+
+										if (t.check(Token::comma))
+										{
+											t.next();
+
+											if (t.check(Token::integer))
+											{
+												int east = atoi(t.getToken().c_str());
+												t.next();
+
+												if (t.check(Token::paranr))
+												{
+													brushes.push_back(new Brush(top, bottom, west, east));
+													t.next();
+													complete = true;
+												}
+											}
+										}
+									}
+								}
+								else if (t.check(Token::paranr))
+								{
+									brushes.push_back(new Brush(top, bottom));
+									t.next();
+									complete = true;
+								}
+							}
+						}
+						else if (t.check(Token::paranr))
+						{
+							brushes.push_back(new Brush(top));
+							t.next();
+							complete = true;
+						}
+					}
+
+					if (!complete)
+					{
+						return false;
+					}
+				}
+
+				if (t.check(Token::semicolon))
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	bool Stage::parseStage(Tokenizer &t)
+	{
+		std::fill(stage, stage + (STAGE_WIDTH * STAGE_HEIGHT * STAGE_DEPTH), 0);
+		int i = 0;
+		t.next();
+
+		if (t.check(Token::word, "STAGE"))
+		{
+			t.next();
+
+			if (t.check(Token::colon))
+			{
+				t.next();
+
+				while (t.check(Token::paranl))
+				{
+					bool complete = false;
+					t.next();
+
+					if (t.check(Token::integer))
+					{
+						int brush = atoi(t.getToken().c_str());
+						t.next();
+
+						if (t.check(Token::comma))
+						{
+							t.next();
+
+							if (t.check(Token::integer))
+							{
+								int count = atoi(t.getToken().c_str());
+								t.next();
+
+								if (t.check(Token::paranr))
+								{
+									for (int j = 0; j < count; j++)
+									{
+										stage[i] = brush;
+										i++;
+									}
+
+									t.next();
+									complete = true;
+								}
+							}
+						}
+					}
+
+					if (!complete)
+					{
+						return false;
+					}
+				}
+
+				if (t.check(Token::semicolon))
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	bool Stage::writeStageFile(std::string filepath)
+	{
+		return true;
 	}
 
 	bool Stage::createStageMesh()
@@ -257,21 +433,18 @@ namespace sc
 		int vertCount = 0;
 		StageVertex tempVert;
 
-		LOG_D; LOG_D << "Building Stage Mesh";
-
 		for (int i = 0; i < STAGE_WIDTH; i++)
 		{
 			for (int j = 0; j < STAGE_HEIGHT; j++)
 			{
 				for (int k = 0; k < STAGE_DEPTH; k++)
 				{
-					if (stage[i][j][k] != 0)
+					if (get(i, j, k) != 0)
 					{
-						LOG_D << "(" << i << ", " << j << ", " << k << ") = " << stage[i][j][k];
-						Brush* brush = &(brushes[stage[i][j][k] - 1]);
+						Brush* brush = brushes[get(i, j, k) - 1];
 						
 						//E
-						if (i + 1 >= STAGE_WIDTH || stage[i + 1][j][k] == 0)
+						if (i + 1 >= STAGE_WIDTH || get(i + 1, j, k) == 0)
 						{
 							tempVert.position     = glm::vec3(i + 1.0f, j + 0.0f, k + 0.0f);
 							tempVert.normal       = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -303,7 +476,7 @@ namespace sc
 						}
 
 						//W
-						if (i - 1 <= -1 || stage[i - 1][j][k] == 0)
+						if (i - 1 <= -1 || get(i - 1, j, k) == 0)
 						{
 							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 1.0f);
 							tempVert.normal       = glm::vec3(-1.0f, 0.0f, 0.0f);
@@ -335,7 +508,7 @@ namespace sc
 						}
 
 						//T
-						if (j + 1 >= STAGE_HEIGHT || stage[i][j + 1][k] == 0)
+						if (j + 1 >= STAGE_HEIGHT || get(i, j + 1, k) == 0)
 						{
 							tempVert.position     = glm::vec3(i + 0.0f, j + 1.0f, k + 1.0f);
 							tempVert.normal       = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -399,7 +572,7 @@ namespace sc
 						// }
 
 						//S
-						if (k + 1 >= STAGE_DEPTH || stage[i][j][k + 1] == 0)
+						if (k + 1 >= STAGE_DEPTH || get(i, j, k + 1) == 0)
 						{
 							tempVert.position     = glm::vec3(i + 0.0f, j + 0.0f, k + 1.0f);
 							tempVert.normal       = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -467,16 +640,6 @@ namespace sc
 		}
 	}
 
-	bool Stage::createStageModel()
-	{
-		if (assets.modelStack.pushWorld(new Model(ID("MO_STAGE"), ID("ME_STAGE"), ID("MA_STAGE"))) != NULL)
-		{
-			return true;			
-		}
-
-		return false;
-	}
-
 	void Stage::updateStageMesh()
 	{
 		std::vector<StageVertex> stageVertices;
@@ -487,68 +650,64 @@ namespace sc
 		stageMesh->updateStage(&stageVertices, &stageIndices);		
 	}
 
-	int Stage::getTextureX(int textureNum)
+	bool Stage::getDefaultStageTextures()
 	{
-		if (textureNum < 128)
-		{
-			return (textureNum * SIMPLE_TEXTURE_DIM) % STAGE_TEXTURE_DIM;
-		}
-
-		if (textureNum < 192)
-		{
-			return (textureNum * SIMPLE_TEXTURE_DIM) % (STAGE_TEXTURE_DIM / 2);
-		}
-
-		if (textureNum == 192)
-		{
-			return 2186;
-		}
-
-		if (textureNum == 193)
-		{
-			return 3072;
-		}
-
-		return -1;
+		textures.push_back("RED");
+		textures.push_back("BLUE");
+		return true;
 	}
 
-	int Stage::getTextureY(int textureNum)
+	bool Stage::loadStageTextures()
 	{
-		if (textureNum < 192)
+		std::vector<GLuint*> dataArray;
+
+		ILuint texIds[MAX_SIMPLE_TEXTURES];
+		ilGenImages(MAX_SIMPLE_TEXTURES, texIds);
+
+		ILboolean success;
+
+		for (size_t i = 0; i < textures.size(); i++)
 		{
-			return ((textureNum * SIMPLE_TEXTURE_DIM) / STAGE_TEXTURE_DIM) * SIMPLE_TEXTURE_DIM;
+			ilBindImage(texIds[i]);
+
+			success = ilLoadImage(("Resources/StageTextures/Simple/Albedo/ST_" + textures[i] + ".png").c_str());
+
+			if (success == IL_TRUE)
+			{
+				success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+
+				if (success == IL_TRUE)
+				{
+					if (ilGetInteger(IL_IMAGE_WIDTH) == SIMPLE_TEXTURE_DIM && ilGetInteger(IL_IMAGE_HEIGHT) == SIMPLE_TEXTURE_DIM)
+					{
+						dataArray.push_back((GLuint*)ilGetData());
+					}
+					else
+					{
+						LOG_E << "Simple stage texture has wrong dimensions. Should be 256x256";
+						return false;
+					}
+				}
+				else
+				{
+					LOG_E << "Error converting image to RGBA";
+					return false;
+				}
+			}
+			else
+			{
+				LOG_E << "Error loading simple stage texture";
+				return false;
+			}
 		}
 
-		if (textureNum == 192 || textureNum == 193)
-		{
-			return 2048;
-		}
+		assets.textureStack.pushWorld(new Texture(ID("TX_STAGE"), SIMPLE_TEXTURE_DIM, SIMPLE_TEXTURE_DIM, dataArray));
+		ilDeleteImages(MAX_SIMPLE_TEXTURES, texIds);
 
-		return -1;
-	}
-
-	float Stage::getTextureUMin(int textureNum)
-	{
-		// return (float)getTextureX(textureNum) / (float)STAGE_TEXTURE_DIM;
-		return 0.0f;
-	}
-
-	float Stage::getTextureVMin(int textureNum)
-	{
-		// return (float)getTextureY(textureNum) / (float)STAGE_TEXTURE_DIM;
-		return 0.0f;
-	}
-
-	float Stage::getTextureUMax(int textureNum)
-	{
-		// return getTextureUMin(textureNum) + ((float)SIMPLE_TEXTURE_DIM / (float)STAGE_TEXTURE_DIM);
-		return 0.5f;
-	}
-
-	float Stage::getTextureVMax(int textureNum)
-	{
-		// return getTextureVMin(textureNum) + ((float)SIMPLE_TEXTURE_DIM / (float)STAGE_TEXTURE_DIM);
-		return 0.5f;
+		std::vector<ID> tempString;
+		tempString.push_back(ID("TX_STAGE"));
+		
+		return assets.materialStack.pushWorld(new Material(ID("MA_STAGE"), NULL, NULL, NULL, &tempString, ID("SH_STAGE")));
 	}
 
 	int Stage::getTextureNum(std::string textureName)
@@ -568,6 +727,16 @@ namespace sc
 		return 255;
 	}
 
+	bool Stage::createStageModel()
+	{
+		if (assets.modelStack.pushWorld(new Model(ID("MO_STAGE"), ID("ME_STAGE"), ID("MA_STAGE"))) != NULL)
+		{
+			return true;			
+		}
+
+		return false;
+	}
+
 	int Stage::getWidth()
 	{
 		return width;
@@ -583,11 +752,21 @@ namespace sc
 		return height;
 	}
 
+	int Stage::get(int x, int y, int z)
+	{
+		return stage[x + (y * STAGE_WIDTH) + (z * STAGE_WIDTH * STAGE_HEIGHT)];
+	}
+
+	void Stage::set(int x, int y, int z, int brush)
+	{
+		stage[x + (y * STAGE_WIDTH) + (z * STAGE_WIDTH * STAGE_HEIGHT)] = brush;
+	}
+
 	void Stage::drawBrush(std::vector<glm::ivec3>* slots, int brush)
 	{
 		for (auto it = slots->begin(); it != slots->end(); it++) 
 		{
-			stage[(*it).x][(*it).y][(*it).z] = brush + 1;
+			set((*it).x, (*it).y, (*it).z, brush + 1);
 		}
 	}
 }

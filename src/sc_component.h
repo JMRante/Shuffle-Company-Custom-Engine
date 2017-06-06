@@ -63,6 +63,9 @@ namespace sc
 		glm::vec3 rotation;
 		glm::vec3 scale;
 
+		// Transform* parent;
+		// std::vector<Transform*> children;
+
 		Transform();
 		Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
 
@@ -124,7 +127,7 @@ namespace sc
 		Model* model;
 
 		DrawModel();
-		DrawModel(ID modelId, bool isVisible);
+		DrawModel(ID modelId);
 		void render(ID cameraId);
 		void mouseRender(ID cameraId, unsigned int index);
 
@@ -167,7 +170,7 @@ namespace sc
 
 		glm::vec4 color;
 
-		DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color, bool isVisible);
+		DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color);
 		void render(ID cameraId);
 		void mouseRender(ID cameraId, unsigned int index);
 		void calculateTransform();
@@ -185,7 +188,7 @@ namespace sc
 
 		Sprite* sprite;
 
-		DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId, bool isVisible);
+		DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId);
 		void render(ID cameraId);
 		void mouseRender(ID cameraId, unsigned int index);
 		void calculateTransform();

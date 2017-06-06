@@ -230,7 +230,7 @@ namespace sc
 	Draw::Draw() : Component()
 	{
 		isMouseSelectable = false;
-		isVisible = false;
+		isVisible = true;
 	}
 
 	void Draw::addToMouseSelectable() {}
@@ -245,15 +245,13 @@ namespace sc
 		addType(ID("DRAWMODEL"));
 
 		model = assets.modelStack.get("MO_ERROR");
-		this->isVisible = false;
 	}
 
-	DrawModel::DrawModel(ID modelId, bool isVisible) : Draw()
+	DrawModel::DrawModel(ID modelId) : Draw()
 	{
 		addType(ID("DRAWMODEL"));
 
 		model = assets.modelStack.get(modelId);
-		this->isVisible = isVisible;
 	}
 
 	void DrawModel::render(ID cameraId)
@@ -456,7 +454,7 @@ namespace sc
 	/*
 		DrawRectangle
 						*/
-	DrawRectangle::DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color, bool isVisible) : DrawOrtho()
+	DrawRectangle::DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color) : DrawOrtho()
 	{
 		addType(ID("DRAWRECTANGLE"));
 
@@ -563,7 +561,7 @@ namespace sc
 	/*
 		DrawSprite
 					*/
-	DrawSprite::DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId, bool isVisible) : DrawOrtho()
+	DrawSprite::DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId) : DrawOrtho()
 	{
 		addType(ID("DRAWSPRITE"));
 
@@ -574,7 +572,6 @@ namespace sc
 		this->pivotX = pivotX;
 		this->pivotY = pivotY;
 		this->sprite = assets.spriteStack.get(spriteId);
-		this->isVisible = isVisible;
 	}
 
 	void DrawSprite::calculateTransform()
@@ -682,7 +679,6 @@ namespace sc
 		this->color = color;
 		this->font = assets.fontStack.get(fontId);
 
-		isVisible = true;
 		hAlignment = TextHAlign::left;
 		vAlignment = TextVAlign::top;
 		justification = TextHAlign::left;

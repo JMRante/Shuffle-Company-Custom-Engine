@@ -22,58 +22,114 @@ namespace sc
 	{
 		char c = stream->peek();
 		currentToken.clear();
-		bool gotDelimiters = false;
+		currentType = Token::none;
 
 		if (c != EOF)
 		{
-			while (c != EOF)
+			while (c == '\r' || c == '\n' || c == ' ')
 			{
-				if (std::find(delimiters.begin(), delimiters.end(), c) == delimiters.end())
+				stream->get(c);
+			}
+
+			if (std::isdigit(c))
+			{
+				currentType = Token::integer;
+
+				while (std::isdigit(stream->peek()))
 				{
-					if (gotDelimiters == true)
-					{
-						return true;
-					}
-
-					if (std::isdigit(c) && currentToken.size() == 0)
-					{
-						currentType = "int";
-					}
-					else if (c == ';')
-					{
-						currentType = "statementEnd";
-					}
-					else
-					{
-						currentType = "word";
-					}
-
 					stream->get(c);
 					currentToken += c;
 				}
-				else
+
+				return true;
+			}
+			else if (c == ';')
+			{
+				currentType = Token::semicolon;
+				stream->get(c);
+				currentToken += c;
+				return true;
+			}
+			else if (c == ':')
+			{
+				currentType = Token::colon;
+				stream->get(c);
+				currentToken += c;
+				return true;
+			}
+			else if (c == ',')
+			{
+				currentType = Token::comma;
+				stream->get(c);
+				currentToken += c;
+				return true;
+			}
+			else if (c == '(')
+			{
+				currentType = Token::paranl;
+				stream->get(c);
+				currentToken += c;
+				return true;
+			}
+			else if (c == ')')
+			{
+				currentType = Token::paranr;
+				stream->get(c);
+				currentToken += c;
+				return true;
+			}
+			else if (c == '"')
+			{
+				currentType = Token::string;
+				stream->get(c);
+
+				while (stream->peek() != '"' && stream->peek() != EOF)
 				{
-					gotDelimiters = true;
 					stream->get(c);
+					currentToken += c;
 				}
 
-				c = stream->peek();
-			}
+				if (c == '"')
+				{
+					stream->get(c);
+					return true;
+				}
 
-			return false;	
+				if (c == EOF)
+				{
+					LOG_E << "Bad token, incomplete string";
+					return true;
+				}
+
+				return false;
+			}
+			else if (std::isalpha(c))
+			{
+				currentType = Token::word;
+
+				while (std::isalnum(stream->peek()))
+				{
+					stream->get(c);
+					currentToken += c;
+				}
+
+				return true;
+			}
+			else
+			{
+				LOG_E << "Bad token read";
+				currentType = Token::none;
+				currentToken.clear();
+				return false;
+			}	
 		}
 
-		currentToken = "null";
-		currentType = "null";
+		currentType = Token::eof;
+		currentToken = "eof";
 		return false;
 	}
 
-	void Tokenizer::addDelimiter(char delimiter)
-	{
-		delimiters.push_back(delimiter);
-	}
-
-	std::string Tokenizer::getType()
+	Token Tokenizer::getType()
 	{
 		return currentType;
 	}
@@ -83,9 +139,9 @@ namespace sc
 		return currentToken;
 	}
 
-	bool Tokenizer::checkType(std::string type)
+	bool Tokenizer::check(Token type)
 	{
-		if (type.compare(currentType) == 0)
+		if (type == currentType)
 		{
 			return true;
 		}
@@ -93,7 +149,7 @@ namespace sc
 		return false;
 	}
 
-	bool Tokenizer::checkToken(std::string token)
+	bool Tokenizer::check(std::string token)
 	{
 		if (token.compare(currentToken) == 0)
 		{
@@ -103,9 +159,9 @@ namespace sc
 		return false;
 	}
 
-	bool Tokenizer::check(std::string type, std::string token)
+	bool Tokenizer::check(Token type, std::string token)
 	{
-		if (type.compare(currentType) == 0 && token.compare(currentToken) == 0)
+		if (type == currentType && token.compare(currentToken) == 0)
 		{
 			return true;
 		}

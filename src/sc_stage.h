@@ -5,7 +5,15 @@
     sc_stage.h
     ------------------------------------
 
+	Sample Stage File:
 
+	NAME:"Crate's Landing";
+	W:20;
+	H:10;
+	D:30;
+	TEX:RED,BLUE;
+	BRUSH:(0)(1)(0,1);
+	STAGE:(0,4)(2,45);
 
 */
 
@@ -16,6 +24,7 @@
 #include <fstream>
 #include <string>
 #include <cmath>
+#include <algorithm>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -30,7 +39,7 @@
 
 #define STAGE_WIDTH 200
 #define STAGE_DEPTH 200
-#define STAGE_HEIGHT 100
+#define STAGE_HEIGHT 20
 
 #define MAX_SIMPLE_TEXTURES 200
 #define MAX_AUTO_TEXTURES 20
@@ -44,51 +53,54 @@ namespace sc
 	{
 	public:
 		int tex_E;
-		int tex_N;
 		int tex_W;
 		int tex_S;
 		int tex_T;
-		int tex_B;
 
 		Brush(int texNum);
+		Brush(int texTop, int texBottom);
+		Brush(int texTop, int texSouth, int texWest, int texEast);
 	};
 
 	class Stage : public Component
 	{
 	private:
 		std::vector<std::string> textures;
-		std::vector<Brush> brushes;
-		int stage[STAGE_WIDTH][STAGE_HEIGHT][STAGE_DEPTH] = {};
+		std::vector<Brush*> brushes;
+		int stage[STAGE_WIDTH * STAGE_HEIGHT * STAGE_DEPTH] = {};
 		int width;
 		int depth;
 		int height;
 		Mesh* stageMesh;
+		std::string name;
 
 	public:
 		Stage();
 
-		bool loadStage(std::string filepath);
 		bool readStageFile(std::string filepath);
-		bool loadStageTextures();
+		bool parseName(Tokenizer &t);
+		bool parseDimensions(Tokenizer &t);
+		bool parseTextures(Tokenizer &t);
+		bool parseBrushes(Tokenizer &t);
+		bool parseStage(Tokenizer &t);
+		bool writeStageFile(std::string filepath);
+
 		bool createStageMesh();
 		void buildStageMesh(std::vector<StageVertex> &stageVertices, std::vector<int> &stageIndices);
-		bool createStageModel();
-
 		void updateStageMesh();
 
-		int getTextureX(int textureNum);
-		int getTextureY(int textureNum);
-
-		float getTextureUMin(int textureNum);
-		float getTextureVMin(int textureNum);
-		float getTextureUMax(int textureNum);
-		float getTextureVMax(int textureNum);
-
+		bool getDefaultStageTextures();
+		bool loadStageTextures();
 		int getTextureNum(std::string textureName);
+
+		bool createStageModel();
 
 		int getWidth();
 		int getDepth();
 		int getHeight();
+
+		int get(int x, int y, int z);
+		void set(int x, int y, int z, int brush);
 
 		void drawBrush(std::vector<glm::ivec3>* slots, int brush);
 	};

@@ -21,23 +21,22 @@
 
 namespace sc
 {
+	enum Token {none, integer, semicolon, colon, comma, paranl, paranr, string, word, eof};
 	class Tokenizer
 	{
 	private:
-		std::string currentType;
+		Token currentType;
 		std::string currentToken;
-		std::vector<char> delimiters;
 		std::istream* stream;
 
 	public:
 		Tokenizer(std::istream* stream);
 		bool next();
-		void addDelimiter(char delimiter);
-		std::string getType();
+		Token getType();
 		std::string getToken();
-		bool checkType(std::string type);
-		bool checkToken(std::string token);
-		bool check(std::string type, std::string token);
+		bool check(Token type);
+		bool check(std::string token);
+		bool check(Token type, std::string token);
 	};
 }
 
