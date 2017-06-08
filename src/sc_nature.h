@@ -110,6 +110,16 @@ namespace sc
 		FramerateCounter();
 		void update();
 	};
+
+	class Button : public Nature
+	{
+	private:
+		DrawRectangle* fore;
+
+	public:
+		Button();
+		void update();
+	};
 }
 
 #endif

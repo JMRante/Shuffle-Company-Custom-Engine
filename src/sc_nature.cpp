@@ -101,7 +101,7 @@ namespace sc
 	/*
 		EditorCamera
 						*/
-	EditorCamera::EditorCamera(float keyMoveSpeed, float mouseMoveSpeed)
+	EditorCamera::EditorCamera(float keyMoveSpeed, float mouseMoveSpeed) : Nature()
 	{
 		this->keyMoveSpeed = keyMoveSpeed;
 		this->mouseMoveSpeed = mouseMoveSpeed;
@@ -229,7 +229,7 @@ namespace sc
 	/*
 		EditorSlot
 				*/
-	EditorSlot::EditorSlot(int x, int z) 
+	EditorSlot::EditorSlot(int x, int z) : Nature()
 	{
 		this->x = x;
 		this->z = z;
@@ -263,7 +263,7 @@ namespace sc
 	/*
 		Cursor
 				*/
-	Cursor::Cursor()
+	Cursor::Cursor() : Nature()
 	{
 		cursorState = CursorState::point;
 
@@ -324,7 +324,7 @@ namespace sc
 	/*
 		FramerateCounter
 						*/
-	FramerateCounter::FramerateCounter()
+	FramerateCounter::FramerateCounter() : Nature()
 	{
 		framerateHistoryCount = -1;
 		framerateAverage = 0;
@@ -385,6 +385,23 @@ namespace sc
 		else
 		{
 			dt->setText(fToS(framerateAverage));
+		}
+	}
+
+	Button::Button() : Nature()
+	{
+	}
+
+	void Button::update()
+	{
+		if (fore == NULL)
+		{
+			fore = state->getComponent<DrawRectangle>(ID(entityId.getStr() + "FORE"));
+		}
+
+		if (fore != NULL)
+		{
+			
 		}
 	}
 }

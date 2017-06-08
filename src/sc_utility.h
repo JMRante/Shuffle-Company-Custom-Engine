@@ -41,10 +41,12 @@ namespace sc
 	public:
 		ID();
 		ID(const char* id);
+		ID(std::string str);
 		bool is(const char* id) const;
 		bool is(ID id) const;
 		const char* get() const;
 		char get(int i) const;
+		std::string getStr();
 	};
 
 	bool operator<(const ID& l, const ID& r);

@@ -134,14 +134,14 @@ namespace sc
 		dr->calculateTransform();
 		dr->addToMouseSelectable();
 		
-		ID foreId = ID((std::string(id.get()) + std::string("FORE")).c_str());
+		ID foreId = ID(id.getStr() + "FORE");
 		targetState->addEntity(foreId);
 		targetState->addComponent<Transform>(foreId, new Transform());
 		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(foreId, new DrawRectangle(position.x + 2.0f, position.y + 2.0f, size.x - 4.0f, size.y - 4.0f, 0.0f, 0.0f, glm::vec4(45.0f/255.0f, 45.0f/255.0f, 46.0f/255.0f, 1.0f)));
 		dr2->setLayer(2);
 		dr2->calculateTransform();
 
-		ID foreSpriteId = ID((std::string(id.get()) + std::string("SP")).c_str());
+		ID foreSpriteId = ID(id.getStr() + "SP");
 		targetState->addEntity(foreSpriteId);
 		targetState->addComponent<Transform>(foreSpriteId, new Transform());
 		DrawSprite* ds = targetState->addComponent<DrawSprite>(foreSpriteId, new DrawSprite(position.x, position.y, 1.0f, 1.0f, 0.0f, 0.0f, spriteId));

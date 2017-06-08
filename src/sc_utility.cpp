@@ -109,6 +109,24 @@ namespace sc
         }
     }
 
+    ID::ID(std::string str)
+    {
+        int i = 0;
+        bool end = false;
+
+        while (!end && i < ID_SIZE)
+        {
+            this->id[i] = str[i];
+
+            if (str[i] == '\0')
+            {
+                end = true;
+            }
+
+            i++;
+        }        
+    }
+
     bool ID::is(const char* id) const
     {
         int i = 0;
@@ -168,6 +186,11 @@ namespace sc
         }
 
         return (const char)id[i];
+    }
+
+    std::string ID::getStr()
+    {
+        return std::string(id);
     }
 
     bool operator<(const ID& l, const ID& r)
