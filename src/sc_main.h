@@ -24,6 +24,7 @@ extern SDL_GLContext glContext;
 extern bool hasQuit;
 
 extern Uint32 startTime;
+extern Uint32 deltaTime;
 extern Sint32 delay;
 
 #endif

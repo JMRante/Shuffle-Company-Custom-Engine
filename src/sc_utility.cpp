@@ -78,6 +78,11 @@ namespace sc
         return num;
     }
 
+    float getDeltaSec()
+    {
+        return (float)deltaTime / 1000.0f;
+    }
+
     /*
         ID
             */

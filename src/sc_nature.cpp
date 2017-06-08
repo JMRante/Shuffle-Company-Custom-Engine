@@ -58,8 +58,8 @@ namespace sc
 		float mouseXDelta = (float)input.getMouseXDelta();
 		float mouseYDelta = (float)input.getMouseYDelta();
 
-		yaw += mouseXDelta * -mouseSpeed;
-		pitch += mouseYDelta * -mouseSpeed;
+		yaw += mouseXDelta * -mouseSpeed * getDeltaSec();
+		pitch += mouseYDelta * -mouseSpeed * getDeltaSec();
 		yaw = glm::mod(yaw, 360.0f);
 		pitch = glm::clamp(pitch, -89.0f, 89.0f);
 		
@@ -91,7 +91,7 @@ namespace sc
 
 		if (translate != glm::vec3(0.0f, 0.0f, 0.0f))
 		{
-			translate = moveSpeed * glm::normalize(translate);
+			translate = moveSpeed * glm::normalize(translate) * getDeltaSec();
 			trans->position = currentPosition + translate;
 			camera->calculateViewMatrix();	
 		}
@@ -129,7 +129,7 @@ namespace sc
 			float mouseXDelta = (float)input.getMouseXDelta();
 			float mouseYDelta = (float)input.getMouseYDelta();
 
-			translate = mouseMoveSpeed * glm::vec3(mouseXDelta, 0.0f, mouseYDelta);
+			translate = mouseMoveSpeed * glm::vec3(mouseXDelta, 0.0f, mouseYDelta) * getDeltaSec();
 		}
 		else
 		{
@@ -156,7 +156,7 @@ namespace sc
 
 			if (translate != glm::vec3(0.0f, 0.0f, 0.0f))
 			{
-				translate = keyMoveSpeed * glm::normalize(translate);
+				translate = keyMoveSpeed * glm::normalize(translate) * getDeltaSec();
 			}
 		}
 

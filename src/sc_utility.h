@@ -21,6 +21,7 @@
 #include <string>
 
 #include "sc_log.h"
+#include "sc_main.h"
 
 #define ID_SIZE 32
 
@@ -30,6 +31,7 @@ namespace sc
 	std::string iToS(int i);
 	std::string fToS(float f);
 	GLuint powerOfTwo(GLuint num);
+	float getDeltaSec();
 
 	class ID
 	{

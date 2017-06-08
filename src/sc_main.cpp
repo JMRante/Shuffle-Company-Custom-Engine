@@ -50,6 +50,7 @@ SDL_GLContext glContext;
 bool hasQuit = false;
 
 Uint32 startTime = 0;
+Uint32 deltaTime = 0;
 Sint32 delay = 0;
 
 bool initiate()
@@ -177,10 +178,13 @@ int main(int argc, char **argv)
 			sc::input.mouseSelectedEntity = renderer.renderForMouseSelect(game.state);
 
 			delay = startTime + MS_PER_FRAME - SDL_GetTicks();
+
 			if (delay >= 0)
 			{
 				SDL_Delay(delay);
 			}
+
+			deltaTime = SDL_GetTicks() - startTime;
 		}
 	}
 	else
