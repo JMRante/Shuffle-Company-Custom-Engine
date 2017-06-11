@@ -111,13 +111,18 @@ namespace sc
 		void update();
 	};
 
+	enum ButtonAction {saveLevel, loadLevel};
 	class Button : public Nature
 	{
 	private:
-		DrawRectangle* fore;
+		float highlightSpeed;
+		float highlightPosition;
+		glm::vec4 normalColor;
+		glm::vec4 highlightColor;
+		ButtonAction action;
 
 	public:
-		Button();
+		Button(ButtonAction action);
 		void update();
 	};
 }

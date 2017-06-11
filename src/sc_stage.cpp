@@ -83,18 +83,24 @@ namespace sc
 		std::ifstream file;
 		file.open(filepath);
 
+		LOG_D << "Parsing Level File"; LOG_FLUSH;
 		if (file)
 		{
 			Tokenizer t(&file);
 
+			LOG_D << "Reading Name"; LOG_FLUSH;
 			if (parseName(t))
 			{
+				LOG_D << "Reading Dimensions"; LOG_FLUSH;
 				if (parseDimensions(t))
 				{
+					LOG_D << "Reading Textures"; LOG_FLUSH;
 					if (parseTextures(t))
 					{
+						LOG_D << "Reading Brushes"; LOG_FLUSH;
 						if (parseBrushes(t))
 						{
+							LOG_D << "Reading Stage"; LOG_FLUSH;
 							if (parseStage(t))
 							{
 								return true;
@@ -408,6 +414,74 @@ namespace sc
 
 	bool Stage::writeStageFile(std::string filepath)
 	{
+		std::ofstream file;
+		file.open(filepath);
+
+		file << "NAME:\"" << name << "\";\n";
+		file << "W:" << width << ";\n";
+		file << "H:" << height << ";\n";
+		file << "D:" << depth << ";\n";
+
+		file << "TEX:";
+		for (size_t i = 0; i < textures.size(); i++)
+		{
+			file << textures[i] << ",";
+		}
+		file << ";\n";
+
+		file << "BRUSH:";
+		for (size_t i = 0; i < brushes.size(); i++)
+		{
+			file << "(";
+
+			if (brushes[i]->tex_T == brushes[i]->tex_S &&
+				brushes[i]->tex_T == brushes[i]->tex_W &&
+				brushes[i]->tex_T == brushes[i]->tex_E)
+			{
+				file << brushes[i]->tex_T;
+			}
+			else if (brushes[i]->tex_T != brushes[i]->tex_S &&
+					 brushes[i]->tex_S == brushes[i]->tex_W &&
+					 brushes[i]->tex_S == brushes[i]->tex_E)
+			{
+				file << brushes[i]->tex_T;
+				file << ",";
+				file << brushes[i]->tex_S;
+			}
+			else
+			{
+				file << brushes[i]->tex_T;
+				file << ",";
+				file << brushes[i]->tex_S;
+				file << ",";
+				file << brushes[i]->tex_W;
+				file << ",";
+				file << brushes[i]->tex_E;
+			}
+
+			file << ")";
+		}
+		file << ";\n";
+
+		int j = 0;
+		file << "STAGE:";		
+		while (j < STAGE_WIDTH * STAGE_HEIGHT * STAGE_DEPTH)
+		{
+			int brushLineCount = 0;
+			int currentBrush = stage[j];
+
+			while (stage[j] == currentBrush)
+			{
+				brushLineCount++;
+				j++;
+			}
+
+			file << "(" << currentBrush << "," << brushLineCount << ")";
+		}
+		file << ";";
+
+		file.close();
+
 		return true;
 	}
 

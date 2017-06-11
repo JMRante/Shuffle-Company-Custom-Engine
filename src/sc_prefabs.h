@@ -45,7 +45,7 @@ namespace sc
 		ID createUIText(ID id, glm::vec2 position, std::string text, glm::vec4 color, ID fontId, TextHAlign ha, TextVAlign va, TextHAlign just);
 
 		ID createEditorSlot(ID id, glm::vec3 position, int x, int z);
-		ID createSpriteButton(ID id, glm::vec2 position, glm::vec2 size, ID spriteId);
+		ID createSpriteButton(ID id, glm::vec2 position, glm::vec2 size, ID spriteId, ButtonAction action);
 
 		ID createCursor();
 	};

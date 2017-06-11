@@ -388,20 +388,80 @@ namespace sc
 		}
 	}
 
-	Button::Button() : Nature()
+	Button::Button(ButtonAction action) : Nature()
 	{
+		highlightSpeed = 4.0f;
+		highlightPosition = 0.0f;
+		normalColor = glm::vec4(45.0f/255.0f, 45.0f/255.0f, 46.0f/255.0f, 1.0f);
+		highlightColor = glm::vec4(74.0f/255.0f, 74.0f/255.0f, 79.0f/255.0f, 1.0f);
+		this->action = action;
 	}
 
 	void Button::update()
 	{
-		if (fore == NULL)
-		{
-			fore = state->getComponent<DrawRectangle>(ID(entityId.getStr() + "FORE"));
-		}
+		bool isMouseHere = entityId.is(input.mouseSelectedEntity);
+		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
+		DrawRectangle* fore = state->getComponent<DrawRectangle>(ID(entityId.getStr() + "FORE"));
 
 		if (fore != NULL)
 		{
-			
+			if (isMouseHere)
+			{
+				if (highlightPosition <= 1.0f)
+				{
+					highlightPosition += highlightSpeed * getDeltaSec();
+				}
+				
+				if (highlightPosition > 1.0f)
+				{
+					highlightPosition = 1.0f;
+				}
+			}
+			else
+			{
+				if (highlightPosition >= 0.0f)
+				{
+					highlightPosition -= highlightSpeed * getDeltaSec();
+				}
+				
+				if (highlightPosition < 0.0f)
+				{
+					highlightPosition = 0.0f;
+				}
+			}
+
+			if (isMouseHere && input.mouseButtonHeld(SDL_BUTTON_LEFT))
+			{
+				fore->color = glm::vec4(109.0f/255.0f, 108.0f/255.0f, 120.0f/255.0f, 1.0f);
+			}
+			else
+			{
+				fore->color = glm::vec4(lerp(normalColor.x, highlightColor.x, highlightPosition), lerp(normalColor.y, highlightColor.y, highlightPosition), lerp(normalColor.z, highlightColor.z, highlightPosition), 1.0f);
+			}
+		}
+
+		if (isMouseHere && input.mouseButtonPressed(SDL_BUTTON_LEFT))
+		{
+			switch (action)
+			{
+				case ButtonAction::saveLevel:
+				{
+					stage->writeStageFile("Custom/Levels/newFormat.shuff");
+					break;
+				}
+
+				case ButtonAction::loadLevel:
+				{
+					stage->readStageFile("Custom/Levels/newFormat.shuff");
+					stage->updateStageMesh();
+					break;
+				}
+
+				default:
+				{
+					break;	
+				}
+			}
 		}
 	}
 }

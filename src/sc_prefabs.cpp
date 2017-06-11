@@ -123,7 +123,7 @@ namespace sc
 		return id;
 	}
 
-	ID PrefabFactory::createSpriteButton(ID id, glm::vec2 position, glm::vec2 size, ID spriteId)
+	ID PrefabFactory::createSpriteButton(ID id, glm::vec2 position, glm::vec2 size, ID spriteId, ButtonAction action)
 	{
 		targetState->addEntity(id);
 		targetState->addEntityTag(id, ID("T_BUTTON"));
@@ -133,6 +133,7 @@ namespace sc
 		dr->setLayer(1);
 		dr->calculateTransform();
 		dr->addToMouseSelectable();
+		targetState->addComponent<Button>(id, new Button(action));
 		
 		ID foreId = ID(id.getStr() + "FORE");
 		targetState->addEntity(foreId);

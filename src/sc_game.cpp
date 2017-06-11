@@ -43,8 +43,8 @@ namespace sc
 			}
 		}
 
-		pf.createSpriteButton(ID("E_SAVEBUTTON"), glm::vec2(sc::config.get("WINDOW_WIDTH") - 96.0f, sc::config.get("WINDOW_HEIGHT") - 48.0f), glm::vec2(48.0f, 48.0f), ID("SP_SAVEICON"));
-		pf.createSpriteButton(ID("E_LOADBUTTON"), glm::vec2(sc::config.get("WINDOW_WIDTH") - 48.0f, sc::config.get("WINDOW_HEIGHT") - 48.0f), glm::vec2(48.0f, 48.0f), ID("SP_LOADICON"));
+		pf.createSpriteButton(ID("E_SAVEBUTTON"), glm::vec2(sc::config.get("WINDOW_WIDTH") - 96.0f, sc::config.get("WINDOW_HEIGHT") - 48.0f), glm::vec2(48.0f, 48.0f), ID("SP_SAVEICON"), ButtonAction::saveLevel);
+		pf.createSpriteButton(ID("E_LOADBUTTON"), glm::vec2(sc::config.get("WINDOW_WIDTH") - 48.0f, sc::config.get("WINDOW_HEIGHT") - 48.0f), glm::vec2(48.0f, 48.0f), ID("SP_LOADICON"), ButtonAction::loadLevel);
 
 		//pf.createUISprite(ID("E_SPRITE"), glm::vec2(256, 16), glm::vec2(1.0f, 1.0f), glm::vec2(0, 0), ID("SP_TEST"));
 		//pf.createUIRectangle(ID("E_RECTB"), glm::vec2(sc::config.get("WINDOW_WIDTH") / 2, sc::config.get("WINDOW_HEIGHT") / 2), glm::vec2(640, 256), glm::vec2(320, 128), glm::vec4(0.0f, 0.0f, 5.0f, 1.0f));

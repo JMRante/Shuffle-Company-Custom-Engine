@@ -26,10 +26,12 @@ namespace sc
 
 		if (c != EOF)
 		{
-			while (c == '\r' || c == '\n' || c == ' ')
+			while (stream->peek() == '\r' || stream->peek() == '\n' || stream->peek() == ' ')
 			{
 				stream->get(c);
 			}
+
+			c = stream->peek();
 
 			if (std::isdigit(c))
 			{
@@ -41,6 +43,7 @@ namespace sc
 					currentToken += c;
 				}
 
+				LOG_D << "CurrentToken: " << currentToken; LOG_FLUSH;
 				return true;
 			}
 			else if (c == ';')
@@ -48,6 +51,7 @@ namespace sc
 				currentType = Token::semicolon;
 				stream->get(c);
 				currentToken += c;
+				LOG_D << "CurrentToken: " << currentToken; LOG_FLUSH;
 				return true;
 			}
 			else if (c == ':')
@@ -55,6 +59,7 @@ namespace sc
 				currentType = Token::colon;
 				stream->get(c);
 				currentToken += c;
+				LOG_D << "CurrentToken: " << currentToken; LOG_FLUSH;
 				return true;
 			}
 			else if (c == ',')
@@ -62,6 +67,7 @@ namespace sc
 				currentType = Token::comma;
 				stream->get(c);
 				currentToken += c;
+				LOG_D << "CurrentToken: " << currentToken; LOG_FLUSH;
 				return true;
 			}
 			else if (c == '(')
@@ -69,6 +75,7 @@ namespace sc
 				currentType = Token::paranl;
 				stream->get(c);
 				currentToken += c;
+				LOG_D << "CurrentToken: " << currentToken; LOG_FLUSH;
 				return true;
 			}
 			else if (c == ')')
@@ -76,6 +83,7 @@ namespace sc
 				currentType = Token::paranr;
 				stream->get(c);
 				currentToken += c;
+				LOG_D << "CurrentToken: " << currentToken; LOG_FLUSH;
 				return true;
 			}
 			else if (c == '"')
@@ -89,13 +97,13 @@ namespace sc
 					currentToken += c;
 				}
 
-				if (c == '"')
+				if (stream->peek() == '"')
 				{
 					stream->get(c);
 					return true;
 				}
 
-				if (c == EOF)
+				if (stream->peek() == EOF)
 				{
 					LOG_E << "Bad token, incomplete string";
 					return true;
@@ -113,6 +121,7 @@ namespace sc
 					currentToken += c;
 				}
 
+				LOG_D << "CurrentToken: " << currentToken; LOG_FLUSH;
 				return true;
 			}
 			else

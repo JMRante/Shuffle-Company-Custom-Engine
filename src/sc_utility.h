@@ -32,6 +32,7 @@ namespace sc
 	std::string fToS(float f);
 	GLuint powerOfTwo(GLuint num);
 	float getDeltaSec();
+	float lerp(float start, float end, float t);
 
 	class ID
 	{

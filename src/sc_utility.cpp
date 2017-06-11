@@ -83,6 +83,12 @@ namespace sc
         return (float)deltaTime / 1000.0f;
     }
 
+    float lerp(float start, float end, float t)
+    {
+        return start + (t * (end - start));
+    }
+
+
     /*
         ID
             */
