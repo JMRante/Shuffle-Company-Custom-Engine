@@ -16,6 +16,9 @@
 
 namespace sc
 {
+	/*
+		Brush
+				*/
 	Brush::Brush(int texNum)
 	{
 		tex_E = texNum;
@@ -40,6 +43,10 @@ namespace sc
 		tex_T = texTop;
 	}
 
+
+	/*
+		Stage
+				*/
 	Stage::Stage() : Component() 
 	{
 		width = 10;
@@ -839,13 +846,5 @@ namespace sc
 	void Stage::set(int x, int y, int z, int brush)
 	{
 		stage[x + (y * STAGE_WIDTH) + (z * STAGE_WIDTH * STAGE_HEIGHT)] = brush;
-	}
-
-	void Stage::drawBrush(std::vector<glm::ivec3>* slots, int brush)
-	{
-		for (auto it = slots->begin(); it != slots->end(); it++) 
-		{
-			set((*it).x, (*it).y, (*it).z, brush + 1);
-		}
 	}
 }

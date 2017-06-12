@@ -25,6 +25,7 @@ namespace sc
 		pf.createStage("Custom/Levels/TestLevel.shuff");
 
 		//pf.createDebugCamera(ID("E_CAMERA"), glm::vec3(1.5f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.1f, 100.0f, 0.07f, 0.1f);
+		pf.createEditor(ID("E_EDITOR"));
 		pf.createEditorCamera(ID("E_CAMERA"), glm::vec3(0.0f, 12.0f, 10.0f), -60.0f, 0.1f, 100.0f, 6.25f, 0.625f);
 		pf.createFramerateCounter(ID("E_FRAMECOUNT"), glm::vec2(16, sc::config.get("WINDOW_HEIGHT") - 32), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), ID("FT_MONO"));
 		state->getComponent<DrawText>(ID("E_FRAMECOUNT"))->setLayer(0);

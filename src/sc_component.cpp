@@ -983,4 +983,81 @@ namespace sc
 			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawText";
 		}
 	}
+
+
+	/*
+		EditorOperationManager
+								*/
+	EditorOperation::EditorOperation() {}
+
+
+	SetBrush::SetBrush(int newBrush, glm::ivec3 position) : EditorOperation()
+	{
+		this->newBrush = newBrush;
+		this->previousBrush = 0;
+		this->position = position;	
+	}
+
+	void SetBrush::operate()
+	{
+		LOG_D << "SetBrushOperate: Pos. " << glm::to_string(position) << " Brush. " << newBrush << std::endl;
+
+		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
+		previousBrush = stage->get(position.x, position.y, position.z);
+		stage->set(position.x, position.y, position.z, newBrush);
+		stage->updateStageMesh();
+	}
+
+	void SetBrush::reverse()
+	{
+		LOG_D << "SetBrushOperate: Pos. " << glm::to_string(position) << " Brush. " << previousBrush << std::endl;
+
+		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
+		stage->set(position.x, position.y, position.z, previousBrush);
+		stage->updateStageMesh();
+	}
+
+
+	EditorOperationManager::EditorOperationManager(size_t maxOperations)
+	{
+		this->maxOperations = maxOperations;
+		currentOperation = 0;
+	}
+
+	void EditorOperationManager::doOperation(EditorOperation* operation)
+	{
+		operation->state = state;
+		operation->operate();
+
+		if (currentOperation != 0)
+		{
+			operations.erase(operations.begin(), operations.begin() + currentOperation);
+			currentOperation = 0;
+		}
+
+		operations.insert(operations.begin(), operation);
+
+		if (operations.size() >= maxOperations)
+		{
+			operations.pop_back();
+		}
+	}
+
+	void EditorOperationManager::undoOperation()
+	{
+		if (currentOperation < operations.size())
+		{
+			operations[currentOperation]->reverse();
+			currentOperation++;
+		}
+	}
+
+	void EditorOperationManager::redoOperation()
+	{
+		if (currentOperation > 0)
+		{
+			currentOperation--;
+			operations[currentOperation]->operate();
+		}
+	}
 }

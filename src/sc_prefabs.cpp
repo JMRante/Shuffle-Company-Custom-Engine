@@ -23,7 +23,7 @@ namespace sc
 		ID id = ID("E_STAGE");
 
 		targetState->addEntity(id);
-		Stage* stage = targetState->addComponent<Stage>(id, new Stage());
+		targetState->addComponent<Stage>(id, new Stage());
 		targetState->addComponent<Transform>(id, new Transform());
 		targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_STAGE")));
 
@@ -106,6 +106,15 @@ namespace sc
 		return id;
 	}
 	
+	ID PrefabFactory::createEditor(ID id)
+	{
+		targetState->addEntity(id);
+		targetState->addComponent<EditorOperationManager>(id, new EditorOperationManager(64));
+		targetState->addComponent<EditorShortcuts>(id, new EditorShortcuts());
+
+		return id;
+	}
+
 	ID PrefabFactory::createEditorSlot(ID id, glm::vec3 position, int x, int z)
 	{
 		targetState->addEntity(id);

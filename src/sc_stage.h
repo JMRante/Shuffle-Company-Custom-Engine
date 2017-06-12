@@ -101,8 +101,6 @@ namespace sc
 
 		int get(int x, int y, int z);
 		void set(int x, int y, int z, int brush);
-
-		void drawBrush(std::vector<glm::ivec3>* slots, int brush);
 	};
 }
 

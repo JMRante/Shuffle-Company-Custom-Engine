@@ -83,6 +83,13 @@ namespace sc
 		void update();
 	};
 
+	class EditorShortcuts : public Nature
+	{
+	public:
+		EditorShortcuts();
+		void update();
+	};
+
 	enum CursorState {point, hover, click, drag};
 	class Cursor : public Nature
 	{

@@ -229,6 +229,43 @@ namespace sc
 		float getDrawStartX(int line);
 		float getDrawStartY();
 	};
+
+	class EditorOperation
+	{
+	public:
+		State* state;
+
+		EditorOperation();
+		virtual void operate() = 0;
+		virtual void reverse() = 0;
+	};
+
+	class SetBrush : public EditorOperation
+	{
+	private:
+		int newBrush;
+		int previousBrush;
+		glm::ivec3 position;
+
+	public:
+		SetBrush(int newBrush, glm::ivec3 position);
+		void operate();
+		void reverse();
+	};
+
+	class EditorOperationManager : public Component
+	{
+	private:
+		size_t maxOperations;
+		size_t currentOperation;
+		std::vector<EditorOperation*> operations;
+
+	public:
+		EditorOperationManager(size_t maxOperations);
+		void doOperation(EditorOperation* operation);
+		void undoOperation();
+		void redoOperation();
+	};
 }
 
 #endif

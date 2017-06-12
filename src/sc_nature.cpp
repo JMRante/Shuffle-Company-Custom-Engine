@@ -237,20 +237,23 @@ namespace sc
 
 	void EditorSlot::update()
 	{
-		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
 		DrawModel* dm = state->getComponent<DrawModel>(entityId);
-		EditorCamera* ec = state->getComponent<EditorCamera>(ID("E_CAMERA"));
 
 		if (entityId.is(input.mouseSelectedEntity))
 		{
+			EditorCamera* ec = state->getComponent<EditorCamera>(ID("E_CAMERA"));
+			EditorOperationManager* eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
+			Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
+
 			dm->model = assets.modelStack.get(ID("MO_EDITSLOTB"));
 
-			if (input.mouseButtonHeld(SDL_BUTTON_LEFT))
+			if (input.mouseButtonHeld(SDL_BUTTON_LEFT) && stage->get(x, ec->getCameraLayer(), z) != 1)
 			{
-				std::vector<glm::ivec3> singleSlot;
-				singleSlot.push_back(glm::ivec3(x, ec->getCameraLayer(), z));
-				stage->drawBrush(&singleSlot, 0);
-				stage->updateStageMesh();
+				eom->doOperation(new SetBrush(1, glm::ivec3(x, ec->getCameraLayer(), z)));
+			}
+			else if (input.mouseButtonHeld(SDL_BUTTON_RIGHT) && stage->get(x, ec->getCameraLayer(), z) != 0)
+			{
+				eom->doOperation(new SetBrush(0, glm::ivec3(x, ec->getCameraLayer(), z)));
 			}
 		}
 		else
@@ -259,6 +262,25 @@ namespace sc
 		}
 	}
 
+
+	/*
+		EditorShortcuts
+						*/
+	EditorShortcuts::EditorShortcuts() : Nature() {}
+
+	void EditorShortcuts::update()
+	{
+		EditorOperationManager* eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
+
+		if (input.keyPressed(SDLK_r))
+		{
+			eom->redoOperation();
+		}
+		else if (input.keyPressed(SDLK_u))
+		{
+			eom->undoOperation();
+		}
+	}
 
 	/*
 		Cursor
