@@ -27,6 +27,7 @@
 #include "sc_component.h"
 #include "sc_main.h"
 #include "sc_utility.h"
+#include "sc_events.h"
 
 namespace sc
 {
@@ -111,7 +112,6 @@ namespace sc
 		void update();
 	};
 
-	enum ButtonAction {saveLevel, loadLevel};
 	class Button : public Nature
 	{
 	private:
@@ -119,10 +119,11 @@ namespace sc
 		float highlightPosition;
 		glm::vec4 normalColor;
 		glm::vec4 highlightColor;
-		ButtonAction action;
+		Event* event;
 
 	public:
-		Button(ButtonAction action);
+		Button(Event* event);
+		~Button();
 		void update();
 	};
 }

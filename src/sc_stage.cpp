@@ -425,7 +425,12 @@ namespace sc
 		file << "TEX:";
 		for (size_t i = 0; i < textures.size(); i++)
 		{
-			file << textures[i] << ",";
+			file << textures[i];
+
+			if (i != textures.size() - 1)
+			{
+				file << ",";
+			}
 		}
 		file << ";\n";
 

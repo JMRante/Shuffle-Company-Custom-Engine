@@ -388,19 +388,23 @@ namespace sc
 		}
 	}
 
-	Button::Button(ButtonAction action) : Nature()
+	Button::Button(Event* event) : Nature()
 	{
 		highlightSpeed = 4.0f;
 		highlightPosition = 0.0f;
 		normalColor = glm::vec4(45.0f/255.0f, 45.0f/255.0f, 46.0f/255.0f, 1.0f);
 		highlightColor = glm::vec4(74.0f/255.0f, 74.0f/255.0f, 79.0f/255.0f, 1.0f);
-		this->action = action;
+		this->event = event;
+	}
+
+	Button::~Button()
+	{
+		delete event;
 	}
 
 	void Button::update()
 	{
 		bool isMouseHere = entityId.is(input.mouseSelectedEntity);
-		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
 		DrawRectangle* fore = state->getComponent<DrawRectangle>(ID(entityId.getStr() + "FORE"));
 
 		if (fore != NULL)
@@ -442,26 +446,7 @@ namespace sc
 
 		if (isMouseHere && input.mouseButtonPressed(SDL_BUTTON_LEFT))
 		{
-			switch (action)
-			{
-				case ButtonAction::saveLevel:
-				{
-					stage->writeStageFile("Custom/Levels/newFormat.shuff");
-					break;
-				}
-
-				case ButtonAction::loadLevel:
-				{
-					stage->readStageFile("Custom/Levels/newFormat.shuff");
-					stage->updateStageMesh();
-					break;
-				}
-
-				default:
-				{
-					break;	
-				}
-			}
+			event->happen();
 		}
 	}
 }
