@@ -20,8 +20,11 @@ OBJLOAD_INCLUDE = -IX:\Base\Dev\MinGWDevLib\tinyobjloader-master
 FREETYPE_LIB = -LX:\Base\Dev\MinGWDevLib\freetype-2.7.1\objs -lfreetype
 FREETYPE_INCLUDE = -IX:\Base\Dev\MinGWDevLib\freetype-2.7.1\include
 
-COMPILER_FLAGS = -g -Wall -c $(SDL_INCLUDE) $(DevIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE) $(OBJLOAD_INCLUDE) $(FREETYPE_INCLUDE)
-LD_FLAGS = -mwindows -lmingw32 $(SDL_LIB) $(DevIL_LIB) $(FREEGLUT_LIB) $(GLEW_LIB) $(FREETYPE_LIB)
+BOOST_LIB = -LX:\Base\Dev\MinGWDevLib\boost_1_64_0\stage\lib -llibboost_system-mgw53-1_64 -llibboost_filesystem-mgw53-1_64
+BOOST_INCLUDE = -IX:\Base\Dev\MinGWDevLib\boost_1_64_0
+
+COMPILER_FLAGS = -g -Wall -c $(SDL_INCLUDE) $(DevIL_INCLUDE) $(FREEGLUT_INCLUDE) $(GLEW_INCLUDE) $(GLM_INCLUDE) $(OBJLOAD_INCLUDE) $(FREETYPE_INCLUDE) $(BOOST_INCLUDE)
+LD_FLAGS = -mwindows -lmingw32 $(SDL_LIB) $(DevIL_LIB) $(FREEGLUT_LIB) $(GLEW_LIB) $(FREETYPE_LIB) $(BOOST_LIB)
 EXE = ShuffleCompany.exe
 
 all: $(EXE)

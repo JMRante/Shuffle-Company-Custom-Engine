@@ -26,6 +26,7 @@ namespace sc
 		entityId = ID("NULL");
 		addType(ID("NULL"));
 		state = NULL;
+		isActive = true;
 	}
 
 	bool Component::isType(ID id)
@@ -1000,8 +1001,6 @@ namespace sc
 
 	void SetBrush::operate()
 	{
-		LOG_D << "SetBrushOperate: Pos. " << glm::to_string(position) << " Brush. " << newBrush << std::endl;
-
 		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
 		previousBrush = stage->get(position.x, position.y, position.z);
 		stage->set(position.x, position.y, position.z, newBrush);
@@ -1010,8 +1009,6 @@ namespace sc
 
 	void SetBrush::reverse()
 	{
-		LOG_D << "SetBrushOperate: Pos. " << glm::to_string(position) << " Brush. " << previousBrush << std::endl;
-
 		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
 		stage->set(position.x, position.y, position.z, previousBrush);
 		stage->updateStageMesh();
@@ -1059,5 +1056,11 @@ namespace sc
 			currentOperation--;
 			operations[currentOperation]->operate();
 		}
+	}
+
+	void EditorOperationManager::clearOperations()
+	{
+		operations.clear();
+		currentOperation = 0;
 	}
 }

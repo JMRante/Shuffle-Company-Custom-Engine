@@ -56,7 +56,21 @@ namespace sc
 	public:
 		LoadLevelEvent(State* state, std::string levelFile);
 		void happen();
-	};	
+	};
+
+	class OpenLoadSelector : public Event
+	{
+	public:
+		OpenLoadSelector(State* state);
+		void happen();
+	};
+
+	class CloseSelector : public Event
+	{
+	public:
+		CloseSelector(State* state);
+		void happen();
+	};
 }
 
 #endif

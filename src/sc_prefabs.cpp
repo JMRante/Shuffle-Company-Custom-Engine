@@ -136,9 +136,10 @@ namespace sc
 	{
 		targetState->addEntity(id);
 		targetState->addEntityTag(id, ID("T_BUTTON"));
+		targetState->addEntityTag(id, ID("T_MAINEDIT"));
 
 		targetState->addComponent<Transform>(id, new Transform());
-		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(position.x, position.y, size.x, size.y, 0.0f, 0.0f, glm::vec4(74.0f/255.0f, 74.0f/255.0f, 79.0f/255.0f, 1.0f)));
+		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(position.x, position.y, size.x, size.y, 0.0f, 0.0f, COL_EDTIOR_UI_BUTTONEDGE));
 		dr->setLayer(1);
 		dr->calculateTransform();
 		dr->addToMouseSelectable();
@@ -147,16 +148,81 @@ namespace sc
 		ID foreId = ID(id.getStr() + "FORE");
 		targetState->addEntity(foreId);
 		targetState->addComponent<Transform>(foreId, new Transform());
-		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(foreId, new DrawRectangle(position.x + 2.0f, position.y + 2.0f, size.x - 4.0f, size.y - 4.0f, 0.0f, 0.0f, glm::vec4(45.0f/255.0f, 45.0f/255.0f, 46.0f/255.0f, 1.0f)));
+		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(foreId, new DrawRectangle(position.x + 2.0f, position.y + 2.0f, size.x - 4.0f, size.y - 4.0f, 0.0f, 0.0f, COL_EDITOR_UI_BUTTON));
 		dr2->setLayer(2);
 		dr2->calculateTransform();
 
-		ID foreSpriteId = ID(id.getStr() + "SP");
-		targetState->addEntity(foreSpriteId);
-		targetState->addComponent<Transform>(foreSpriteId, new Transform());
-		DrawSprite* ds = targetState->addComponent<DrawSprite>(foreSpriteId, new DrawSprite(position.x, position.y, 1.0f, 1.0f, 0.0f, 0.0f, spriteId));
+		ID sprId = ID(id.getStr() + "SP");
+		targetState->addEntity(sprId);
+		targetState->addComponent<Transform>(sprId, new Transform());
+		DrawSprite* ds = targetState->addComponent<DrawSprite>(sprId, new DrawSprite(position.x, position.y, 1.0f, 1.0f, 0.0f, 0.0f, spriteId));
 		ds->setLayer(3);
 		ds->calculateTransform();
+
+		return id;
+	}
+
+	ID PrefabFactory::createTextButton(ID id, glm::vec2 position, ID fontId, std::string text, Event* event)
+	{
+		targetState->addEntity(id);
+		targetState->addEntityTag(id, ID("T_BUTTON"));
+
+		ID textId = ID(id.getStr() + "TX");
+		targetState->addEntity(textId);
+		targetState->addComponent<Transform>(textId, new Transform());
+		DrawText* dt = targetState->addComponent<DrawText>(id, new DrawText(position.x + 6.0f, position.y + 6.0f, text, COL_WHITE, fontId));
+		dt->setLayer(3);
+		float textWidth = dt->getWidth();
+		float textHeight = dt->getHeight();
+
+		targetState->addComponent<Transform>(id, new Transform());
+		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(position.x, position.y, textWidth + 12.0f, textHeight + 4.0f, 0.0f, 0.0f, COL_EDTIOR_UI_BUTTONEDGE));
+		dr->setLayer(1);
+		dr->calculateTransform();
+		dr->addToMouseSelectable();
+		targetState->addComponent<Button>(id, new Button(event));
+
+		ID foreId = ID(id.getStr() + "FORE");
+		targetState->addEntity(foreId);
+		targetState->addComponent<Transform>(foreId, new Transform());
+		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(foreId, new DrawRectangle(position.x + 2.0f, position.y + 2.0f, textWidth + 8.0f, textHeight, 0.0f, 0.0f, COL_EDITOR_UI_BUTTON));
+		dr2->setLayer(2);
+		dr2->calculateTransform();
+
+		return id;
+	}
+
+	ID PrefabFactory::createFileSelector(ID id, std::string startPath, Event* selectEvent)
+	{
+		ID tag = ID("T_SELECTOREDIT");
+
+		targetState->addEntity(id);
+		targetState->addEntityTag(id, ID("T_" + id.getStr()));
+		targetState->addEntityTag(id, tag);
+		targetState->addComponent<Transform>(id, new Transform());
+		DrawRectangle* dr1 = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(config.get("WINDOW_WIDTH") / 2.0f, config.get("WINDOW_HEIGHT") / 2.0f, 850.0f, 550.0f, 425.0f, 275.0f, COL_EDITOR_UI_BACKGROUND));
+		dr1->setLayer(10);
+		dr1->calculateTransform();
+
+		ID windowId = ID(id.getStr() + "WINDOW");
+		targetState->addEntity(windowId);
+		targetState->addEntityTag(windowId, ID("T_" + id.getStr()));
+		targetState->addEntityTag(windowId, tag);
+		targetState->addComponent<Transform>(windowId, new Transform());
+		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(windowId, new DrawRectangle(config.get("WINDOW_WIDTH") / 2.0f, (config.get("WINDOW_HEIGHT") / 2.0f) + 50.0f, 800.0f, 400.0f, 400.0f, 200.0f, COL_EDITOR_UI_FOREGROUND));
+		dr2->setLayer(11);
+		dr2->calculateTransform();
+
+		// for (int i = 0; i < 40; i++)
+		// {
+		// 	ID itemId = ID(id.getStr() + "ITEM" + iToS(i));
+		// 	targetState->addEntity(itemId);
+		// 	targetState->addEntityTag(itemId, ID("T_" + id.getStr()));
+		// 	targetState->addComponent<Transform>(itemId, new Transform());
+		// 	DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(windowId, new DrawRectangle((config.get("WINDOW_WIDTH") / 2.0f), (config.get("WINDOW_HEIGHT") / 2.0f) + 50.0f, 400.0f, 20.0f, 0.0f, 0.0f, glm::vec4(86.0f/255.0f, 86.0f/255.0f, 94.0f/255.0f, 1.0f)));
+		// 	dr2->setLayer(11);
+		// 	dr2->calculateTransform();
+		// }
 
 		return id;
 	}

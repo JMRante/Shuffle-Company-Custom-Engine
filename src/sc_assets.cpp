@@ -936,6 +936,7 @@ namespace sc
 		//Load Fonts
 		fontStack.pushBase(new Font(ID("FT_TEST"), "Resources/Fonts/OpenSans-Regular.ttf", 28));
 		fontStack.pushBase(new Font(ID("FT_MONO"), "Resources/Fonts/RobotoMono-Regular.ttf", 16));
+		fontStack.pushBase(new Font(ID("FT_EDITOR"), "Resources/Fonts/RobotoMono-Regular.ttf", 20));
 
 		//Load textures
 		textureStack.pushBase(new Texture(ID("TX_EDITSLOTA"), "Resources/Textures/editorEmptySlot.png"));

@@ -49,5 +49,29 @@ namespace sc
 		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
 		stage->readStageFile(levelFile);
 		stage->updateStageMesh();
+
+		EditorOperationManager* eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
+		eom->clearOperations();
+	}
+
+
+	/*
+		LoadLevelEvent
+						*/
+	OpenLoadSelector::OpenLoadSelector(State* state) : Event(state) {}
+
+	void OpenLoadSelector::happen()
+	{
+
+	}
+
+	/*
+		LoadLevelEvent
+						*/
+	CloseSelector::CloseSelector(State* state) : Event(state) {}
+
+	void CloseSelector::happen()
+	{
+
 	}
 }

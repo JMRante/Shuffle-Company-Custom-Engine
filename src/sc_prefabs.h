@@ -25,6 +25,8 @@
 #include "sc_component.h"
 #include "sc_game.h"
 #include "sc_events.h"
+#include "sc_config.h"
+#include "sc_color.h"
 
 namespace sc
 {
@@ -49,6 +51,8 @@ namespace sc
 
 		ID createEditorSlot(ID id, glm::vec3 position, int x, int z);
 		ID createSpriteButton(ID id, glm::vec2 position, glm::vec2 size, ID spriteId, Event* event);
+		ID createTextButton(ID id, glm::vec2 position, ID fontId, std::string text, Event* event);
+		ID createFileSelector(ID id, std::string startPath, Event* selectEvent);
 
 		ID createCursor();
 	};

@@ -18,7 +18,6 @@ namespace sc
 	Nature::Nature() : Component() 
 	{
 		addType(ID("NATURE"));
-		isActive = true;
 	}
 
 	void Nature::onStateInsert()
@@ -414,8 +413,8 @@ namespace sc
 	{
 		highlightSpeed = 4.0f;
 		highlightPosition = 0.0f;
-		normalColor = glm::vec4(45.0f/255.0f, 45.0f/255.0f, 46.0f/255.0f, 1.0f);
-		highlightColor = glm::vec4(74.0f/255.0f, 74.0f/255.0f, 79.0f/255.0f, 1.0f);
+		normalColor = COL_EDITOR_UI_BUTTON;
+		highlightColor = COL_EDTIOR_UI_BUTTONEDGE;
 		this->event = event;
 	}
 
@@ -458,7 +457,7 @@ namespace sc
 
 			if (isMouseHere && input.mouseButtonHeld(SDL_BUTTON_LEFT))
 			{
-				fore->color = glm::vec4(109.0f/255.0f, 108.0f/255.0f, 120.0f/255.0f, 1.0f);
+				fore->color = COL_EDITOR_UI_BUTTONCLICK;
 			}
 			else
 			{
@@ -470,5 +469,15 @@ namespace sc
 		{
 			event->happen();
 		}
+	}
+
+	FileSelectorItem::FileSelectorItem()
+	{
+		fileName = "";
+	}
+
+	void FileSelectorItem::update()
+	{
+
 	}
 }

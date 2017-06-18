@@ -42,6 +42,7 @@ namespace sc
 	public:
 		ID entityId;
 		State* state;
+		bool isActive;
 
 		Component();
 		virtual ~Component() {}
@@ -265,6 +266,7 @@ namespace sc
 		void doOperation(EditorOperation* operation);
 		void undoOperation();
 		void redoOperation();
+		void clearOperations();
 	};
 }
 

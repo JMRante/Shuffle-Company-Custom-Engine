@@ -12,6 +12,7 @@
 
 #include "sc_utility.h"
 
+
 namespace sc
 {
     //Stolen shamelessly from the SDL Wiki article on SDL_RWread
@@ -88,6 +89,18 @@ namespace sc
         return start + (t * (end - start));
     }
 
+    std::vector<std::string> getFiles(std::string directory)
+    {
+        //Currently only implemented for Windows
+        std::vector<std::string> filenames;
+
+        // for (auto &p : fs::directory_iterator(directory))
+        // {
+        //     filename.push_back(std::string(p));
+        // }
+
+        return filenames;
+    }
 
     /*
         ID

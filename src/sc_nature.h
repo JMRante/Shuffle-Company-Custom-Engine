@@ -28,14 +28,13 @@
 #include "sc_main.h"
 #include "sc_utility.h"
 #include "sc_events.h"
+#include "sc_color.h"
 
 namespace sc
 {
 	class Nature : public Component
 	{
 	public:
-		bool isActive;
-
 		Nature();
 		//virtual void create() = 0;
 		virtual void update() = 0;
@@ -131,6 +130,21 @@ namespace sc
 	public:
 		Button(Event* event);
 		~Button();
+		void update();
+	};
+
+	class FileSelector : public Nature
+	{
+
+	};
+
+	class FileSelectorItem : public Nature
+	{
+	private:
+		std::string fileName;
+
+	public:
+		FileSelectorItem();
 		void update();
 	};
 }

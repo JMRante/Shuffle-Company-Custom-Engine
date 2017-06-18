@@ -19,20 +19,31 @@
 #include <cstdlib>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "sc_log.h"
 #include "sc_main.h"
 
+#include <boost/filesystem.hpp>
+
 #define ID_SIZE 32
+
+namespace fs = boost::filesystem;
 
 namespace sc
 {
 	char* fileRead(const char* filename);
+
 	std::string iToS(int i);
 	std::string fToS(float f);
+
 	GLuint powerOfTwo(GLuint num);
+
 	float getDeltaSec();
+
 	float lerp(float start, float end, float t);
+
+	std::vector<std::string> getFiles(std::string directory);
 
 	class ID
 	{

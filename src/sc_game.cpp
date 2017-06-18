@@ -20,6 +20,8 @@ namespace sc
 
 		PrefabFactory pf(state);
 
+		getFiles("Custom/Levels");
+
 		//Create Editor Scene
 		//Build elements
 		pf.createStage("Custom/Levels/TestLevel.shuff");
@@ -46,6 +48,8 @@ namespace sc
 
 		pf.createSpriteButton(ID("E_SAVEBUTTON"), glm::vec2(sc::config.get("WINDOW_WIDTH") - 96.0f, sc::config.get("WINDOW_HEIGHT") - 48.0f), glm::vec2(48.0f, 48.0f), ID("SP_SAVEICON"), new SaveLevelEvent(state, "Custom/Levels/newFormat.shuff"));
 		pf.createSpriteButton(ID("E_LOADBUTTON"), glm::vec2(sc::config.get("WINDOW_WIDTH") - 48.0f, sc::config.get("WINDOW_HEIGHT") - 48.0f), glm::vec2(48.0f, 48.0f), ID("SP_LOADICON"), new LoadLevelEvent(state, "Custom/Levels/newFormat.shuff"));
+		pf.createTextButton(ID("E_TEXTBUTTON"), glm::vec2(0.0f, 0.0f), ID("FT_EDITOR"), "Cancel", new SaveLevelEvent(state, "Custom/Levels/newFormat.shuff"));
+		//pf.createFileSelector(ID("E_FILESELECT"), "temp", new SaveLevelEvent(state, "Custom/Levels/newFormat.shuff"));
 
 		//pf.createUISprite(ID("E_SPRITE"), glm::vec2(256, 16), glm::vec2(1.0f, 1.0f), glm::vec2(0, 0), ID("SP_TEST"));
 		//pf.createUIRectangle(ID("E_RECTB"), glm::vec2(sc::config.get("WINDOW_WIDTH") / 2, sc::config.get("WINDOW_HEIGHT") / 2), glm::vec2(640, 256), glm::vec2(320, 128), glm::vec4(0.0f, 0.0f, 5.0f, 1.0f));
