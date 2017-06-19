@@ -62,10 +62,10 @@ namespace sc
 		yaw = glm::mod(yaw, 360.0f);
 		pitch = glm::clamp(pitch, -89.0f, 89.0f);
 		
-		trans->rotation = glm::vec3(glm::radians(pitch), glm::radians(yaw), 0.0f);
+		trans->setRot(glm::vec3(glm::radians(pitch), glm::radians(yaw), 0.0f));
 
 		//Translation
-		glm::vec3 currentPosition = trans->position;
+		glm::vec3 currentPosition = trans->getPos();
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		if (input.keyHeld(SDLK_w))
@@ -91,7 +91,7 @@ namespace sc
 		if (translate != glm::vec3(0.0f, 0.0f, 0.0f))
 		{
 			translate = moveSpeed * glm::normalize(translate) * getDeltaSec();
-			trans->position = currentPosition + translate;
+			trans->setPos(currentPosition + translate);
 			camera->calculateViewMatrix();	
 		}
 	}
@@ -118,7 +118,7 @@ namespace sc
 			editSlotTransforms = state->getComponentFromTagged<Transform>(ID("T_EDITSLOT"));
 		}
 
-		glm::vec3 currentPosition = trans->position;
+		glm::vec3 currentPosition = trans->getPos();
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		//Scroll horizontally
@@ -172,8 +172,7 @@ namespace sc
 
 				for (size_t i = 0; i < editSlotTransforms.size(); i++)
 				{
-					editSlotTransforms[i]->position += glm::vec3(0.0f, 1.0f, 0.0f);
-					editSlotTransforms[i]->calculateWorldMatrix();
+					editSlotTransforms[i]->setPos(editSlotTransforms[i]->getPos() + glm::vec3(0.0f, 1.0f, 0.0f));
 				}
 			}
 			else if (input.getMouseWheelDelta() < 0 && cameraLayer > 0)
@@ -183,8 +182,7 @@ namespace sc
 
 				for (size_t i = 0; i < editSlotTransforms.size(); i++)
 				{
-					editSlotTransforms[i]->position -= glm::vec3(0.0f, 1.0f, 0.0f);
-					editSlotTransforms[i]->calculateWorldMatrix();
+					editSlotTransforms[i]->setPos(editSlotTransforms[i]->getPos() - glm::vec3(0.0f, 1.0f, 0.0f));
 				}
 			}
 		}
@@ -198,8 +196,7 @@ namespace sc
 
 				for (size_t i = 0; i < editSlotTransforms.size(); i++)
 				{
-					editSlotTransforms[i]->position += glm::vec3(0.0f, 1.0f, 0.0f);
-					editSlotTransforms[i]->calculateWorldMatrix();
+					editSlotTransforms[i]->setPos(editSlotTransforms[i]->getPos() + glm::vec3(0.0f, 1.0f, 0.0f));
 				}
 			}
 			else if (input.keyPressed(SDLK_a) && cameraLayer > 0)
@@ -209,13 +206,12 @@ namespace sc
 
 				for (size_t i = 0; i < editSlotTransforms.size(); i++)
 				{
-					editSlotTransforms[i]->position -= glm::vec3(0.0f, 1.0f, 0.0f);
-					editSlotTransforms[i]->calculateWorldMatrix();
+					editSlotTransforms[i]->setPos(editSlotTransforms[i]->getPos() - glm::vec3(0.0f, 1.0f, 0.0f));
 				}
 			}
 		}
 
-		trans->position = currentPosition + translate;
+		trans->setPos(currentPosition + translate);
 		camera->calculateViewMatrix();
 	}
 
@@ -303,7 +299,6 @@ namespace sc
 
 		sprite->x = mouseX;
 		sprite->y = mouseY;
-		sprite->calculateTransform();
 
 		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE))
 		{

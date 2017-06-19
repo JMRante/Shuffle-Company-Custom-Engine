@@ -48,7 +48,10 @@ namespace sc
 
 		pf.createSpriteButton(ID("E_SAVEBUTTON"), glm::vec2(sc::config.get("WINDOW_WIDTH") - 96.0f, sc::config.get("WINDOW_HEIGHT") - 48.0f), glm::vec2(48.0f, 48.0f), ID("SP_SAVEICON"), new SaveLevelEvent(state, "Custom/Levels/newFormat.shuff"));
 		pf.createSpriteButton(ID("E_LOADBUTTON"), glm::vec2(sc::config.get("WINDOW_WIDTH") - 48.0f, sc::config.get("WINDOW_HEIGHT") - 48.0f), glm::vec2(48.0f, 48.0f), ID("SP_LOADICON"), new LoadLevelEvent(state, "Custom/Levels/newFormat.shuff"));
-		pf.createTextButton(ID("E_TEXTBUTTON"), glm::vec2(0.0f, 0.0f), ID("FT_EDITOR"), "Cancel", new SaveLevelEvent(state, "Custom/Levels/newFormat.shuff"));
+		Transform* testTran = state->getComponent<Transform>(pf.createTextButton(ID("E_TEXTBUTTON"), glm::vec2(0.0f, 0.0f), ID("FT_EDITOR"), "Cancel", new SaveLevelEvent(state, "Custom/Levels/newFormat.shuff")));
+		testTran->setPosX(64.0f);
+		testTran->setPosY(64.0f);
+		testTran->setRotZ(glm::radians(45.0f));
 		//pf.createFileSelector(ID("E_FILESELECT"), "temp", new SaveLevelEvent(state, "Custom/Levels/newFormat.shuff"));
 
 		//pf.createUISprite(ID("E_SPRITE"), glm::vec2(256, 16), glm::vec2(1.0f, 1.0f), glm::vec2(0, 0), ID("SP_TEST"));
@@ -69,6 +72,11 @@ namespace sc
 			{
 				(*it)->update(); 
 			}
+		}
+
+		for (auto it = state->transformPointers.begin(); it != state->transformPointers.end(); it++) 
+		{
+			(*it)->calculate();
 		}
 
 		if (input.quitEvent())

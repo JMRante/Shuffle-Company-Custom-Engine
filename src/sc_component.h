@@ -57,21 +57,54 @@ namespace sc
 	class Transform : public Component
 	{
 	private:
-		glm::mat4 worldMatrix;
+		Transform* parent;
+		std::vector<Transform*> children;
+		bool dirty;
 
-	public:
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scale;
 
-		// Transform* parent;
-		// std::vector<Transform*> children;
+		glm::mat4 matrix;
 
+	public:
 		Transform();
 		Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
 
-		glm::mat4 getWorldMatrix();
-		void calculateWorldMatrix();
+		void onStateInsert();
+		void onStateRemove();
+
+		glm::mat4 calculate();
+		glm::mat4 getMatrix();
+		void setParent(Transform* newParent);
+		void removeParent();
+
+		glm::vec3 getPos();
+		float getPosX();
+		float getPosY();
+		float getPosZ();
+		void setPos(glm::vec3 pos);
+		void setPosX(float x);
+		void setPosY(float y);
+		void setPosZ(float z);
+
+		glm::vec3 getRot();
+		float getRotX();
+		float getRotY();
+		float getRotZ();
+		void setRot(glm::vec3 rot);
+		void setRotX(float x);
+		void setRotY(float y);
+		void setRotZ(float z);
+
+		glm::vec3 getSca();
+		float getScaX();
+		float getScaY();
+		float getScaZ();
+		void setSca(glm::vec3 sca);
+		void setScaX(float x);
+		void setScaY(float y);
+		void setScaZ(float z);
 	};
 
 	class Camera : public Component
@@ -174,7 +207,6 @@ namespace sc
 		DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color);
 		void render(ID cameraId);
 		void mouseRender(ID cameraId, unsigned int index);
-		void calculateTransform();
 	};
 
 	class DrawSprite : public DrawOrtho
@@ -192,7 +224,6 @@ namespace sc
 		DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId);
 		void render(ID cameraId);
 		void mouseRender(ID cameraId, unsigned int index);
-		void calculateTransform();
 	};
 
 	enum TextHAlign {left, center, right};

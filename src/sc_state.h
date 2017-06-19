@@ -37,6 +37,7 @@ namespace sc
 		std::vector<DrawModel*> modelPointers;
 		std::vector<DrawModel*> transparentModelPointers;
 		std::vector<DrawOrtho*> orthoPointers;
+		std::vector<Transform*> transformPointers;
 
 		std::vector<DrawModel*> mouseSelectModels;
 		std::vector<DrawOrtho*> mouseSelectOrthos;

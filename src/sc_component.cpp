@@ -90,7 +90,9 @@ namespace sc
 		this->position = glm::vec3(0.0f, 0.0f, 0.0f);
 		this->rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 		this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
-		calculateWorldMatrix();
+
+		parent = NULL;
+		dirty = true;
 	}
 
 	Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : Component()
@@ -100,17 +102,216 @@ namespace sc
 		this->position = position;
 		this->rotation = rotation;
 		this->scale = scale;
-		calculateWorldMatrix();
+
+		parent = NULL;
+		dirty = true;
 	}
 
-	glm::mat4 Transform::getWorldMatrix()
+	void Transform::onStateInsert() 
 	{
-		return worldMatrix;
+		state->transformPointers.push_back(this);
 	}
 
-	void Transform::calculateWorldMatrix()
+	void Transform::onStateRemove()
 	{
-		worldMatrix = glm::translate(glm::mat4(1.0f), position) * glm::eulerAngleYXZ(rotation[1], rotation[0], rotation[2]) * glm::scale(glm::mat4(1.0f), scale);
+		for (auto oi = state->transformPointers.begin(); oi != state->transformPointers.end(); oi++)
+		{
+			if ((*oi)->entityId.is(entityId) && (*oi)->sameTypes((Component*) this))
+			{
+				state->transformPointers.erase(oi);
+			}
+		}
+	}
+
+	glm::mat4 Transform::calculate()
+	{
+		if (dirty)
+		{
+			LOG_D << "Calculating Transform for " << entityId.get();
+
+			if (parent == NULL)
+			{
+				matrix = glm::translate(glm::mat4(1.0f), position) * glm::eulerAngleYXZ(rotation[1], rotation[0], rotation[2]) * glm::scale(glm::mat4(1.0f), scale);
+			}
+			else
+			{
+				matrix = parent->calculate() * glm::translate(glm::mat4(1.0f), position) * glm::eulerAngleYXZ(rotation[1], rotation[0], rotation[2]) * glm::scale(glm::mat4(1.0f), scale);
+			}
+
+			dirty = false;
+		}
+
+		return matrix;
+	}
+
+	glm::mat4 Transform::getMatrix()
+	{
+		return matrix;
+	}
+
+	void Transform::setParent(Transform* newParent)
+	{	
+		if (parent != NULL)
+		{
+			for (auto it = parent->children.begin(); it != parent->children.end(); it++) 
+			{
+				if ((*it)->entityId.is(entityId))
+				{
+					parent->children.erase(it);
+				}
+			}
+		}
+
+		parent = newParent;
+		parent->children.push_back(this);
+	}
+
+	void Transform::removeParent()
+	{
+		if (parent != NULL)
+		{
+			for (auto it = parent->children.begin(); it != parent->children.end(); it++) 
+			{
+				if ((*it)->entityId.is(entityId))
+				{
+					parent->children.erase(it);
+				}
+			}
+		}
+
+		parent = NULL;
+	}
+
+	glm::vec3 Transform::getPos() 
+	{
+		return position;
+	}
+
+	float Transform::getPosX() 
+	{
+		return position.x;
+	}
+
+	float Transform::getPosY() 
+	{
+		return position.y;
+	}
+
+	float Transform::getPosZ() 
+	{
+		return position.z;
+	}
+
+	void Transform::setPos(glm::vec3 pos) 
+	{
+		position = pos;
+		dirty = true;
+	}
+
+	void Transform::setPosX(float x) 
+	{
+		position.x = x;
+		dirty = true;
+	}
+
+	void Transform::setPosY(float y) 
+	{
+		position.y = y;
+		dirty = true;
+	}
+
+	void Transform::setPosZ(float z) 
+	{
+		position.z = z;
+		dirty = true;
+	}
+
+	glm::vec3 Transform::getRot() 
+	{
+		return rotation;
+	}
+
+	float Transform::getRotX() 
+	{
+		return rotation.x;
+	}
+
+	float Transform::getRotY() 
+	{
+		return rotation.y;
+	}
+
+	float Transform::getRotZ() 
+	{
+		return rotation.z;
+	}
+
+	void Transform::setRot(glm::vec3 rot) 
+	{
+		rotation = rot;
+		dirty = true;
+	}
+
+	void Transform::setRotX(float x) 
+	{
+		rotation.x = x;
+		dirty = true;
+	}
+
+	void Transform::setRotY(float y) 
+	{
+		rotation.y = y;
+		dirty = true;
+	}
+
+	void Transform::setRotZ(float z) 
+	{
+		rotation.z = z;
+		dirty = true;
+	}
+
+	glm::vec3 Transform::getSca() 
+	{
+		return scale;
+	}
+
+	float Transform::getScaX() 
+	{
+		return scale.x;
+	}
+
+	float Transform::getScaY() 
+	{
+		return scale.y;
+	}
+
+	float Transform::getScaZ() 
+	{
+		return scale.z;
+	}
+
+	void Transform::setSca(glm::vec3 sca) 
+	{
+		scale = sca;
+		dirty = true;
+	}
+
+	void Transform::setScaX(float x) 
+	{
+		scale.x = x;
+		dirty = true;
+	}
+
+	void Transform::setScaY(float y) 
+	{
+		scale.y = y;
+		dirty = true;
+	}
+
+	void Transform::setScaZ(float z) 
+	{
+		scale.z = z;
+		dirty = true;
 	}
 
 
@@ -174,8 +375,8 @@ namespace sc
 
 			if (transform != NULL)
 			{
-				glm::vec3 pos = transform->position;
-				glm::vec3 rot = transform->rotation;
+				glm::vec3 pos = transform->getPos();
+				glm::vec3 rot = transform->getRot();
 				float pitch = rot.x;
 				float yaw = rot.y;
 
@@ -306,7 +507,7 @@ namespace sc
 			//Bind transform to shader
 			Camera* cam = state->getComponent<Camera>(cameraId);
 
-			glm::mat4 pvw = cam->getProjectionMatrix() * cam->getViewMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
+			glm::mat4 pvw = cam->getProjectionMatrix() * cam->getViewMatrix() * state->getComponent<Transform>(entityId)->getMatrix();
 			glUniformMatrix4fv(glGetUniformLocation(model->material->shader->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
 
 			glBindVertexArray(model->mesh->VAOid);
@@ -335,7 +536,7 @@ namespace sc
 
 			Camera* cam = state->getComponent<Camera>(cameraId);
 
-			glm::mat4 pvw = cam->getProjectionMatrix() * cam->getViewMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
+			glm::mat4 pvw = cam->getProjectionMatrix() * cam->getViewMatrix() * state->getComponent<Transform>(entityId)->getMatrix();
 			glUniformMatrix4fv(glGetUniformLocation(model->material->shader->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
 
 			glBindVertexArray(model->mesh->VAOid);
@@ -468,29 +669,6 @@ namespace sc
 		this->color = color;
 	}
 
-	void DrawRectangle::calculateTransform()
-	{
-		if (state != NULL)
-		{
-			Transform* transform = state->getComponent<Transform>(entityId);
-
-			if (transform != NULL)
-			{
-				transform->scale = glm::vec3(width, height, 0.0f);
-				transform->position = glm::vec3(x - pivotX, y - pivotY, (float) layer);
-				transform->calculateWorldMatrix();
-			}
-			else
-			{
-				LOG_E << "Transform does not exist for " << entityId.get() << ", cannot calculate DrawRectangle transform";
-			}
-		}
-		else
-		{
-			LOG_E << entityId.get() << " has not been added to a state yet, cannot calculate DrawRectangle transform";
-		}
-	}
-
 	void DrawRectangle::render(ID cameraId)
 	{
 		if (state != NULL)
@@ -508,7 +686,7 @@ namespace sc
 					color[3]);
 
 				//Bind transform to shader
-				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getMatrix() * (glm::translate(glm::mat4(1.0f), glm::vec3(x - pivotX, y - pivotY, (float) layer)) * glm::scale(glm::mat4(1.0f), glm::vec3(width, height, 0.0f)));
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);
@@ -544,7 +722,7 @@ namespace sc
 					indexColor[3]);
 
 				//Bind transform to shader
-				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getMatrix() * (glm::translate(glm::mat4(1.0f), glm::vec3(x - pivotX, y - pivotY, (float) layer)) * glm::scale(glm::mat4(1.0f), glm::vec3(width, height, 0.0f)));
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);
@@ -575,29 +753,6 @@ namespace sc
 		this->sprite = assets.spriteStack.get(spriteId);
 	}
 
-	void DrawSprite::calculateTransform()
-	{
-		if (state != NULL)
-		{
-			Transform* transform = state->getComponent<Transform>(entityId);
-
-			if (transform != NULL)
-			{
-				transform->scale = glm::vec3(scaleX * sprite->width, scaleY * sprite->height, 0.0f);
-				transform->position = glm::vec3(x - pivotX, y - pivotY, (float) layer);
-				transform->calculateWorldMatrix();
-			}
-			else
-			{
-				LOG_E << "Transform does not exist for " << entityId.get() << ", cannot calculate DrawSprite transform";
-			}
-		}
-		else
-		{
-			LOG_E << entityId.get() << " has not been added to a state yet, cannot calculate DrawSprite transform";
-		}
-	}
-
 	void DrawSprite::render(ID cameraId)
 	{
 		if (state != NULL)
@@ -616,7 +771,7 @@ namespace sc
 				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"sprite"), 0);
 
 				//Bind transform to shader
-				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getMatrix() * (glm::translate(glm::mat4(1.0f), glm::vec3(x - pivotX, y - pivotY, (float) layer)) * glm::scale(glm::mat4(1.0f), glm::vec3(scaleX * sprite->width, scaleY * sprite->height, 0.0f)));
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);
@@ -652,7 +807,7 @@ namespace sc
 					indexColor[3]);
 
 				//Bind transform to shader
-				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getWorldMatrix();
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getMatrix() * (glm::translate(glm::mat4(1.0f), glm::vec3(x - pivotX, y - pivotY, (float) layer)) * glm::scale(glm::mat4(1.0f), glm::vec3(scaleX * sprite->width, scaleY * sprite->height, 0.0f)));
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);
@@ -847,7 +1002,7 @@ namespace sc
 				glBindTexture(GL_TEXTURE_2D, font->textureGLid);
 				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"fontTexture"), 0);
 
-				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix();
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
 
 				int currentLine = 0;
@@ -926,7 +1081,7 @@ namespace sc
 					indexColor[2],
 					indexColor[3]);
 
-				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix();
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
 
 				int currentLine = 0;
