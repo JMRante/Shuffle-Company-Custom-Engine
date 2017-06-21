@@ -275,6 +275,22 @@ namespace sc
 		{
 			eom->undoOperation();
 		}
+
+		std::vector<Transform*> trans = state->getComponentFromTagged<Transform>(ID("T_MAINEDIT"));
+		if (input.keyPressed(SDLK_g))
+		{
+			for (auto it = trans.begin(); it != trans.end(); it++)
+			{
+				(*it)->setActive(false);
+			}
+		}
+		else if (input.keyPressed(SDLK_h))
+		{
+			for (auto it = trans.begin(); it != trans.end(); it++)
+			{
+				(*it)->setActive(true);
+			}
+		}
 	}
 
 	/*

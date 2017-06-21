@@ -68,7 +68,7 @@ namespace sc
 
 		for (auto it = state->naturePointers.begin(); it != state->naturePointers.end(); it++) 
 		{
-			if ((*it)->isActive)
+			if ((*it)->getActive())
 			{
 				(*it)->update(); 
 			}

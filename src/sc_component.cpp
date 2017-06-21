@@ -79,6 +79,23 @@ namespace sc
 
 	void Component::onStateRemove() {}
 
+	bool Component::getActive()
+	{
+		Transform* tran = state->getComponent<Transform>(entityId);
+
+		if (tran != NULL)
+		{
+			return (tran->getActive() && isActive);
+		}
+
+		return isActive;
+	}
+
+	void Component::setActive(bool set)
+	{
+		isActive = set;
+	}
+
 
 	/*
 		Transform
@@ -123,12 +140,25 @@ namespace sc
 		}
 	}
 
+	bool Transform::getActive()
+	{
+		return isActive;
+	}
+
+	void Transform::setActive(bool set)
+	{
+		isActive = set;
+
+		for (auto it = children.begin(); it != children.end(); it++) 
+		{
+			(*it)->setActive(set);
+		}
+	}
+
 	glm::mat4 Transform::calculate()
 	{
 		if (dirty)
 		{
-			LOG_D << "Calculating Transform for " << entityId.get();
-
 			if (parent == NULL)
 			{
 				matrix = glm::translate(glm::mat4(1.0f), position) * glm::eulerAngleYXZ(rotation[1], rotation[0], rotation[2]) * glm::scale(glm::mat4(1.0f), scale);
@@ -432,7 +462,6 @@ namespace sc
 	Draw::Draw() : Component()
 	{
 		isMouseSelectable = false;
-		isVisible = true;
 	}
 
 	void Draw::addToMouseSelectable() {}
@@ -458,7 +487,7 @@ namespace sc
 
 	void DrawModel::render(ID cameraId)
 	{
-		if (isVisible)
+		if (getActive())
 		{
 			int textureCount = 0;
 
@@ -518,7 +547,7 @@ namespace sc
 
 	void DrawModel::mouseRender(ID cameraId, unsigned int index)
 	{
-		if (isVisible)
+		if (getActive())
 		{
 			glm::vec4 indexColor = glm::vec4((float)((index >> 16) & 0xff)/255.0,
 											 (float)((index >> 8) & 0xff)/255.0,
@@ -673,7 +702,7 @@ namespace sc
 	{
 		if (state != NULL)
 		{
-			if (isVisible)
+			if (getActive())
 			{
 				Mesh* mesh = assets.meshStack.get(ID("ME_QUAD"));
 				Shader* shad = assets.shaderStack.get(ID("SH_COLOR"));
@@ -704,7 +733,7 @@ namespace sc
 	{
 		if (state != NULL)
 		{
-			if (isVisible)
+			if (getActive())
 			{
 				glm::vec4 indexColor = glm::vec4((float)((index >> 16) & 0xff)/255.0,
 												 (float)((index >> 8) & 0xff)/255.0,
@@ -757,7 +786,7 @@ namespace sc
 	{
 		if (state != NULL)
 		{
-			if (isVisible)
+			if (getActive())
 			{
 				Mesh* mesh = assets.meshStack.get(ID("ME_QUAD"));
 				Shader* shad = assets.shaderStack.get(ID("SH_SPRITE"));
@@ -789,7 +818,7 @@ namespace sc
 	{
 		if (state != NULL)
 		{
-			if (isVisible)
+			if (getActive())
 			{
 				glm::vec4 indexColor = glm::vec4((float)((index >> 16) & 0xff)/255.0,
 												 (float)((index >> 8) & 0xff)/255.0,
@@ -987,7 +1016,7 @@ namespace sc
 	{
 		if (state != NULL)
 		{
-			if (isVisible)
+			if (getActive())
 			{
 				Shader* shad = assets.shaderStack.get(ID("SH_FONT"));
 				glUseProgram(shad->GLid);
@@ -1065,7 +1094,7 @@ namespace sc
 	{
 		if (state != NULL)
 		{
-			if (isVisible)
+			if (getActive())
 			{
 				glm::vec4 indexColor = glm::vec4((float)((index >> 16) & 0xff)/255.0,
 												 (float)((index >> 8) & 0xff)/255.0,

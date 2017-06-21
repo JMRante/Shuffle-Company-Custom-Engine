@@ -39,16 +39,20 @@ namespace sc
 	private:
 		std::vector<ID> types;
 
+	protected:
+		bool isActive;
+
 	public:
 		ID entityId;
 		State* state;
-		bool isActive;
 
 		Component();
 		virtual ~Component() {}
 		bool isType(ID id);
 		bool sameTypes(Component* comp);
 		void addType(ID id);
+		virtual bool getActive();
+		virtual void setActive(bool set);
 
 		virtual void onStateInsert();
 		virtual void onStateRemove();
@@ -73,6 +77,9 @@ namespace sc
 
 		void onStateInsert();
 		void onStateRemove();
+
+		bool getActive();
+		void setActive(bool set);
 
 		glm::mat4 calculate();
 		glm::mat4 getMatrix();
@@ -147,8 +154,6 @@ namespace sc
 		bool isMouseSelectable;
 
 	public:
-		bool isVisible;
-
 		Draw();
 
 		virtual void addToMouseSelectable();
