@@ -106,7 +106,7 @@ namespace sc
 	{
 		targetState->addEntity(id);
 		targetState->addComponent<EditorOperationManager>(id, new EditorOperationManager(64));
-		targetState->addComponent<EditorShortcuts>(id, new EditorShortcuts());
+		targetState->addComponent<EditorControl>(id, new EditorControl());
 
 		return id;
 	}

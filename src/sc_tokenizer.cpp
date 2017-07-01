@@ -115,7 +115,7 @@ namespace sc
 			{
 				currentType = Token::word;
 
-				while (std::isalnum(stream->peek()))
+				while (std::isalnum(stream->peek()) || stream->peek() == '_')
 				{
 					stream->get(c);
 					currentToken += c;

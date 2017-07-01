@@ -73,8 +73,13 @@ namespace sc
 		int height;
 		Mesh* stageMesh;
 		std::string name;
+		int mouseSelectCount;
+		int mouseSelectLayer;
+		int mouseSelected;
 
 	public:
+		bool faceSelectMode;
+
 		Stage();
 
 		bool readStageFile(std::string filepath);
@@ -101,6 +106,11 @@ namespace sc
 
 		int get(int x, int y, int z);
 		void set(int x, int y, int z, int brush);
+
+		int getMouseSelectCount();
+		void setMouseSelected(int selected);
+		void setMouseSelectLayer(int layer);
+		glm::ivec3 getSelectedBlock();
 	};
 }
 

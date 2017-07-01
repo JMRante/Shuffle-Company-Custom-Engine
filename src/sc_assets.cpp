@@ -221,6 +221,15 @@ namespace sc
 			//Texture
 			glEnableVertexAttribArray(3);
 			glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(StageVertex), (GLvoid*)(8 * sizeof(GLfloat)));
+
+			//ID
+			glEnableVertexAttribArray(4);
+			glVertexAttribIPointer(4, 1, GL_INT, sizeof(StageVertex), (GLvoid*)(9 * sizeof(GLfloat)));
+
+			//IDColor
+			glEnableVertexAttribArray(5);
+			glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(StageVertex), (GLvoid*)((9 * sizeof(GLfloat)) + sizeof(GLint)));
+
 		glBindVertexArray(0);
 
 		indexCount = indices->size();
@@ -946,6 +955,7 @@ namespace sc
 		shaderStack.pushBase(new Shader(ID("SH_PASS"), "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl"));
 		shaderStack.pushBase(new Shader(ID("SH_TEX"), "Resources/Shaders/sc_shader_testTextureVertex.glsl", "Resources/Shaders/sc_shader_testTextureFragment.glsl"));
 		shaderStack.pushBase(new Shader(ID("SH_STAGE"), "Resources/Shaders/sc_shader_stageVertex.glsl", "Resources/Shaders/sc_shader_stageFragment.glsl"));
+		shaderStack.pushBase(new Shader(ID("SH_STAGESELECT"), "Resources/Shaders/sc_shader_stageSelectVertex.glsl", "Resources/Shaders/sc_shader_stageSelectFragment.glsl"));
 		shaderStack.pushBase(new Shader(ID("SH_COLOR"), "Resources/Shaders/sc_shader_flatColorVertex.glsl", "Resources/Shaders/sc_shader_flatColorFragment.glsl"));
 		shaderStack.pushBase(new Shader(ID("SH_SPRITE"), "Resources/Shaders/sc_shader_spriteVertex.glsl", "Resources/Shaders/sc_shader_spriteFragment.glsl"));
 		shaderStack.pushBase(new Shader(ID("SH_FONT"), "Resources/Shaders/sc_shader_fontVertex.glsl", "Resources/Shaders/sc_shader_fontFragment.glsl"));

@@ -52,12 +52,26 @@ namespace sc
 
 	ID Renderer::renderForMouseSelect(State* state)
 	{
-		unsigned int indexCount = 1;
+		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
+		unsigned int stageSelectCount = 0;
 
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		if (stage != NULL)
+		{
+			stageSelectCount = stage->getMouseSelectCount();
+		}
+
+		unsigned int indexCount = 1 + stageSelectCount;
+
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Render 3D, perspective elements
+		//Render stage with selection spots
+		if (stage != NULL)
+		{
+			state->getComponent<DrawModel>(ID("E_STAGE"))->stageMouseRender(renderCameraEntityId);
+		}
+
 		//Render each opaque model
 		for (auto drawIt = state->mouseSelectModels.begin(); drawIt != state->mouseSelectModels.end(); drawIt++)
 		{
@@ -75,6 +89,8 @@ namespace sc
 			}
 		glDepthFunc(GL_LESS);
 
+		//SDL_GL_SwapWindow(window);
+
 		unsigned char res[4];
 		GLint viewport[4];
 
@@ -82,14 +98,42 @@ namespace sc
 		glReadPixels(input.getMouseX(), input.getMouseY(), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &res);
 
 		unsigned int indexGet = ((unsigned int)res[0] << 16) | ((unsigned int)res[1] << 8) | ((unsigned int)res[2] << 0);
+		LOG_D << indexGet;
 
-		if ((size_t)indexGet > state->mouseSelectModels.size() && (size_t)indexGet <= (state->mouseSelectModels.size() + state->mouseSelectOrthos.size()))
+		if ((size_t)indexGet <= (state->mouseSelectModels.size() + state->mouseSelectOrthos.size() + stageSelectCount))
 		{
-			return state->mouseSelectOrthos[(indexGet - state->mouseSelectModels.size()) - 1]->entityId;
+			if ((size_t)indexGet > (state->mouseSelectModels.size() + stageSelectCount))
+			{
+				if (stage != NULL)
+				{
+					stage->setMouseSelected(-1);
+				}
+
+				return state->mouseSelectOrthos[(indexGet - state->mouseSelectModels.size() - stageSelectCount) - 1]->entityId;
+			}
+			else if (indexGet > stageSelectCount)
+			{
+				if (stage != NULL)
+				{
+					stage->setMouseSelected(-1);
+				}
+
+				return state->mouseSelectModels[(indexGet - stageSelectCount) - 1]->entityId;
+			}
+			else if (indexGet > 0)
+			{
+				if (stage != NULL)
+				{
+					stage->setMouseSelected(indexGet);
+				}
+
+				return ID("STAGESELECTED");
+			}			
 		}
-		else if (indexGet > 0)
+
+		if (stage != NULL)
 		{
-			return state->mouseSelectModels[indexGet - 1]->entityId;
+			stage->setMouseSelected(-1);
 		}
 
 		return ID("NULL");

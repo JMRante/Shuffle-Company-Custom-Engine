@@ -82,10 +82,10 @@ namespace sc
 		void update();
 	};
 
-	class EditorShortcuts : public Nature
+	class EditorControl : public Nature
 	{
 	public:
-		EditorShortcuts();
+		EditorControl();
 		void update();
 	};
 

@@ -574,6 +574,24 @@ namespace sc
 		}
 	}
 
+	void DrawModel::stageMouseRender(ID cameraId)
+	{
+		if (getActive())
+		{
+			Shader* shad = assets.shaderStack.get(ID("SH_STAGESELECT"));
+			glUseProgram(shad->GLid);
+
+			Camera* cam = state->getComponent<Camera>(cameraId);
+
+			glm::mat4 pvw = cam->getProjectionMatrix() * cam->getViewMatrix() * state->getComponent<Transform>(entityId)->getMatrix();
+			glUniformMatrix4fv(glGetUniformLocation(model->material->shader->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
+
+			glBindVertexArray(model->mesh->VAOid);
+				glDrawElements(GL_TRIANGLES, model->mesh->indexCount, GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+		}		
+	}
+
 	void DrawModel::onStateInsert()
 	{
 		state->modelPointers.push_back(this);

@@ -48,6 +48,8 @@ namespace sc
 		glm::vec3 normal;
 		glm::vec2 textureCoord;
 		float textureNum;
+		int id;
+		glm::vec3 idColor;
 	};
 
 	class Mesh

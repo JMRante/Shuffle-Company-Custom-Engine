@@ -169,6 +169,7 @@ namespace sc
 		DrawModel(ID modelId);
 		void render(ID cameraId);
 		void mouseRender(ID cameraId, unsigned int index);
+		void stageMouseRender(ID cameraId);
 
 		void onStateInsert();
 		void onStateRemove();

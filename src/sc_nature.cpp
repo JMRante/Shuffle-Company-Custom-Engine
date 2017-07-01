@@ -169,6 +169,8 @@ namespace sc
 			{
 				translate += glm::vec3(0.0f, 1.0f, 0.0f);
 				cameraLayer++;
+				stage->setMouseSelectLayer(cameraLayer);
+				stage->updateStageMesh();
 
 				for (size_t i = 0; i < editSlotTransforms.size(); i++)
 				{
@@ -179,6 +181,8 @@ namespace sc
 			{
 				translate -= glm::vec3(0.0f, 1.0f, 0.0f);
 				cameraLayer--;
+				stage->setMouseSelectLayer(cameraLayer);
+				stage->updateStageMesh();
 
 				for (size_t i = 0; i < editSlotTransforms.size(); i++)
 				{
@@ -193,6 +197,8 @@ namespace sc
 			{
 				translate += glm::vec3(0.0f, 1.0f, 0.0f);
 				cameraLayer++;
+				stage->setMouseSelectLayer(cameraLayer);
+				stage->updateStageMesh();
 
 				for (size_t i = 0; i < editSlotTransforms.size(); i++)
 				{
@@ -203,6 +209,8 @@ namespace sc
 			{
 				translate -= glm::vec3(0.0f, 1.0f, 0.0f);
 				cameraLayer--;
+				stage->setMouseSelectLayer(cameraLayer);
+				stage->updateStageMesh();
 
 				for (size_t i = 0; i < editSlotTransforms.size(); i++)
 				{
@@ -233,22 +241,18 @@ namespace sc
 	void EditorSlot::update()
 	{
 		DrawModel* dm = state->getComponent<DrawModel>(entityId);
+		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
 
 		if (entityId.is(input.mouseSelectedEntity))
 		{
 			EditorCamera* ec = state->getComponent<EditorCamera>(ID("E_CAMERA"));
 			EditorOperationManager* eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
-			Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
 
 			dm->model = assets.modelStack.get(ID("MO_EDITSLOTB"));
 
 			if (input.mouseButtonHeld(SDL_BUTTON_LEFT) && stage->get(x, ec->getCameraLayer(), z) != 1)
 			{
 				eom->doOperation(new SetBrush(1, glm::ivec3(x, ec->getCameraLayer(), z)));
-			}
-			else if (input.mouseButtonHeld(SDL_BUTTON_RIGHT) && stage->get(x, ec->getCameraLayer(), z) != 0)
-			{
-				eom->doOperation(new SetBrush(0, glm::ivec3(x, ec->getCameraLayer(), z)));
 			}
 		}
 		else
@@ -259,11 +263,11 @@ namespace sc
 
 
 	/*
-		EditorShortcuts
+		EditorControl
 						*/
-	EditorShortcuts::EditorShortcuts() : Nature() {}
+	EditorControl::EditorControl() : Nature() {}
 
-	void EditorShortcuts::update()
+	void EditorControl::update()
 	{
 		EditorOperationManager* eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
 
@@ -289,6 +293,18 @@ namespace sc
 			for (auto it = trans.begin(); it != trans.end(); it++)
 			{
 				(*it)->setActive(true);
+			}
+		}
+
+		if (ID("STAGESELECTED").is(input.mouseSelectedEntity))
+		{
+			Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
+			glm::ivec3 coord = stage->getSelectedBlock();
+
+			if (input.mouseButtonHeld(SDL_BUTTON_RIGHT) && coord.x != -1 && stage->get(coord.x, coord.y, coord.z) != 0)
+			{
+				eom->doOperation(new SetBrush(0, coord));
+				stage->setMouseSelected(-1);
 			}
 		}
 	}
