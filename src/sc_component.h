@@ -72,6 +72,10 @@ namespace sc
 		glm::mat4 matrix;
 
 	public:
+		bool useParentTransform;
+		bool useParentScale;
+		bool useParentRotation;
+
 		Transform();
 		Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
 
@@ -201,16 +205,13 @@ namespace sc
 	class DrawRectangle : public DrawOrtho
 	{
 	public:
-		float x;
-		float y;
-		float width;
-		float height;
 		float pivotX;
 		float pivotY;
 
 		glm::vec4 color;
 
-		DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color);
+		DrawRectangle();
+		void initialize(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color);
 		void render(ID cameraId);
 		void mouseRender(ID cameraId, unsigned int index);
 	};
@@ -218,16 +219,15 @@ namespace sc
 	class DrawSprite : public DrawOrtho
 	{
 	public:
-		float x;
-		float y;
-		float scaleX;
-		float scaleY;
 		float pivotX;
 		float pivotY;
+		float scaleX;
+		float scaleY;
 
 		Sprite* sprite;
 
-		DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId);
+		DrawSprite();
+		void initialize(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId);
 		void render(ID cameraId);
 		void mouseRender(ID cameraId, unsigned int index);
 	};
@@ -243,9 +243,6 @@ namespace sc
 		float height;
 
 	public:
-		float x;
-		float y;
-
 		TextHAlign hAlignment;
 		TextVAlign vAlignment;
 		TextHAlign justification;
@@ -254,7 +251,8 @@ namespace sc
 		glm::vec4 color;
 		Font* font;
 
-		DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId);
+		DrawText();
+		void initialize(float x, float y, std::string text, glm::vec4 color, ID fontId);
 		void render(ID cameraId);
 		void mouseRender(ID cameraId, unsigned int index);
 		void setText(std::string text);
@@ -264,8 +262,8 @@ namespace sc
 		float getLineWidth(int line);
 		void calculateWidth();
 		void calculateHeight();
-		float getDrawStartX(int line);
-		float getDrawStartY();
+		float getDrawOffsetX(int line);
+		float getDrawOffsetY();
 	};
 
 	class EditorOperation

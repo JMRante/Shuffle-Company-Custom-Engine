@@ -110,6 +110,10 @@ namespace sc
 
 		parent = NULL;
 		dirty = true;
+
+		useParentTransform = true;
+		useParentScale = true;
+		useParentRotation = true;
 	}
 
 	Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : Component()
@@ -122,6 +126,10 @@ namespace sc
 
 		parent = NULL;
 		dirty = true;
+
+		useParentTransform = true;
+		useParentScale = true;
+		useParentRotation = true;
 	}
 
 	void Transform::onStateInsert() 
@@ -165,7 +173,24 @@ namespace sc
 			}
 			else
 			{
-				matrix = parent->calculate() * glm::translate(glm::mat4(1.0f), position) * glm::eulerAngleYXZ(rotation[1], rotation[0], rotation[2]) * glm::scale(glm::mat4(1.0f), scale);
+				matrix = parent->calculate();
+
+				if (!useParentTransform)
+				{
+					matrix *= glm::translate(glm::mat4(1.0f), glm::vec3(-parent->getPosX(), -parent->getPosY(), -parent->getPosZ()));
+				}
+
+				if (!useParentRotation)
+				{
+					matrix *= glm::eulerAngleYXZ(-parent->getRotY(), -parent->getRotX(), -parent->getRotZ());
+				}
+
+				if (!useParentScale)
+				{
+					matrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1.0f/parent->getScaX(), 1.0f/parent->getScaY(), 1.0f/parent->getScaZ()));				
+				}
+
+				matrix *= glm::translate(glm::mat4(1.0f), position) * glm::eulerAngleYXZ(rotation[1], rotation[0], rotation[2]) * glm::scale(glm::mat4(1.0f), scale);
 			}
 
 			dirty = false;
@@ -703,14 +728,28 @@ namespace sc
 	/*
 		DrawRectangle
 						*/
-	DrawRectangle::DrawRectangle(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color) : DrawOrtho()
+	DrawRectangle::DrawRectangle() : DrawOrtho()
 	{
 		addType(ID("DRAWRECTANGLE"));
+	}
 
-		this->x = x;
-		this->y = y;
-		this->width = width;
-		this->height = height;
+	void DrawRectangle::initialize(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color)
+	{
+		Transform* tran = state->getComponent<Transform>(entityId);
+
+		if (tran != NULL)
+		{
+			tran->setPosX(x);
+			tran->setPosY(y);
+			tran->setScaX(width);
+			tran->setScaY(height);
+			tran->useParentScale = false;
+		}
+		else
+		{
+			LOG_E << entityId.get() << " cannot have a DrawRectangle, it doesn't have a Transform";
+		}
+
 		this->pivotX = pivotX;
 		this->pivotY = pivotY;
 		this->color = color;
@@ -733,7 +772,7 @@ namespace sc
 					color[3]);
 
 				//Bind transform to shader
-				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getMatrix() * (glm::translate(glm::mat4(1.0f), glm::vec3(x - pivotX, y - pivotY, (float) layer)) * glm::scale(glm::mat4(1.0f), glm::vec3(width, height, 0.0f)));
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(pivotX, pivotY, 0.0f)) * state->getComponent<Transform>(entityId)->getMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);
@@ -769,7 +808,7 @@ namespace sc
 					indexColor[3]);
 
 				//Bind transform to shader
-				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getMatrix() * (glm::translate(glm::mat4(1.0f), glm::vec3(x - pivotX, y - pivotY, (float) layer)) * glm::scale(glm::mat4(1.0f), glm::vec3(width, height, 0.0f)));
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(pivotX, pivotY, 0.0f)) * state->getComponent<Transform>(entityId)->getMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);
@@ -787,17 +826,33 @@ namespace sc
 	/*
 		DrawSprite
 					*/
-	DrawSprite::DrawSprite(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId) : DrawOrtho()
+	DrawSprite::DrawSprite() : DrawOrtho()
 	{
 		addType(ID("DRAWSPRITE"));
+	}
 
-		this->x = x;
-		this->y = y;
-		this->scaleX = scaleX;
-		this->scaleY = scaleY;
+	void DrawSprite::initialize(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId)
+	{
+		Transform* tran = state->getComponent<Transform>(entityId);
+		this->sprite = assets.spriteStack.get(spriteId);
+
+		if (tran != NULL)
+		{
+			tran->setPosX(x);
+			tran->setPosY(y);
+			tran->setScaX(sprite->width);
+			tran->setScaY(sprite->height);
+			tran->useParentScale = false;
+		}
+		else
+		{
+			LOG_E << entityId.get() << " cannot have a DrawSprite, it doesn't have a Transform";
+		}
+
 		this->pivotX = pivotX;
 		this->pivotY = pivotY;
-		this->sprite = assets.spriteStack.get(spriteId);
+		this->scaleX = scaleX;
+		this->scaleY = scaleY;
 	}
 
 	void DrawSprite::render(ID cameraId)
@@ -818,7 +873,7 @@ namespace sc
 				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"sprite"), 0);
 
 				//Bind transform to shader
-				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getMatrix() * (glm::translate(glm::mat4(1.0f), glm::vec3(x - pivotX, y - pivotY, (float) layer)) * glm::scale(glm::mat4(1.0f), glm::vec3(scaleX * sprite->width, scaleY * sprite->height, 0.0f)));
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(pivotX, pivotY, 0)) * state->getComponent<Transform>(entityId)->getMatrix() * glm::scale(glm::mat4(1.0f), glm::vec3(scaleX, scaleY, 0.0f));
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);
@@ -854,7 +909,7 @@ namespace sc
 					indexColor[3]);
 
 				//Bind transform to shader
-				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getMatrix() * (glm::translate(glm::mat4(1.0f), glm::vec3(x - pivotX, y - pivotY, (float) layer)) * glm::scale(glm::mat4(1.0f), glm::vec3(scaleX * sprite->width, scaleY * sprite->height, 0.0f)));
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(pivotX, pivotY, 0)) * state->getComponent<Transform>(entityId)->getMatrix() * glm::scale(glm::mat4(1.0f), glm::vec3(scaleX, scaleY, 0.0f));
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));				
 
 				glBindVertexArray(mesh->VAOid);
@@ -872,12 +927,26 @@ namespace sc
 	/*
 		DrawText
 				*/
-	DrawText::DrawText(float x, float y, std::string text, glm::vec4 color, ID fontId) : DrawOrtho()
+	DrawText::DrawText() : DrawOrtho()
 	{
 		addType(ID("DRAWTEXT"));
+	}
 
-		this->x = x;
-		this->y = y;
+	void DrawText::initialize(float x, float y, std::string text, glm::vec4 color, ID fontId)
+	{
+		Transform* tran = state->getComponent<Transform>(entityId);
+
+		if (tran != NULL)
+		{
+			tran->setPosX(x);
+			tran->setPosY(y);
+			tran->useParentScale = false;
+		}
+		else
+		{
+			LOG_E << entityId.get() << " cannot have a DrawText, it doesn't have a Transform";
+		}
+
 		this->text = text;
 		this->color = color;
 		this->font = assets.fontStack.get(fontId);
@@ -985,20 +1054,19 @@ namespace sc
 		height = (lineCount * font->maxCharHeight) + ((lineCount - 1) * lineSeperation);
 	}
 
-	float DrawText::getDrawStartX(int line)
+	float DrawText::getDrawOffsetX(int line)
 	{
 		float tempX = 0.0f;
 
 		switch(justification)
 		{
 		case TextHAlign::left:
-			tempX = x;
 			break;
 		case TextHAlign::center:
-			tempX = x + ((width - getLineWidth(line)) / 2.0f);
+			tempX = (width - getLineWidth(line)) / 2.0f;
 			break;
 		case TextHAlign::right:
-			tempX = x + (width - getLineWidth(line));
+			tempX = width - getLineWidth(line);
 			break;
 		}
 
@@ -1015,16 +1083,16 @@ namespace sc
 		return 0.0f;
 	}
 
-	float DrawText::getDrawStartY()
+	float DrawText::getDrawOffsetY()
 	{
 		switch (vAlignment)
 		{
 		case TextVAlign::top:
-			return y;
+			return 0.0f;
 		case TextVAlign::middle:
-			return y + (height / 2.0f);
+			return height / 2.0f;
 		case TextVAlign::bottom:
-			return y + height;
+			return height;
 		}
 
 		return 0.0f;
@@ -1036,6 +1104,7 @@ namespace sc
 		{
 			if (getActive())
 			{
+				Transform* tran = state->getComponent<Transform>(entityId);
 				Shader* shad = assets.shaderStack.get(ID("SH_FONT"));
 				glUseProgram(shad->GLid);
 
@@ -1049,12 +1118,12 @@ namespace sc
 				glBindTexture(GL_TEXTURE_2D, font->textureGLid);
 				glUniform1i(glGetUniformLocation(shad->GLid, (const GLchar*)"fontTexture"), 0);
 
-				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getMatrix();
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * tran->getMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
 
 				int currentLine = 0;
-				GLfloat x = getDrawStartX(currentLine);
-				GLfloat y = getDrawStartY();
+				GLfloat x = getDrawOffsetX(currentLine);
+				GLfloat y = getDrawOffsetY();
 
 				std::string::const_iterator cIt;
 
@@ -1066,7 +1135,7 @@ namespace sc
 					if ((*cIt) == '\n')
 					{
 						currentLine++;
-						x = getDrawStartX(currentLine);
+						x = getDrawOffsetX(currentLine);
 						y -= (font->maxCharHeight + lineSeperation);
 					}
 					else
@@ -1119,6 +1188,7 @@ namespace sc
 												 (float)((index >> 0) & 0xff)/255.0,
 												 1.0);
 
+				Transform* tran = state->getComponent<Transform>(entityId);
 				Shader* shad = assets.shaderStack.get(ID("SH_COLOR"));
 				glUseProgram(shad->GLid);
 
@@ -1128,12 +1198,12 @@ namespace sc
 					indexColor[2],
 					indexColor[3]);
 
-				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * state->getComponent<Transform>(entityId)->getMatrix();
+				glm::mat4 pvw = state->getComponent<Camera>(cameraId)->getOrthoMatrix() * tran->getMatrix();
 				glUniformMatrix4fv(glGetUniformLocation(shad->GLid, "PVW"), 1, GL_FALSE, glm::value_ptr(pvw));
 
 				int currentLine = 0;
-				GLfloat x = getDrawStartX(currentLine);
-				GLfloat y = getDrawStartY();
+				GLfloat x = getDrawOffsetX(currentLine);
+				GLfloat y = getDrawOffsetY();
 
 				std::string::const_iterator cIt;
 
@@ -1145,7 +1215,7 @@ namespace sc
 					if ((*cIt) == '\n')
 					{
 						currentLine++;
-						x = getDrawStartX(currentLine);
+						x = getDrawOffsetX(currentLine);
 						y -= (font->maxCharHeight + lineSeperation);
 					}
 					else

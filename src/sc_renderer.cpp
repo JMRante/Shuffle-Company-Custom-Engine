@@ -98,7 +98,6 @@ namespace sc
 		glReadPixels(input.getMouseX(), input.getMouseY(), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &res);
 
 		unsigned int indexGet = ((unsigned int)res[0] << 16) | ((unsigned int)res[1] << 8) | ((unsigned int)res[2] << 0);
-		LOG_D << indexGet;
 
 		if ((size_t)indexGet <= (state->mouseSelectModels.size() + state->mouseSelectOrthos.size() + stageSelectCount))
 		{

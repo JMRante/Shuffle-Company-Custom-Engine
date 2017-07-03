@@ -325,12 +325,13 @@ namespace sc
 	void Cursor::update()
 	{
 		DrawSprite* sprite = state->getComponent<DrawSprite>(entityId);
+		Transform* tran = state->getComponent<Transform>(entityId);
 
 		int mouseX = input.getMouseX();
 		int mouseY = input.getMouseY();
 
-		sprite->x = mouseX;
-		sprite->y = mouseY;
+		tran->setPosX(mouseX);
+		tran->setPosY(mouseY);
 
 		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE))
 		{

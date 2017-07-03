@@ -2,10 +2,10 @@
 
     SHUFFLE COMPANY SOURCE CODE
 
-    sc_shader_spriteVertex.glsl
+    sc_shader_fontVertex.glsl
     ------------------------------------
 
-	A vertex shader for rendering 2D sprites.
+	A vertex shader for rendering 2D fonts.
 
 */
 

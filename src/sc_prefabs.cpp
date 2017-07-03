@@ -66,7 +66,8 @@ namespace sc
 	{
 		targetState->addEntity(id);
 		targetState->addComponent<Transform>(id, new Transform());
-		targetState->addComponent<DrawText>(id, new DrawText(position.x, position.y, "", color, fontId));
+		DrawText* dt = targetState->addComponent<DrawText>(id, new DrawText());
+		dt->initialize(position.x, position.y, "", color, fontId);
 		targetState->addComponent<FramerateCounter>(id, new FramerateCounter());
 
 		return id;
@@ -76,7 +77,8 @@ namespace sc
 	{
 		targetState->addEntity(id);
 		targetState->addComponent<Transform>(id, new Transform());
-		targetState->addComponent<DrawRectangle>(id, new DrawRectangle(position.x, position.y, size.x, size.y, pivot.x, pivot.y, color));
+		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle());
+		dr->initialize(position.x, position.y, size.x, size.y, pivot.x, pivot.y, color);
 
 		return id;
 	}
@@ -85,7 +87,8 @@ namespace sc
 	{
 		targetState->addEntity(id);
 		targetState->addComponent<Transform>(id, new Transform());
-		targetState->addComponent<DrawSprite>(id, new DrawSprite(position.x, position.y, scale.x, scale.y, pivot.x, pivot.y, spriteId));
+		DrawSprite* ds = targetState->addComponent<DrawSprite>(id, new DrawSprite());
+		ds->initialize(position.x, position.y, scale.x, scale.y, pivot.x, pivot.y, spriteId);
 
 		return id;
 	}
@@ -94,7 +97,8 @@ namespace sc
 	{
 		targetState->addEntity(id);
 		targetState->addComponent<Transform>(id, new Transform());
-		DrawText* dt = targetState->addComponent<DrawText>(id, new DrawText(position.x, position.y, text, color, fontId));
+		DrawText* dt = targetState->addComponent<DrawText>(id, new DrawText());
+		dt->initialize(position.x, position.y, text, color, fontId);
 		dt->hAlignment = ha;
 		dt->vAlignment = va;
 		dt->justification = just;
@@ -127,15 +131,27 @@ namespace sc
 		return id;
 	}
 
-	ID PrefabFactory::createSpriteButton(ID id, glm::vec2 position, glm::vec2 size, ID spriteId, Event* event)
+	ID PrefabFactory::createEditorPanel(ID id, glm::vec2 position, int layer, glm::vec2 size)
+	{
+		targetState->addEntity(id);
+		targetState->addComponent<Transform>(id, new Transform());
+		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle());
+		dr->initialize(position.x, position.y, size.x, size.y, 0.0f, 0.0f, COL_EDITOR_UI_BACKGROUND);
+		dr->setLayer(layer);
+
+		return id;
+	}
+
+	ID PrefabFactory::createEditorSpriteButton(ID id, glm::vec2 position, int layer, glm::vec2 size, ID spriteId, Event* event)
 	{
 		targetState->addEntity(id);
 		targetState->addEntityTag(id, ID("T_BUTTON"));
 		targetState->addEntityTag(id, ID("T_MAINEDIT"));
 
 		Transform* tran1 = targetState->addComponent<Transform>(id, new Transform());
-		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(position.x, position.y, size.x, size.y, 0.0f, 0.0f, COL_EDTIOR_UI_BUTTONEDGE));
-		dr->setLayer(1);
+		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle());
+		dr->initialize(position.x, position.y, size.x, size.y, 0.0f, 0.0f, COL_EDTIOR_UI_BUTTONEDGE);
+		dr->setLayer(layer);
 		dr->addToMouseSelectable();
 		targetState->addComponent<Button>(id, new Button(event));
 		
@@ -143,20 +159,22 @@ namespace sc
 		targetState->addEntity(foreId);
 		Transform* tran2 = targetState->addComponent<Transform>(foreId, new Transform());
 		tran2->setParent(tran1);
-		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(foreId, new DrawRectangle(position.x + 2.0f, position.y + 2.0f, size.x - 4.0f, size.y - 4.0f, 0.0f, 0.0f, COL_EDITOR_UI_BUTTON));
-		dr2->setLayer(2);
+		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(foreId, new DrawRectangle());
+		dr2->initialize(2.0f, 2.0f, size.x - 4.0f, size.y - 4.0f, 0.0f, 0.0f, COL_EDITOR_UI_BUTTON);
+		dr2->setLayer(layer + 1);
 
 		ID sprId = ID(id.getStr() + "SP");
 		targetState->addEntity(sprId);
 		Transform* tran3 = targetState->addComponent<Transform>(sprId, new Transform());
 		tran3->setParent(tran2);
-		DrawSprite* ds = targetState->addComponent<DrawSprite>(sprId, new DrawSprite(position.x, position.y, 1.0f, 1.0f, 0.0f, 0.0f, spriteId));
-		ds->setLayer(3);
+		DrawSprite* ds = targetState->addComponent<DrawSprite>(sprId, new DrawSprite());
+		ds->initialize(-2.0f, -2.0f, 1.0f, 1.0f, 0.0f, 0.0f, spriteId);
+		ds->setLayer(layer + 2);
 
 		return id;
 	}
 
-	ID PrefabFactory::createTextButton(ID id, glm::vec2 position, ID fontId, std::string text, Event* event)
+	ID PrefabFactory::createEditorTextButton(ID id, glm::vec2 position, int layer, ID fontId, std::string text, Event* event)
 	{
 		targetState->addEntity(id);
 		targetState->addEntityTag(id, ID("T_BUTTON"));
@@ -164,14 +182,16 @@ namespace sc
 		ID textId = ID(id.getStr() + "TX");
 		targetState->addEntity(textId);
 		Transform* tran3 = targetState->addComponent<Transform>(textId, new Transform());
-		DrawText* dt = targetState->addComponent<DrawText>(textId, new DrawText(position.x + 6.0f, position.y + 6.0f, text, COL_WHITE, fontId));
-		dt->setLayer(3);
+		DrawText* dt = targetState->addComponent<DrawText>(textId, new DrawText());
+		dt->initialize(4.0f, 4.0f, text, COL_WHITE, fontId);
+		dt->setLayer(layer + 2);
 		float textWidth = dt->getWidth();
 		float textHeight = dt->getHeight();
 
 		Transform* tran1 = targetState->addComponent<Transform>(id, new Transform());
-		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(position.x, position.y, textWidth + 12.0f, textHeight + 4.0f, 0.0f, 0.0f, COL_EDTIOR_UI_BUTTONEDGE));
-		dr->setLayer(1);
+		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle());
+		dr->initialize(position.x, position.y, textWidth + 12.0f, textHeight + 4.0f, 0.0f, 0.0f, COL_EDTIOR_UI_BUTTONEDGE);
+		dr->setLayer(layer);
 		dr->addToMouseSelectable();
 		targetState->addComponent<Button>(id, new Button(event));
 
@@ -180,30 +200,31 @@ namespace sc
 		Transform* tran2 = targetState->addComponent<Transform>(foreId, new Transform());
 		tran2->setParent(tran1);
 		tran3->setParent(tran2);
-		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(foreId, new DrawRectangle(position.x + 2.0f, position.y + 2.0f, textWidth + 8.0f, textHeight, 0.0f, 0.0f, COL_EDITOR_UI_BUTTON));
-		dr2->setLayer(2);
+		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(foreId, new DrawRectangle());
+		dr2->initialize(2.0f, 2.0f, textWidth + 8.0f, textHeight, 0.0f, 0.0f, COL_EDITOR_UI_BUTTON);
+		dr2->setLayer(layer + 1);
 
 		return id;
 	}
 
-	ID PrefabFactory::createFileSelector(ID id, std::string startPath, Event* selectEvent)
+	ID PrefabFactory::createEditorFileSelector(ID id, std::string startPath, Event* selectEvent)
 	{
-		ID tag = ID("T_SELECTOREDIT");
+		// ID tag = ID("T_SELECTOREDIT");
 
-		targetState->addEntity(id);
-		targetState->addEntityTag(id, ID("T_" + id.getStr()));
-		targetState->addEntityTag(id, tag);
-		targetState->addComponent<Transform>(id, new Transform());
-		DrawRectangle* dr1 = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(config.get("WINDOW_WIDTH") / 2.0f, config.get("WINDOW_HEIGHT") / 2.0f, 850.0f, 550.0f, 425.0f, 275.0f, COL_EDITOR_UI_BACKGROUND));
-		dr1->setLayer(10);
+		// targetState->addEntity(id);
+		// targetState->addEntityTag(id, ID("T_" + id.getStr()));
+		// targetState->addEntityTag(id, tag);
+		// targetState->addComponent<Transform>(id, new Transform());
+		// DrawRectangle* dr1 = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(config.get("WINDOW_WIDTH") / 2.0f, config.get("WINDOW_HEIGHT") / 2.0f, 850.0f, 550.0f, 425.0f, 275.0f, COL_EDITOR_UI_BACKGROUND));
+		// dr1->setLayer(10);
 
-		ID windowId = ID(id.getStr() + "WINDOW");
-		targetState->addEntity(windowId);
-		targetState->addEntityTag(windowId, ID("T_" + id.getStr()));
-		targetState->addEntityTag(windowId, tag);
-		targetState->addComponent<Transform>(windowId, new Transform());
-		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(windowId, new DrawRectangle(config.get("WINDOW_WIDTH") / 2.0f, (config.get("WINDOW_HEIGHT") / 2.0f) + 50.0f, 800.0f, 400.0f, 400.0f, 200.0f, COL_EDITOR_UI_FOREGROUND));
-		dr2->setLayer(11);
+		// ID windowId = ID(id.getStr() + "WINDOW");
+		// targetState->addEntity(windowId);
+		// targetState->addEntityTag(windowId, ID("T_" + id.getStr()));
+		// targetState->addEntityTag(windowId, tag);
+		// targetState->addComponent<Transform>(windowId, new Transform());
+		// DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(windowId, new DrawRectangle(config.get("WINDOW_WIDTH") / 2.0f, (config.get("WINDOW_HEIGHT") / 2.0f) + 50.0f, 800.0f, 400.0f, 400.0f, 200.0f, COL_EDITOR_UI_FOREGROUND));
+		// dr2->setLayer(11);
 
 		// for (int i = 0; i < 40; i++)
 		// {
@@ -226,8 +247,10 @@ namespace sc
 		{
 			targetState->addEntity(id);
 			targetState->addComponent<Transform>(id, new Transform());
-			targetState->addComponent<DrawSprite>(id, new DrawSprite(input.getMouseX(), input.getMouseY(), 1.0, 1.0, 0.0f, 32.0f, ID("SP_POINTCUR")));
-			targetState->addComponent<Cursor>(id, new Cursor());			
+			DrawSprite* ds = targetState->addComponent<DrawSprite>(id, new DrawSprite());
+			ds->initialize(input.getMouseX(), input.getMouseY(), 1.0, 1.0, 0.0f, 0.0f, ID("SP_POINTCUR"));
+			ds->pivotY = -((float)ds->sprite->height);
+			targetState->addComponent<Cursor>(id, new Cursor());
 		}
 		else
 		{
