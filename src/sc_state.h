@@ -65,6 +65,7 @@ namespace sc
 			component->entityId = entityId;
 			component->state = this;
 
+			component->create();
 			component->onStateInsert();
 			
 			componentMap[entityId].push_back((Component*) component);
@@ -103,6 +104,7 @@ namespace sc
 					if (typeid(T) == typeid(**ci))
 					{
 						(*ci)->onStateRemove();
+						(*ci)->destroy();
 						delete *ci;
 						coms->erase(ci);
 

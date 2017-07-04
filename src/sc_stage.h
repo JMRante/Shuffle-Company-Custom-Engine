@@ -72,7 +72,7 @@ namespace sc
 		int depth;
 		int height;
 		Mesh* stageMesh;
-		std::string name;
+		std::string title;
 		int mouseSelectCount;
 		int mouseSelectLayer;
 		int mouseSelected;
@@ -83,7 +83,7 @@ namespace sc
 		Stage();
 
 		bool readStageFile(std::string filepath);
-		bool parseName(Tokenizer &t);
+		bool parseTitle(Tokenizer &t);
 		bool parseDimensions(Tokenizer &t);
 		bool parseTextures(Tokenizer &t);
 		bool parseBrushes(Tokenizer &t);

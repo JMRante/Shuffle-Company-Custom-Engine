@@ -99,8 +99,8 @@ namespace sc
 		{
 			Tokenizer t(&file);
 
-			LOG_D << "Reading Name"; LOG_FLUSH;
-			if (parseName(t))
+			LOG_D << "Reading Title"; LOG_FLUSH;
+			if (parseTitle(t))
 			{
 				LOG_D << "Reading Dimensions"; LOG_FLUSH;
 				if (parseDimensions(t))
@@ -132,11 +132,11 @@ namespace sc
 		return false;
 	}
 
-	bool Stage::parseName(Tokenizer &t)
+	bool Stage::parseTitle(Tokenizer &t)
 	{
 		t.next();
 
-		if (t.check(Token::word, "NAME"))
+		if (t.check(Token::word, "TITLE"))
 		{
 			t.next();
 
@@ -146,7 +146,7 @@ namespace sc
 
 				if (t.check(Token::string))
 				{
-					name = t.getToken();
+					title = t.getToken();
 					t.next();
 
 					if (t.check(Token::semicolon))
@@ -428,7 +428,7 @@ namespace sc
 		std::ofstream file;
 		file.open(filepath);
 
-		file << "NAME:\"" << name << "\";\n";
+		file << "TITLE:\"" << title << "\";\n";
 		file << "W:" << width << ";\n";
 		file << "H:" << height << ";\n";
 		file << "D:" << depth << ";\n";

@@ -17,7 +17,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "glm/ext.hpp"
 
-#define COL_EDITOR_UI_BACKGROUND glm::vec4(38.0f/255.0f, 38.0f/255.0f, 41.0f/255.0f, 1.0f)
+#define COL_EDITOR_UI_BACKGROUND glm::vec4(33.0f/255.0f, 33.0f/255.0f, 36.0f/255.0f, 1.0f)
+#define COL_EDITOR_UI_BACKGROUND_FOCUS glm::vec4(38.0f/255.0f, 38.0f/255.0f, 41.0f/255.0f, 1.0f)
 #define COL_EDITOR_UI_FOREGROUND glm::vec4(48.0f/255.0f, 48.0f/255.0f, 51.0f/255.0f, 1.0f)
 #define COL_EDITOR_UI_BUTTON glm::vec4(63.0f/255.0f, 63.0f/255.0f, 68.0f/255.0f, 1.0f)
 #define COL_EDTIOR_UI_BUTTONEDGE glm::vec4(86.0f/255.0f, 86.0f/255.0f, 94.0f/255.0f, 1.0f)

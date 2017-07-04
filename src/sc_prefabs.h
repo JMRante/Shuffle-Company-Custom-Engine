@@ -51,8 +51,10 @@ namespace sc
 		ID createEditorSlot(ID id, glm::vec3 position, int x, int z);
 
 		ID createEditorPanel(ID id, glm::vec2 position, int layer, glm::vec2 size);
+		ID createEditorLabel(ID id, glm::vec2 position, ID fontId, std::string text);
 		ID createEditorSpriteButton(ID id, glm::vec2 position, int layer, glm::vec2 size, ID spriteId, Event* event);
 		ID createEditorTextButton(ID id, glm::vec2 position, int layer, ID fontId, std::string text, Event* event);
+		ID createEditorTextField(ID id, glm::vec2 position, int layer, int length, ID fontId, std::string startText);
 		ID createEditorFileSelector(ID id, std::string startPath, Event* selectEvent);
 
 		ID createCursor();

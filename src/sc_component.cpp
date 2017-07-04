@@ -75,10 +75,6 @@ namespace sc
 		types.push_back(id);
 	}
 
-	void Component::onStateInsert() {}
-
-	void Component::onStateRemove() {}
-
 	bool Component::getActive()
 	{
 		Transform* tran = state->getComponent<Transform>(entityId);

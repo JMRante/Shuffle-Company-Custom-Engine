@@ -48,14 +48,19 @@ namespace sc
 
 		Component();
 		virtual ~Component() {}
+
+		virtual void create() {}
+		virtual void destroy() {}
+
 		bool isType(ID id);
 		bool sameTypes(Component* comp);
 		void addType(ID id);
+
+		virtual void onStateInsert() {};
+		virtual void onStateRemove() {};
+
 		virtual bool getActive();
 		virtual void setActive(bool set);
-
-		virtual void onStateInsert();
-		virtual void onStateRemove();
 	};
 
 	class Transform : public Component

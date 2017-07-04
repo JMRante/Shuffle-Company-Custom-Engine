@@ -38,6 +38,86 @@ namespace sc
 
 
 	/*
+		Cursor
+				*/
+	Cursor::Cursor() : Nature()
+	{
+		cursorState = CursorState::point;
+
+		pointSprite = assets.spriteStack.get(ID("SP_POINTCUR"));
+		hoverSprite = assets.spriteStack.get(ID("SP_HOVERCUR"));
+		clickSprite = assets.spriteStack.get(ID("SP_CLICKCUR"));
+		dragSprite = assets.spriteStack.get(ID("SP_DRAGCUR"));
+
+		focus = ID("NULL");
+	}
+
+	void Cursor::update()
+	{
+		DrawSprite* sprite = state->getComponent<DrawSprite>(entityId);
+		Transform* tran = state->getComponent<Transform>(entityId);
+
+		int mouseX = input.getMouseX();
+		int mouseY = input.getMouseY();
+
+		tran->setPosX(mouseX);
+		tran->setPosY(mouseY);
+
+		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE))
+		{
+			cursorState = CursorState::drag;
+		}
+		else
+		{
+			cursorState = CursorState::point;
+		}
+
+		if (state->entityHasTag(input.mouseSelectedEntity, ID("T_BUTTON")))
+		{
+			cursorState = CursorState::hover;
+		}
+
+		if (input.mouseButtonPressed(SDL_BUTTON_LEFT))
+		{
+			if (state->entityHasTag(input.mouseSelectedEntity, ID("T_FOCUSABLE")))
+			{
+				focus = input.mouseSelectedEntity;
+			}
+			else
+			{
+				focus = ID("NULL");
+			}
+		}
+
+		if (input.mouseButtonHeld(SDL_BUTTON_LEFT))
+		{
+			cursorState = CursorState::click;
+		}
+
+		switch (cursorState)
+		{
+		case CursorState::point:
+			sprite->sprite = pointSprite;
+			break;
+		case CursorState::hover:
+			sprite->sprite = hoverSprite;
+			break;	
+		case CursorState::click:
+			sprite->sprite = clickSprite;
+			break;
+		case CursorState::drag:
+			sprite->sprite = dragSprite;
+			break;
+		}
+	}
+
+	ID Cursor::getFocus()
+	{
+		return focus;
+	}
+
+
+	/*
 		DebugCamera
 					*/
 	DebugCamera::DebugCamera(float moveSpeed, float mouseSpeed) : Nature()
@@ -309,63 +389,28 @@ namespace sc
 		}
 	}
 
-	/*
-		Cursor
-				*/
-	Cursor::Cursor() : Nature()
-	{
-		cursorState = CursorState::point;
 
-		pointSprite = assets.spriteStack.get(ID("SP_POINTCUR"));
-		hoverSprite = assets.spriteStack.get(ID("SP_HOVERCUR"));
-		clickSprite = assets.spriteStack.get(ID("SP_CLICKCUR"));
-		dragSprite = assets.spriteStack.get(ID("SP_DRAGCUR"));
+	/*
+		EditorTextField
+						*/
+	EditorTextField::EditorTextField() : Nature() {}
+
+	void EditorTextField::create()
+	{
+		box = state->getComponent<DrawRectangle>(entityId);
+		text = state->getComponent<DrawText>(ID(entityId.getStr() + "TX"));
+		cursor = state->getComponent<Cursor>(ID("E_CURSOR"));
 	}
 
-	void Cursor::update()
+	void EditorTextField::update()
 	{
-		DrawSprite* sprite = state->getComponent<DrawSprite>(entityId);
-		Transform* tran = state->getComponent<Transform>(entityId);
-
-		int mouseX = input.getMouseX();
-		int mouseY = input.getMouseY();
-
-		tran->setPosX(mouseX);
-		tran->setPosY(mouseY);
-
-		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE))
+		if (cursor->getFocus().is(entityId))
 		{
-			cursorState = CursorState::drag;
+			box->color = COL_EDITOR_UI_BACKGROUND_FOCUS;
 		}
 		else
 		{
-			cursorState = CursorState::point;
-		}
-
-		if (state->entityHasTag(input.mouseSelectedEntity, ID("T_BUTTON")))
-		{
-			cursorState = CursorState::hover;
-		}
-
-		if (input.mouseButtonHeld(SDL_BUTTON_LEFT))
-		{
-			cursorState = CursorState::click;
-		}
-
-		switch (cursorState)
-		{
-		case CursorState::point:
-			sprite->sprite = pointSprite;
-			break;
-		case CursorState::hover:
-			sprite->sprite = hoverSprite;
-			break;	
-		case CursorState::click:
-			sprite->sprite = clickSprite;
-			break;
-		case CursorState::drag:
-			sprite->sprite = dragSprite;
-			break;
+			box->color = COL_EDITOR_UI_BACKGROUND;			
 		}
 	}
 

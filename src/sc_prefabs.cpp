@@ -136,8 +136,18 @@ namespace sc
 		targetState->addEntity(id);
 		targetState->addComponent<Transform>(id, new Transform());
 		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle());
-		dr->initialize(position.x, position.y, size.x, size.y, 0.0f, 0.0f, COL_EDITOR_UI_BACKGROUND);
+		dr->initialize(position.x, position.y, size.x, size.y, 0.0f, 0.0f, COL_EDITOR_UI_FOREGROUND);
 		dr->setLayer(layer);
+
+		return id;
+	}
+
+	ID PrefabFactory::createEditorLabel(ID id, glm::vec2 position, ID fontId, std::string text)
+	{
+		targetState->addEntity(id);
+		targetState->addComponent<Transform>(id, new Transform());
+		DrawText* dt = targetState->addComponent<DrawText>(id, new DrawText());
+		dt->initialize(position.x, position.y, text, COL_WHITE, fontId);
 
 		return id;
 	}
@@ -203,6 +213,30 @@ namespace sc
 		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(foreId, new DrawRectangle());
 		dr2->initialize(2.0f, 2.0f, textWidth + 8.0f, textHeight, 0.0f, 0.0f, COL_EDITOR_UI_BUTTON);
 		dr2->setLayer(layer + 1);
+
+		return id;
+	}
+
+	ID PrefabFactory::createEditorTextField(ID id, glm::vec2 position, int layer, int length, ID fontId, std::string startText)
+	{
+		targetState->addEntity(id);
+		targetState->addEntityTag(id, ID("T_FOCUSABLE"));
+
+		ID textId = ID(id.getStr() + "TX");
+		targetState->addEntity(textId);
+		Transform* textTran = targetState->addComponent<Transform>(textId, new Transform());
+		DrawText* dt = targetState->addComponent<DrawText>(textId, new DrawText());
+		dt->initialize(8.0f, 8.0f, startText, COL_WHITE, fontId);
+		dt->setLayer(layer + 1);
+
+		Transform* backTran = targetState->addComponent<Transform>(id, new Transform());
+		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle());
+		dr->initialize(position.x, position.y, (length + 0.25f) * dt->font->maxCharWidth + 8.0f, dt->font->maxCharHeight + 8.0f, 0.0f, 0.0f, COL_EDITOR_UI_BACKGROUND);
+		dr->setLayer(layer);
+		dr->addToMouseSelectable();
+		targetState->addComponent<EditorTextField>(id, new EditorTextField());
+
+		textTran->setParent(backTran);
 
 		return id;
 	}

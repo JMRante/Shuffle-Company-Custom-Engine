@@ -36,12 +36,29 @@ namespace sc
 	{
 	public:
 		Nature();
-		//virtual void create() = 0;
+
 		virtual void update() = 0;
-		//virtual void destory() = 0;
 		
 		void onStateInsert();
 		void onStateRemove();
+	};
+
+	enum CursorState {point, hover, click, drag};
+	class Cursor : public Nature
+	{
+	private:
+		Sprite* pointSprite;
+		Sprite* hoverSprite;
+		Sprite* clickSprite;
+		Sprite* dragSprite;
+		ID focus;
+
+	public:
+		CursorState cursorState;
+
+		Cursor();
+		void update();
+		ID getFocus();
 	};
 
 	class DebugCamera : public Nature
@@ -89,19 +106,16 @@ namespace sc
 		void update();
 	};
 
-	enum CursorState {point, hover, click, drag};
-	class Cursor : public Nature
+	class EditorTextField : public Nature
 	{
 	private:
-		Sprite* pointSprite;
-		Sprite* hoverSprite;
-		Sprite* clickSprite;
-		Sprite* dragSprite;
+		DrawRectangle* box;
+		DrawText* text;
+		Cursor* cursor;
 
 	public:
-		CursorState cursorState;
-
-		Cursor();
+		EditorTextField();
+		void create();
 		void update();
 	};
 
