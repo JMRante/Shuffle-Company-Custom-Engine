@@ -29,6 +29,7 @@
 #include "sc_utility.h"
 #include "sc_events.h"
 #include "sc_color.h"
+#include "sc_stage.h"
 
 namespace sc
 {
@@ -47,6 +48,9 @@ namespace sc
 	class Cursor : public Nature
 	{
 	private:
+		Transform* tran;
+		DrawSprite* drawSprite;
+
 		Sprite* pointSprite;
 		Sprite* hoverSprite;
 		Sprite* clickSprite;
@@ -57,6 +61,7 @@ namespace sc
 		CursorState cursorState;
 
 		Cursor();
+		void create();
 		void update();
 		ID getFocus();
 	};
@@ -64,6 +69,9 @@ namespace sc
 	class DebugCamera : public Nature
 	{
 	private:
+		Transform* tran;
+		Camera* camera;
+
 		float moveSpeed;
 		float mouseSpeed;
 		float yaw;
@@ -71,19 +79,25 @@ namespace sc
 
 	public:
 		DebugCamera(float moveSpeed, float mouseSpeed);
+		void create();
 		void update();
 	};
 
 	class EditorCamera : public Nature
 	{
 	private:
+		Transform* tran;
+		Camera* camera;
+		Stage* stage;
+		std::vector<Transform*> editSlotTransforms;
+
 		float keyMoveSpeed;
 		float mouseMoveSpeed;
 		int cameraLayer;
-		std::vector<Transform*> editSlotTransforms;
 
 	public:
 		EditorCamera(float keyMoveSpeed, float mouseMoveSpeed);
+		void create();
 		void update();
 		int getCameraLayer();
 	};
@@ -91,18 +105,29 @@ namespace sc
 	class EditorSlot : public Nature
 	{
 	private:
+		DrawModel* drawModel;
+		Stage* stage;
+		EditorCamera* ec;
+		EditorOperationManager* eom;
+
 		int x;
 		int z;
 
 	public:
 		EditorSlot(int x, int z);
+		void create();
 		void update();
 	};
 
 	class EditorControl : public Nature
 	{
+	private:
+		EditorOperationManager* eom;
+		Stage* stage;
+
 	public:
 		EditorControl();
+		void create();
 		void update();
 	};
 
@@ -122,6 +147,8 @@ namespace sc
 	class FramerateCounter : public Nature
 	{
 	private:
+		DrawText* drawText;
+
 		float framerateHistory[60] = {};
 		int framerateHistoryCount;
 
@@ -129,12 +156,15 @@ namespace sc
 		float framerateAverage;
 
 		FramerateCounter();
+		void create();
 		void update();
 	};
 
 	class Button : public Nature
 	{
 	private:
+		DrawRectangle* fore;
+
 		float highlightSpeed;
 		float highlightPosition;
 		glm::vec4 normalColor;
@@ -144,6 +174,7 @@ namespace sc
 	public:
 		Button(Event* event);
 		~Button();
+		void create();
 		void update();
 	};
 

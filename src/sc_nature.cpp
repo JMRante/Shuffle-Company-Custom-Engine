@@ -40,7 +40,7 @@ namespace sc
 	/*
 		Cursor
 				*/
-	Cursor::Cursor() : Nature()
+	Cursor::Cursor() : Nature() 
 	{
 		cursorState = CursorState::point;
 
@@ -52,11 +52,14 @@ namespace sc
 		focus = ID("NULL");
 	}
 
+	void Cursor::create()
+	{
+		drawSprite = state->getComponent<DrawSprite>(entityId);
+		tran = state->getComponent<Transform>(entityId);
+	}
+
 	void Cursor::update()
 	{
-		DrawSprite* sprite = state->getComponent<DrawSprite>(entityId);
-		Transform* tran = state->getComponent<Transform>(entityId);
-
 		int mouseX = input.getMouseX();
 		int mouseY = input.getMouseY();
 
@@ -97,16 +100,16 @@ namespace sc
 		switch (cursorState)
 		{
 		case CursorState::point:
-			sprite->sprite = pointSprite;
+			drawSprite->sprite = pointSprite;
 			break;
 		case CursorState::hover:
-			sprite->sprite = hoverSprite;
+			drawSprite->sprite = hoverSprite;
 			break;	
 		case CursorState::click:
-			sprite->sprite = clickSprite;
+			drawSprite->sprite = clickSprite;
 			break;
 		case CursorState::drag:
-			sprite->sprite = dragSprite;
+			drawSprite->sprite = dragSprite;
 			break;
 		}
 	}
@@ -128,11 +131,14 @@ namespace sc
 		pitch = 0.0f;
 	}
 
+	void DebugCamera::create()
+	{
+		tran = state->getComponent<Transform>(entityId);
+		camera = state->getComponent<Camera>(entityId);
+	}
+
 	void DebugCamera::update()
 	{
-		Transform* trans = state->getComponent<Transform>(entityId);
-		Camera* camera = state->getComponent<Camera>(entityId);
-
 		//Rotation
 		float mouseXDelta = (float)input.getMouseXDelta();
 		float mouseYDelta = (float)input.getMouseYDelta();
@@ -142,10 +148,10 @@ namespace sc
 		yaw = glm::mod(yaw, 360.0f);
 		pitch = glm::clamp(pitch, -89.0f, 89.0f);
 		
-		trans->setRot(glm::vec3(glm::radians(pitch), glm::radians(yaw), 0.0f));
+		tran->setRot(glm::vec3(glm::radians(pitch), glm::radians(yaw), 0.0f));
 
 		//Translation
-		glm::vec3 currentPosition = trans->getPos();
+		glm::vec3 currentPosition = tran->getPos();
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		if (input.keyHeld(SDLK_w))
@@ -171,7 +177,7 @@ namespace sc
 		if (translate != glm::vec3(0.0f, 0.0f, 0.0f))
 		{
 			translate = moveSpeed * glm::normalize(translate) * getDeltaSec();
-			trans->setPos(currentPosition + translate);
+			tran->setPos(currentPosition + translate);
 			camera->calculateViewMatrix();	
 		}
 	}
@@ -187,18 +193,21 @@ namespace sc
 		this->cameraLayer = 0;
 	}
 
+	void EditorCamera::create()
+	{
+		tran = state->getComponent<Transform>(entityId);
+		camera = state->getComponent<Camera>(entityId);
+		stage = state->getComponent<Stage>(ID("E_STAGE"));
+	}
+
 	void EditorCamera::update()
 	{
-		Transform* trans = state->getComponent<Transform>(entityId);
-		Camera* camera = state->getComponent<Camera>(entityId);
-		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
-
 		if (editSlotTransforms.size() == 0)
 		{
 			editSlotTransforms = state->getComponentFromTagged<Transform>(ID("T_EDITSLOT"));
 		}
 
-		glm::vec3 currentPosition = trans->getPos();
+		glm::vec3 currentPosition = tran->getPos();
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		//Scroll horizontally
@@ -299,7 +308,7 @@ namespace sc
 			}
 		}
 
-		trans->setPos(currentPosition + translate);
+		tran->setPos(currentPosition + translate);
 		camera->calculateViewMatrix();
 	}
 
@@ -318,17 +327,19 @@ namespace sc
 		this->z = z;
 	}
 
+	void EditorSlot::create()
+	{
+		drawModel = state->getComponent<DrawModel>(entityId);
+		stage = state->getComponent<Stage>(ID("E_STAGE"));
+		ec = state->getComponent<EditorCamera>(ID("E_CAMERA"));
+		eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
+	}
+
 	void EditorSlot::update()
 	{
-		DrawModel* dm = state->getComponent<DrawModel>(entityId);
-		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
-
 		if (entityId.is(input.mouseSelectedEntity))
 		{
-			EditorCamera* ec = state->getComponent<EditorCamera>(ID("E_CAMERA"));
-			EditorOperationManager* eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
-
-			dm->model = assets.modelStack.get(ID("MO_EDITSLOTB"));
+			drawModel->model = assets.modelStack.get(ID("MO_EDITSLOTB"));
 
 			if (input.mouseButtonHeld(SDL_BUTTON_LEFT) && stage->get(x, ec->getCameraLayer(), z) != 1)
 			{
@@ -337,7 +348,7 @@ namespace sc
 		}
 		else
 		{
-			dm->model = assets.modelStack.get(ID("MO_EDITSLOTA"));
+			drawModel->model = assets.modelStack.get(ID("MO_EDITSLOTA"));
 		}
 	}
 
@@ -347,10 +358,14 @@ namespace sc
 						*/
 	EditorControl::EditorControl() : Nature() {}
 
+	void EditorControl::create()
+	{
+		eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
+		stage = state->getComponent<Stage>(ID("E_STAGE"));
+	}
+
 	void EditorControl::update()
 	{
-		EditorOperationManager* eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
-
 		if (input.keyPressed(SDLK_r))
 		{
 			eom->redoOperation();
@@ -360,25 +375,8 @@ namespace sc
 			eom->undoOperation();
 		}
 
-		std::vector<Transform*> trans = state->getComponentFromTagged<Transform>(ID("T_MAINEDIT"));
-		if (input.keyPressed(SDLK_g))
-		{
-			for (auto it = trans.begin(); it != trans.end(); it++)
-			{
-				(*it)->setActive(false);
-			}
-		}
-		else if (input.keyPressed(SDLK_h))
-		{
-			for (auto it = trans.begin(); it != trans.end(); it++)
-			{
-				(*it)->setActive(true);
-			}
-		}
-
 		if (ID("STAGESELECTED").is(input.mouseSelectedEntity))
 		{
-			Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
 			glm::ivec3 coord = stage->getSelectedBlock();
 
 			if (input.mouseButtonHeld(SDL_BUTTON_RIGHT) && coord.x != -1 && stage->get(coord.x, coord.y, coord.z) != 0)
@@ -422,6 +420,11 @@ namespace sc
 	{
 		framerateHistoryCount = -1;
 		framerateAverage = 0;
+	}
+
+	void FramerateCounter::create()
+	{
+		drawText = state->getComponent<DrawText>(entityId);
 	}
 
 	void FramerateCounter::update()
@@ -470,15 +473,13 @@ namespace sc
 		framerateAverage = sum / 60.0f;
 
 		//Update draw
-		DrawText* dt = state->getComponent<DrawText>(entityId);
-
-		if (dt == NULL)
+		if (drawText == NULL)
 		{
 			LOG_D << framerateAverage;			
 		}
 		else
 		{
-			dt->setText(fToS(framerateAverage));
+			drawText->setText(fToS(framerateAverage));
 		}
 	}
 
@@ -496,10 +497,14 @@ namespace sc
 		delete event;
 	}
 
+	void Button::create()
+	{
+		fore = state->getComponent<DrawRectangle>(ID(entityId.getStr() + "FORE"));
+	}
+
 	void Button::update()
 	{
 		bool isMouseHere = entityId.is(input.mouseSelectedEntity);
-		DrawRectangle* fore = state->getComponent<DrawRectangle>(ID(entityId.getStr() + "FORE"));
 
 		if (fore != NULL)
 		{
