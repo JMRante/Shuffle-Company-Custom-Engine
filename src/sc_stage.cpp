@@ -49,8 +49,8 @@ namespace sc
 				*/
 	Stage::Stage() : Component() 
 	{
-		width = 10;
-		depth = 10;
+		width = 50;
+		depth = 50;
 		height = 10;
 		stageMesh = NULL;
 		faceSelectMode = false;

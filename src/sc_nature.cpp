@@ -466,10 +466,10 @@ namespace sc
 		//Calculate
 		float currentFramerate;
 
-		if (delay > MS_PER_FRAME)
+		if (deltaTime > MS_PER_FRAME)
 		{
 			//Framerate is under cap
-			currentFramerate = 1000.0f / ((float) delay);
+			currentFramerate = 1000.0f / ((float) deltaTime);
 		}
 		else
 		{
