@@ -10,3 +10,4 @@ shuffleLog.txt
 /src/Resources/Models*
 /src/Resources/StageTextures*
 /src/Resources/Textures*
+/src/.vscode

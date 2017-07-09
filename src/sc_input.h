@@ -14,12 +14,15 @@
 
 #include <vector>
 #include <algorithm>
+#include <string>
 
 #include <SDL.h>
 
 #include "sc_log.h"
 #include "sc_config.h"
 #include "sc_utility.h"
+
+#define TEXTINPUT_COOLDOWN 5
 
 namespace sc
 {
@@ -41,6 +44,12 @@ namespace sc
 		int mouseYLocal;
 		int mouseWheelDelta;
 		bool firstMouseInput;
+
+		std::string textInputBuffer;
+		size_t textInputBufferCap;
+		size_t textInsertPosition;
+		int backspaceCooldown;
+		int textCursorCooldown;
 
 		bool eventExists(std::vector<SDL_EventType>* eventInput, SDL_EventType event);
 		bool keyInputExists(std::vector<SDL_Keycode>* keyInput, SDL_Keycode key);
@@ -64,6 +73,15 @@ namespace sc
 		int getMouseX();
 		int getMouseY();
 		int getMouseWheelDelta();
+
+		void startTextInput();
+		void stopTextInput();
+		void initTextInputBuffer(std::string startString, size_t cap);
+		bool gettingTextInput();
+		std::string getTextInputBuffer();
+		size_t getTextInsertPosition();
+		void decTextInsertPosition();
+		void incTextInsertPosition();
 		
 		bool quitEvent();
 	};

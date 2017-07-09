@@ -66,7 +66,7 @@ namespace sc
 		tran->setPosX(mouseX);
 		tran->setPosY(mouseY);
 
-		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE))
+		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE) && !input.gettingTextInput())
 		{
 			cursorState = CursorState::drag;
 		}
@@ -154,22 +154,22 @@ namespace sc
 		glm::vec3 currentPosition = tran->getPos();
 		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
 
-		if (input.keyHeld(SDLK_w))
+		if (input.keyHeld(SDL_SCANCODE_W) && !input.gettingTextInput())
 		{
 			translate += camera->getForward();
 		}
 
-		if (input.keyHeld(SDLK_d))
+		if (input.keyHeld(SDL_SCANCODE_D) && !input.gettingTextInput())
 		{
 			translate += camera->getSide();
 		}
 
-		if (input.keyHeld(SDLK_s))
+		if (input.keyHeld(SDL_SCANCODE_S) && !input.gettingTextInput())
 		{
 			translate -= camera->getForward();
 		}
 
-		if (input.keyHeld(SDLK_a))
+		if (input.keyHeld(SDL_SCANCODE_A) && !input.gettingTextInput())
 		{
 			translate -= camera->getSide();
 		}
@@ -212,7 +212,7 @@ namespace sc
 
 		//Scroll horizontally
 		//Mouse Control
-		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE))
+		if (input.mouseButtonHeld(SDL_BUTTON_MIDDLE) && !input.gettingTextInput())
 		{
 			float mouseXDelta = (float)input.getMouseXDelta();
 			float mouseYDelta = (float)input.getMouseYDelta();
@@ -222,22 +222,22 @@ namespace sc
 		else
 		{
 			//Keyboard Control
-			if (input.keyHeld(SDLK_UP))
+			if (input.keyHeld(SDLK_UP) && !input.gettingTextInput())
 			{
 				translate -= glm::vec3(0.0f, 0.0f, 1.0f);
 			}
 
-			if (input.keyHeld(SDLK_RIGHT))
+			if (input.keyHeld(SDLK_RIGHT) && !input.gettingTextInput())
 			{
 				translate += glm::vec3(1.0f, 0.0f, 0.0f);
 			}
 
-			if (input.keyHeld(SDLK_DOWN))
+			if (input.keyHeld(SDLK_DOWN) && !input.gettingTextInput())
 			{
 				translate += glm::vec3(0.0f, 0.0f, 1.0f);
 			}
 
-			if (input.keyHeld(SDLK_LEFT))
+			if (input.keyHeld(SDLK_LEFT) && !input.gettingTextInput())
 			{
 				translate -= glm::vec3(1.0f, 0.0f, 0.0f);
 			}
@@ -252,7 +252,7 @@ namespace sc
 		//Mouse Control
 		int stageHeight = stage->getHeight();
 
-		if (input.getMouseWheelDelta() != 0)
+		if (input.getMouseWheelDelta() != 0 && !input.gettingTextInput())
 		{
 			if (input.getMouseWheelDelta() > 0 && cameraLayer < (stageHeight - 1))
 			{
@@ -282,7 +282,7 @@ namespace sc
 		else 
 		{
 			//Keyboard Control
-			if (input.keyPressed(SDLK_q) && cameraLayer < (stageHeight - 1))
+			if (input.keyPressed(SDLK_q) && !input.gettingTextInput() && cameraLayer < (stageHeight - 1))
 			{
 				translate += glm::vec3(0.0f, 1.0f, 0.0f);
 				cameraLayer++;
@@ -294,7 +294,7 @@ namespace sc
 					editSlotTransforms[i]->setPos(editSlotTransforms[i]->getPos() + glm::vec3(0.0f, 1.0f, 0.0f));
 				}
 			}
-			else if (input.keyPressed(SDLK_a) && cameraLayer > 0)
+			else if (input.keyPressed(SDLK_a) && !input.gettingTextInput() && cameraLayer > 0)
 			{
 				translate -= glm::vec3(0.0f, 1.0f, 0.0f);
 				cameraLayer--;
@@ -341,7 +341,7 @@ namespace sc
 		{
 			drawModel->model = assets.modelStack.get(ID("MO_EDITSLOTB"));
 
-			if (input.mouseButtonHeld(SDL_BUTTON_LEFT) && stage->get(x, ec->getCameraLayer(), z) != 1)
+			if (input.mouseButtonHeld(SDL_BUTTON_LEFT) && !input.gettingTextInput() && stage->get(x, ec->getCameraLayer(), z) != 1)
 			{
 				eom->doOperation(new SetBrush(1, glm::ivec3(x, ec->getCameraLayer(), z)));
 			}
@@ -366,11 +366,11 @@ namespace sc
 
 	void EditorControl::update()
 	{
-		if (input.keyPressed(SDLK_r))
+		if (input.keyPressed(SDLK_r) && !input.gettingTextInput())
 		{
 			eom->redoOperation();
 		}
-		else if (input.keyPressed(SDLK_u))
+		else if (input.keyPressed(SDLK_u) && !input.gettingTextInput())
 		{
 			eom->undoOperation();
 		}
@@ -379,7 +379,7 @@ namespace sc
 		{
 			glm::ivec3 coord = stage->getSelectedBlock();
 
-			if (input.mouseButtonHeld(SDL_BUTTON_RIGHT) && coord.x != -1 && stage->get(coord.x, coord.y, coord.z) != 0)
+			if (input.mouseButtonHeld(SDL_BUTTON_RIGHT) && !input.gettingTextInput() && coord.x != -1 && stage->get(coord.x, coord.y, coord.z) != 0)
 			{
 				eom->doOperation(new SetBrush(0, coord));
 				stage->setMouseSelected(-1);
@@ -391,24 +391,58 @@ namespace sc
 	/*
 		EditorTextField
 						*/
-	EditorTextField::EditorTextField() : Nature() {}
+	EditorTextField::EditorTextField(Event* editEvent, Event* finishEvent, size_t sizeLimit) : Nature() 
+	{
+		this->editEvent = editEvent;
+		this->finishEvent = finishEvent;
+		focused = false;
+		this->sizeLimit = sizeLimit;
+	}
 
 	void EditorTextField::create()
 	{
 		box = state->getComponent<DrawRectangle>(entityId);
 		text = state->getComponent<DrawText>(ID(entityId.getStr() + "TX"));
 		cursor = state->getComponent<Cursor>(ID("E_CURSOR"));
+		textCursorTran = state->getComponent<Transform>(ID(entityId.getStr() + "TXCUR"));
+		textCursor = state->getComponent<DrawText>(ID(entityId.getStr() + "TXCUR"));
 	}
 
 	void EditorTextField::update()
 	{
 		if (cursor->getFocus().is(entityId))
 		{
-			box->color = COL_EDITOR_UI_BACKGROUND_FOCUS;
+			if (!focused)
+			{
+				input.startTextInput();
+				input.initTextInputBuffer(text->getText(), sizeLimit);
+				box->color = COL_EDITOR_UI_BACKGROUND_FOCUS;
+				textCursor->setActive(true);
+				focused = true;
+			}
+
+			if (editEvent != NULL)
+			{
+				editEvent->happen();
+			}
+
+			text->setText(input.getTextInputBuffer());
+			textCursorTran->setPosX(12.0f + (input.getTextInsertPosition() * text->font->maxCharWidth * 0.92f) - (text->font->maxCharWidth / 2.0f));
 		}
 		else
 		{
-			box->color = COL_EDITOR_UI_BACKGROUND;			
+			if (focused)
+			{
+				if (finishEvent != NULL)
+				{
+					finishEvent->happen();
+				}
+
+				box->color = COL_EDITOR_UI_BACKGROUND;
+				textCursor->setActive(false);
+				input.stopTextInput();
+				focused = false;
+			}
 		}
 	}
 
@@ -506,44 +540,41 @@ namespace sc
 	{
 		bool isMouseHere = entityId.is(input.mouseSelectedEntity);
 
-		if (fore != NULL)
+		if (isMouseHere)
 		{
-			if (isMouseHere)
+			if (highlightPosition <= 1.0f)
 			{
-				if (highlightPosition <= 1.0f)
-				{
-					highlightPosition += highlightSpeed * getDeltaSec();
-				}
-				
-				if (highlightPosition > 1.0f)
-				{
-					highlightPosition = 1.0f;
-				}
+				highlightPosition += highlightSpeed * getDeltaSec();
 			}
-			else
+			
+			if (highlightPosition > 1.0f)
 			{
-				if (highlightPosition >= 0.0f)
-				{
-					highlightPosition -= highlightSpeed * getDeltaSec();
-				}
-				
-				if (highlightPosition < 0.0f)
-				{
-					highlightPosition = 0.0f;
-				}
+				highlightPosition = 1.0f;
 			}
-
-			if (isMouseHere && input.mouseButtonHeld(SDL_BUTTON_LEFT))
+		}
+		else
+		{
+			if (highlightPosition >= 0.0f)
 			{
-				fore->color = COL_EDITOR_UI_BUTTONCLICK;
+				highlightPosition -= highlightSpeed * getDeltaSec();
 			}
-			else
+			
+			if (highlightPosition < 0.0f)
 			{
-				fore->color = glm::vec4(lerp(normalColor.x, highlightColor.x, highlightPosition), lerp(normalColor.y, highlightColor.y, highlightPosition), lerp(normalColor.z, highlightColor.z, highlightPosition), 1.0f);
+				highlightPosition = 0.0f;
 			}
 		}
 
-		if (isMouseHere && input.mouseButtonPressed(SDL_BUTTON_LEFT))
+		if (isMouseHere && input.mouseButtonHeld(SDL_BUTTON_LEFT))
+		{
+			fore->color = COL_EDITOR_UI_BUTTONCLICK;
+		}
+		else
+		{
+			fore->color = glm::vec4(lerp(normalColor.x, highlightColor.x, highlightPosition), lerp(normalColor.y, highlightColor.y, highlightPosition), lerp(normalColor.z, highlightColor.z, highlightPosition), 1.0f);
+		}
+
+		if (isMouseHere && input.mouseButtonPressed(SDL_BUTTON_LEFT) && event != NULL)
 		{
 			event->happen();
 		}

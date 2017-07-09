@@ -137,9 +137,16 @@ namespace sc
 		DrawRectangle* box;
 		DrawText* text;
 		Cursor* cursor;
+		Transform* textCursorTran;
+		DrawText* textCursor;
+
+		Event* editEvent;
+		Event* finishEvent;
+		bool focused;
+		size_t sizeLimit;
 
 	public:
-		EditorTextField();
+		EditorTextField(Event* editEvent, Event* finishEvent, size_t sizeLimit);
 		void create();
 		void update();
 	};

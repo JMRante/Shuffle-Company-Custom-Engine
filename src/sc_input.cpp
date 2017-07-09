@@ -23,6 +23,9 @@ namespace sc
 		mouseYLocal = 0;
 		mouseWheelDelta = 0;
 		firstMouseInput = true;
+		backspaceCooldown = 0;
+		textCursorCooldown = 0;
+		textInsertPosition = 0;
 	}
 
 	bool Input::eventExists(std::vector<SDL_EventType>* eventInput, SDL_EventType event)
@@ -103,6 +106,57 @@ namespace sc
 				mouseWheelDelta = event.wheel.y;
 				hasMouseWheelEvent = true;
 			}
+			else if (event.type == SDL_TEXTINPUT)
+			{
+				textInputBuffer.insert(textInsertPosition, std::string(event.text.text));
+
+				if (textInputBuffer.size() > textInputBufferCap)
+				{
+					textInputBuffer = textInputBuffer.substr(0, textInputBufferCap);
+				}
+				else
+				{
+					textInsertPosition++;
+				}
+			}
+		}
+
+		if (SDL_IsTextInputActive())
+		{
+			if (backspaceCooldown == 0)
+			{
+				if (keyHeld(SDLK_BACKSPACE) && textInputBuffer.size() > 0)
+				{
+					if (textInsertPosition > 0)
+					{
+						textInputBuffer.erase(textInsertPosition - 1, 1);
+						backspaceCooldown = TEXTINPUT_COOLDOWN;
+						textInsertPosition--;
+					}
+				}
+			}
+			else
+			{
+				backspaceCooldown--;
+			}
+
+			if (textCursorCooldown == 0)
+			{
+				if (keyHeld(SDLK_LEFT))
+				{
+					input.decTextInsertPosition();
+				}
+				else if (keyHeld(SDLK_RIGHT))
+				{
+					input.incTextInsertPosition();
+				}
+
+				textCursorCooldown = TEXTINPUT_COOLDOWN;
+			}
+			else
+			{
+				textCursorCooldown--;
+			}
 		}
 
 		if (!hasMouseWheelEvent)
@@ -178,6 +232,66 @@ namespace sc
 	int Input::getMouseWheelDelta()
 	{
 		return mouseWheelDelta;
+	}
+
+
+	void Input::startTextInput()
+	{
+		textInputBuffer = "";
+		SDL_StartTextInput();
+	}
+
+	void Input::stopTextInput()
+	{
+		textInputBuffer = "";
+		SDL_StopTextInput();
+	}
+
+	void Input::initTextInputBuffer(std::string startString, size_t cap)
+	{
+		textInputBuffer = startString;
+		textInputBufferCap = cap;
+
+		if (textInputBuffer.size() > textInputBufferCap)
+		{
+			textInputBuffer = textInputBuffer.substr(0, textInputBufferCap);
+			textInsertPosition = textInputBufferCap;
+		}
+		else
+		{
+			textInsertPosition = startString.size();
+		}
+	}
+
+	bool Input::gettingTextInput()
+	{
+		return SDL_IsTextInputActive();
+	}
+
+	std::string Input::getTextInputBuffer()
+	{
+		return textInputBuffer;
+	}
+
+	size_t Input::getTextInsertPosition()
+	{
+		return textInsertPosition;
+	}
+
+	void Input::decTextInsertPosition()
+	{
+		if (textInsertPosition > 0)
+		{
+			textInsertPosition--;
+		}
+	}
+
+	void Input::incTextInsertPosition()
+	{
+		if (textInsertPosition < textInputBuffer.size())
+		{
+			textInsertPosition++;
+		}
 	}
 
 

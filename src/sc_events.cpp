@@ -47,8 +47,11 @@ namespace sc
 	void LoadLevelEvent::happen()
 	{
 		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
+		DrawText* dt = state->getComponent<DrawText>(ID("E_TITLEFIELDTX"));
+
 		stage->readStageFile(levelFile);
 		stage->updateStageMesh();
+		dt->setText(stage->title);
 
 		EditorOperationManager* eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
 		eom->clearOperations();
@@ -73,5 +76,19 @@ namespace sc
 	void CloseSelector::happen()
 	{
 
+	}
+
+
+	/*
+		SaveStageTitle
+						*/
+	SetStageTitle::SetStageTitle(State* state) : Event(state) {}
+
+	void SetStageTitle::happen()
+	{
+		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
+		DrawText* dt = state->getComponent<DrawText>(ID("E_TITLEFIELDTX"));
+
+		stage->title = dt->getText();
 	}
 }

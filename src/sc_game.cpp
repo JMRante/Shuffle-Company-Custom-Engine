@@ -48,13 +48,12 @@ namespace sc
 			}
 		}
 
-
 		pf.createEditorSpriteButton(ID("E_SAVEBUTTON"), glm::vec2(config.get("WINDOW_WIDTH") - 96.0f, config.get("WINDOW_HEIGHT") - 48.0f), 1, glm::vec2(48.0f, 48.0f), ID("SP_SAVEICON"), new SaveLevelEvent(state, "Custom/Levels/newFormat.shuff"));
 		pf.createEditorSpriteButton(ID("E_LOADBUTTON"), glm::vec2(config.get("WINDOW_WIDTH") - 48.0f, config.get("WINDOW_HEIGHT") - 48.0f), 1, glm::vec2(48.0f, 48.0f), ID("SP_LOADICON"), new LoadLevelEvent(state, "Custom/Levels/newFormat.shuff"));
 
-		Transform* textFieldPanelTran = state->getComponent<Transform>(pf.createEditorPanel(ID("E_FIELDPANEL"), glm::vec2(0.0f, config.get("WINDOW_HEIGHT") - 48.0f), 0, glm::vec2(512.0f, 48.0f)));
+		Transform* textFieldPanelTran = state->getComponent<Transform>(pf.createEditorPanel(ID("E_FIELDPANEL"), glm::vec2(0.0f, config.get("WINDOW_HEIGHT") - 48.0f), 0, glm::vec2(720.0f, 48.0f)));
 		Transform* titleLabelTran = state->getComponent<Transform>(pf.createEditorLabel(ID("E_TITLELABEL"), glm::vec2(16.0f, 18.0f), ID("FT_EDITOR"), "Title:"));
-		Transform* titleFieldTran = state->getComponent<Transform>(pf.createEditorTextField(ID("E_TITLEFIELD"), glm::vec2(state->getComponent<DrawText>(ID("E_TITLELABEL"))->getWidth() + 26.0f, 10.0f), 1, 30, ID("FT_EDITOR"), "My Stage"));
+		Transform* titleFieldTran = state->getComponent<Transform>(pf.createEditorTextField(ID("E_TITLEFIELD"), glm::vec2(state->getComponent<DrawText>(ID("E_TITLELABEL"))->getWidth() + 26.0f, 10.0f), 1, 50, ID("FT_EDITOR"), "My Stage", NULL, new SetStageTitle(state)));
 		titleLabelTran->setParent(textFieldPanelTran);
 		titleFieldTran->setParent(textFieldPanelTran);
 		//pf.createFileSelector(ID("E_FILESELECT"), "temp", new SaveLevelEvent(state, "Custom/Levels/newFormat.shuff"));

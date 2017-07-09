@@ -72,13 +72,13 @@ namespace sc
 		int depth;
 		int height;
 		Mesh* stageMesh;
-		std::string title;
 		int mouseSelectCount;
 		int mouseSelectLayer;
 		int mouseSelected;
 
 	public:
 		bool faceSelectMode;
+		std::string title;
 
 		Stage();
 

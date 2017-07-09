@@ -163,7 +163,6 @@ namespace sc
 		dr->initialize(position.x, position.y, size.x, size.y, 0.0f, 0.0f, COL_EDTIOR_UI_BUTTONEDGE);
 		dr->setLayer(layer);
 		dr->addToMouseSelectable();
-		targetState->addComponent<Button>(id, new Button(event));
 		
 		ID foreId = ID(id.getStr() + "FORE");
 		targetState->addEntity(foreId);
@@ -172,6 +171,8 @@ namespace sc
 		DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(foreId, new DrawRectangle());
 		dr2->initialize(2.0f, 2.0f, size.x - 4.0f, size.y - 4.0f, 0.0f, 0.0f, COL_EDITOR_UI_BUTTON);
 		dr2->setLayer(layer + 1);
+
+		targetState->addComponent<Button>(id, new Button(event));
 
 		ID sprId = ID(id.getStr() + "SP");
 		targetState->addEntity(sprId);
@@ -217,7 +218,7 @@ namespace sc
 		return id;
 	}
 
-	ID PrefabFactory::createEditorTextField(ID id, glm::vec2 position, int layer, int length, ID fontId, std::string startText)
+	ID PrefabFactory::createEditorTextField(ID id, glm::vec2 position, int layer, size_t length, ID fontId, std::string startText, Event* editEvent, Event* finishEvent)
 	{
 		targetState->addEntity(id);
 		targetState->addEntityTag(id, ID("T_FOCUSABLE"));
@@ -229,14 +230,23 @@ namespace sc
 		dt->initialize(8.0f, 8.0f, startText, COL_WHITE, fontId);
 		dt->setLayer(layer + 1);
 
+		ID textCursorId = ID(id.getStr() + "TXCUR");
+		targetState->addEntity(textCursorId);
+		Transform* textTran2 = targetState->addComponent<Transform>(textCursorId, new Transform());
+		DrawText* dt2 = targetState->addComponent<DrawText>(textCursorId, new DrawText());
+		dt2->initialize(12.0f + (startText.size() * dt->font->maxCharWidth * 0.92f) - (dt->font->maxCharWidth / 2.0f), 10.0f, "|", COL_WHITE, fontId);
+		dt2->setLayer(layer + 1);
+		dt2->setActive(false);
+
 		Transform* backTran = targetState->addComponent<Transform>(id, new Transform());
 		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle());
-		dr->initialize(position.x, position.y, (length + 0.25f) * dt->font->maxCharWidth + 8.0f, dt->font->maxCharHeight + 8.0f, 0.0f, 0.0f, COL_EDITOR_UI_BACKGROUND);
+		dr->initialize(position.x, position.y, (length * dt->font->maxCharWidth * 0.92f) + 16.0f, dt->font->maxCharHeight + 8.0f, 0.0f, 0.0f, COL_EDITOR_UI_BACKGROUND);
 		dr->setLayer(layer);
 		dr->addToMouseSelectable();
-		targetState->addComponent<EditorTextField>(id, new EditorTextField());
+		targetState->addComponent<EditorTextField>(id, new EditorTextField(editEvent, finishEvent, length));
 
 		textTran->setParent(backTran);
+		textTran2->setParent(backTran);
 
 		return id;
 	}

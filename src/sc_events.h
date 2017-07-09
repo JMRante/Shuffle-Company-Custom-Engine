@@ -71,6 +71,13 @@ namespace sc
 		CloseSelector(State* state);
 		void happen();
 	};
+
+	class SetStageTitle : public Event
+	{
+	public:
+		SetStageTitle(State* state);
+		void happen();
+	};
 }
 
 #endif
