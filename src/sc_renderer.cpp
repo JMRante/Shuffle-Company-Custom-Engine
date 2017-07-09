@@ -19,8 +19,19 @@ namespace sc
 		clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
+    //Render process
+	//foreach view
+	//foreach buffer
+    //foreach shader
+    //foreach model
+    //foreach material
+    //Call Renderer
+
 	void Renderer::render(State* state)
 	{
+        //Views
+        //Render main, 3D view
+        glViewport(0, 0, sc::config.get("WINDOW_WIDTH"), sc::config.get("WINDOW_HEIGHT"));
 		glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
 
 		//Render 3D, perspective elements
@@ -48,10 +59,14 @@ namespace sc
 		glDepthFunc(GL_LESS);
 
 		SDL_GL_SwapWindow(window);
+
+        //Render mouse select view
+        //input.mouseSelectedEntity = renderForMouseSelect(state);
 	}
 
 	ID Renderer::renderForMouseSelect(State* state)
 	{
+        glViewport(0, 0, 1, 1);
 		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
 		unsigned int stageSelectCount = 0;
 
@@ -91,13 +106,13 @@ namespace sc
 
 		//SDL_GL_SwapWindow(window);
 
-		unsigned char res[4];
+		unsigned char resultColor[4];
 		GLint viewport[4];
 
 		glGetIntegerv(GL_VIEWPORT, viewport);
-		glReadPixels(input.getMouseX(), input.getMouseY(), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &res);
+		glReadPixels(input.getMouseX(), input.getMouseY(), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &resultColor);
 
-		unsigned int indexGet = ((unsigned int)res[0] << 16) | ((unsigned int)res[1] << 8) | ((unsigned int)res[2] << 0);
+		unsigned int indexGet = ((unsigned int)resultColor[0] << 16) | ((unsigned int)resultColor[1] << 8) | ((unsigned int)resultColor[2] << 0);
 
 		if ((size_t)indexGet <= (state->mouseSelectModels.size() + state->mouseSelectOrthos.size() + stageSelectCount))
 		{

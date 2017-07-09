@@ -165,7 +165,6 @@ int main(int argc, char **argv)
 
 		sc::Game game;
 		sc::Renderer renderer(window);
-		
 
 		game.start();
 		renderer.setCameraEntity(sc::ID("E_CAMERA"));
@@ -175,8 +174,9 @@ int main(int argc, char **argv)
 			startTime = SDL_GetTicks();
 
 			hasQuit = game.update();
+			LOG_D << "Update Time: " << SDL_GetTicks() - startTime;
 			renderer.render(game.state);
-			sc::input.mouseSelectedEntity = renderer.renderForMouseSelect(game.state);
+			LOG_D << "Render Time: " << SDL_GetTicks() - startTime;
 
 			delay = startTime + MS_PER_FRAME - SDL_GetTicks();
 
