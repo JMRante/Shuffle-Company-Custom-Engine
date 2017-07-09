@@ -141,6 +141,7 @@ bool initiate()
 	}
 
 	sc::assets.loadBaseAssets();
+	sc::input.stopTextInput();
 
 	return true;
 }
