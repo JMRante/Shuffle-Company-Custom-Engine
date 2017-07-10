@@ -51,7 +51,7 @@ namespace sc
 		if (!ret) 
 		{
 			LOG_E << "There was an error loading the mesh file " << filepath;
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 			return;
 		}
 		
@@ -138,7 +138,7 @@ namespace sc
 		if (error != GL_NO_ERROR)
 		{
 			LOG_E << "Error loading mesh: " << gluErrorString(error);
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 		}
 	}
 
@@ -182,7 +182,7 @@ namespace sc
 		if (error != GL_NO_ERROR)
 		{
 			LOG_E << "Error loading mesh: " << gluErrorString(error);
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 		}
 	}
 
@@ -239,7 +239,7 @@ namespace sc
 		if (error != GL_NO_ERROR)
 		{
 			LOG_E << "Error loading mesh: " << gluErrorString(error);
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 		}
 	}
 
@@ -339,7 +339,7 @@ namespace sc
 		if(!success)
 		{
 			LOG_E << "Unable to load the texture " << filepath;
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 		}
 	}
 
@@ -366,7 +366,7 @@ namespace sc
 		if(error != GL_NO_ERROR)
 		{
 			LOG_E << "Error loading texture: " << gluErrorString(error);
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 		}
 	}
 
@@ -400,7 +400,7 @@ namespace sc
 		if(error != GL_NO_ERROR)
 		{
 			LOG_E << "Error loading texture: " << gluErrorString(error);
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 		}
 
 		array = true;
@@ -488,7 +488,7 @@ namespace sc
 		if(!success)
 		{
 			LOG_E << "Unable to load the sprite " << filepath;
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 		}		
 	}
 
@@ -517,7 +517,7 @@ namespace sc
 		if (FT_New_Face(assets.fontLibrary, filepath.c_str(), 0, &face))
 		{
 			LOG_E << "Failed to load font face from " << filepath;
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 			return;
 		}
 
@@ -656,7 +656,7 @@ namespace sc
 		if (GLid != 0)
 		{
 			LOG_E << "Shader already built";
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 			return;	
 		}
 
@@ -670,7 +670,7 @@ namespace sc
 		if (vertexShaderSource == NULL)
 		{
 			LOG_E << "Failed to open vertex shader";		
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 			return;	
 		}
 
@@ -679,7 +679,7 @@ namespace sc
 		if (fragmentShaderSource == NULL)
 		{
 			LOG_E << "Failed to open fragment shader";		
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 			return;
 		}
 
@@ -696,7 +696,7 @@ namespace sc
 		{
 			glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
 			LOG_E << "Vertex Shader Compile Error: " << infoLog;
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 			return;
 		}
 
@@ -713,7 +713,7 @@ namespace sc
 		{
 			glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
 			LOG_E << "Fragment Shader Compile Error: " << infoLog;
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 			return;
 		}
 
@@ -730,7 +730,7 @@ namespace sc
 		{
 			glGetProgramInfoLog(GLid, 512, NULL, infoLog);
 			LOG_E << "Shader Program Linking Error: " << infoLog;
-			this->id = ID("ERROR");
+			this->id = CTID("ERROR");
 			return;		
 		}
 
@@ -836,7 +836,7 @@ namespace sc
 	{
 		for (size_t i = 0; i < subModels.size(); i++)
 		{
-			if (subModels[i]->id.is(id))
+			if (subModels[i]->id == id)
 			{
 				return subModels[i];
 			}
@@ -902,8 +902,8 @@ namespace sc
 		static const int ind[] = {0, 1, 3, 0, 3, 2};
 		std::vector<int> vecInd(ind, ind + sizeof(ind) / sizeof(ind[0]));
 
-		meshStack.pushBase(new Mesh(ID("ME_QUAD"), &vecVert, &vecInd));
-		meshStack.pushBase(new Mesh(ID("ME_SPHERE"), "Resources/Meshes/ME_SPHERE.obj"));
+		meshStack.pushBase(new Mesh(CTID("ME_QUAD"), &vecVert, &vecInd));
+		meshStack.pushBase(new Mesh(CTID("ME_SPHERE"), "Resources/Meshes/ME_SPHERE.obj"));
 
 		//Flat Quad
 		vecVert.clear();
@@ -928,58 +928,58 @@ namespace sc
 		static const int ind2[] = {0, 2, 1, 3, 1, 2};
 		std::vector<int> vecInd2(ind2, ind2 + sizeof(ind2) / sizeof(ind2[0]));
 
-		meshStack.pushBase(new Mesh(ID("ME_FLATQUAD"), &vecVert, &vecInd2));
+		meshStack.pushBase(new Mesh(CTID("ME_FLATQUAD"), &vecVert, &vecInd2));
 
 		//Load Sprites
-		spriteStack.pushBase(new Sprite(ID("SP_ERROR"), "Resources/Textures/ERROR.png"));
-		spriteStack.pushBase(new Sprite(ID("SP_TEST"), "Resources/Textures/testSprite.png"));
+		spriteStack.pushBase(new Sprite(CTID("SP_ERROR"), "Resources/Textures/ERROR.png"));
+		spriteStack.pushBase(new Sprite(CTID("SP_TEST"), "Resources/Textures/testSprite.png"));
 
-		spriteStack.pushBase(new Sprite(ID("SP_CLICKCUR"), "Resources/Textures/Cursor/SP_CLICKCUR.png"));
-		spriteStack.pushBase(new Sprite(ID("SP_DRAGCUR"), "Resources/Textures/Cursor/SP_DRAGCUR.png"));
-		spriteStack.pushBase(new Sprite(ID("SP_HOVERCUR"), "Resources/Textures/Cursor/SP_HOVERCUR.png"));
-		spriteStack.pushBase(new Sprite(ID("SP_POINTCUR"), "Resources/Textures/Cursor/SP_POINTCUR.png"));
+		spriteStack.pushBase(new Sprite(CTID("SP_CLICKCUR"), "Resources/Textures/Cursor/SP_CLICKCUR.png"));
+		spriteStack.pushBase(new Sprite(CTID("SP_DRAGCUR"), "Resources/Textures/Cursor/SP_DRAGCUR.png"));
+		spriteStack.pushBase(new Sprite(CTID("SP_HOVERCUR"), "Resources/Textures/Cursor/SP_HOVERCUR.png"));
+		spriteStack.pushBase(new Sprite(CTID("SP_POINTCUR"), "Resources/Textures/Cursor/SP_POINTCUR.png"));
 
-		spriteStack.pushBase(new Sprite(ID("SP_SAVEICON"), "Resources/Textures/Icons/SP_SAVEICON.png"));
-		spriteStack.pushBase(new Sprite(ID("SP_LOADICON"), "Resources/Textures/Icons/SP_LOADICON.png"));
+		spriteStack.pushBase(new Sprite(CTID("SP_SAVEICON"), "Resources/Textures/Icons/SP_SAVEICON.png"));
+		spriteStack.pushBase(new Sprite(CTID("SP_LOADICON"), "Resources/Textures/Icons/SP_LOADICON.png"));
 
 		//Load Fonts
-		fontStack.pushBase(new Font(ID("FT_TEST"), "Resources/Fonts/OpenSans-Regular.ttf", 28));
-		fontStack.pushBase(new Font(ID("FT_MONO"), "Resources/Fonts/RobotoMono-Regular.ttf", 16));
-		fontStack.pushBase(new Font(ID("FT_EDITOR"), "Resources/Fonts/RobotoMono-Regular.ttf", 20));
+		fontStack.pushBase(new Font(CTID("FT_TEST"), "Resources/Fonts/OpenSans-Regular.ttf", 28));
+		fontStack.pushBase(new Font(CTID("FT_MONO"), "Resources/Fonts/RobotoMono-Regular.ttf", 16));
+		fontStack.pushBase(new Font(CTID("FT_EDITOR"), "Resources/Fonts/RobotoMono-Regular.ttf", 20));
 
 		//Load textures
-		textureStack.pushBase(new Texture(ID("TX_EDITSLOTA"), "Resources/Textures/editorEmptySlot.png"));
-		textureStack.pushBase(new Texture(ID("TX_EDITSLOTB"), "Resources/Textures/editorEmptySlotSelected.png"));
+		textureStack.pushBase(new Texture(CTID("TX_EDITSLOTA"), "Resources/Textures/editorEmptySlot.png"));
+		textureStack.pushBase(new Texture(CTID("TX_EDITSLOTB"), "Resources/Textures/editorEmptySlotSelected.png"));
 
 		//Load Shaders
-		shaderStack.pushBase(new Shader(ID("SH_PASS"), "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl"));
-		shaderStack.pushBase(new Shader(ID("SH_TEX"), "Resources/Shaders/sc_shader_testTextureVertex.glsl", "Resources/Shaders/sc_shader_testTextureFragment.glsl"));
-		shaderStack.pushBase(new Shader(ID("SH_STAGE"), "Resources/Shaders/sc_shader_stageVertex.glsl", "Resources/Shaders/sc_shader_stageFragment.glsl"));
-		shaderStack.pushBase(new Shader(ID("SH_STAGESELECT"), "Resources/Shaders/sc_shader_stageSelectVertex.glsl", "Resources/Shaders/sc_shader_stageSelectFragment.glsl"));
-		shaderStack.pushBase(new Shader(ID("SH_COLOR"), "Resources/Shaders/sc_shader_flatColorVertex.glsl", "Resources/Shaders/sc_shader_flatColorFragment.glsl"));
-		shaderStack.pushBase(new Shader(ID("SH_SPRITE"), "Resources/Shaders/sc_shader_spriteVertex.glsl", "Resources/Shaders/sc_shader_spriteFragment.glsl"));
-		shaderStack.pushBase(new Shader(ID("SH_FONT"), "Resources/Shaders/sc_shader_fontVertex.glsl", "Resources/Shaders/sc_shader_fontFragment.glsl"));
+		shaderStack.pushBase(new Shader(CTID("SH_PASS"), "Resources/Shaders/sc_shader_testVertex.glsl", "Resources/Shaders/sc_shader_testFragment.glsl"));
+		shaderStack.pushBase(new Shader(CTID("SH_TEX"), "Resources/Shaders/sc_shader_testTextureVertex.glsl", "Resources/Shaders/sc_shader_testTextureFragment.glsl"));
+		shaderStack.pushBase(new Shader(CTID("SH_STAGE"), "Resources/Shaders/sc_shader_stageVertex.glsl", "Resources/Shaders/sc_shader_stageFragment.glsl"));
+		shaderStack.pushBase(new Shader(CTID("SH_STAGESELECT"), "Resources/Shaders/sc_shader_stageSelectVertex.glsl", "Resources/Shaders/sc_shader_stageSelectFragment.glsl"));
+		shaderStack.pushBase(new Shader(CTID("SH_COLOR"), "Resources/Shaders/sc_shader_flatColorVertex.glsl", "Resources/Shaders/sc_shader_flatColorFragment.glsl"));
+		shaderStack.pushBase(new Shader(CTID("SH_SPRITE"), "Resources/Shaders/sc_shader_spriteVertex.glsl", "Resources/Shaders/sc_shader_spriteFragment.glsl"));
+		shaderStack.pushBase(new Shader(CTID("SH_FONT"), "Resources/Shaders/sc_shader_fontVertex.glsl", "Resources/Shaders/sc_shader_fontFragment.glsl"));
 
 		std::vector<glm::vec4> tempVec4;
 		tempVec4.push_back(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		materialStack.pushBase(new Material(ID("MA_RED"), NULL, NULL, &tempVec4, NULL, ID("SH_PASS")));
+		materialStack.pushBase(new Material(CTID("MA_RED"), NULL, NULL, &tempVec4, NULL, CTID("SH_PASS")));
 		tempVec4.clear();
 		tempVec4.push_back(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-		materialStack.pushBase(new Material(ID("MA_BLUE"), NULL, NULL, &tempVec4, NULL, ID("SH_PASS")));
+		materialStack.pushBase(new Material(CTID("MA_BLUE"), NULL, NULL, &tempVec4, NULL, CTID("SH_PASS")));
 
 		std::vector<ID> tempTex;
-		tempTex.push_back(ID("TX_EDITSLOTA"));
-		materialStack.pushBase(new Material(ID("MA_EDITSLOTA"), NULL, NULL, NULL, &tempTex, ID("SH_TEX")));
+		tempTex.push_back(CTID("TX_EDITSLOTA"));
+		materialStack.pushBase(new Material(CTID("MA_EDITSLOTA"), NULL, NULL, NULL, &tempTex, CTID("SH_TEX")));
 		tempTex.clear();
-		tempTex.push_back(ID("TX_EDITSLOTB"));
-		materialStack.pushBase(new Material(ID("MA_EDITSLOTB"), NULL, NULL, NULL, &tempTex, ID("SH_TEX")));
+		tempTex.push_back(CTID("TX_EDITSLOTB"));
+		materialStack.pushBase(new Material(CTID("MA_EDITSLOTB"), NULL, NULL, NULL, &tempTex, CTID("SH_TEX")));
 		tempTex.clear();
 
-		modelStack.pushBase(new Model(ID("MO_TESTA"), ID("ME_QUAD"), ID("MA_RED")));
-		modelStack.pushBase(new Model(ID("MO_TESTB"), ID("ME_SPHERE"), ID("MA_BLUE")));
+		modelStack.pushBase(new Model(CTID("MO_TESTA"), CTID("ME_QUAD"), CTID("MA_RED")));
+		modelStack.pushBase(new Model(CTID("MO_TESTB"), CTID("ME_SPHERE"), CTID("MA_BLUE")));
 
-		modelStack.pushBase(new Model(ID("MO_EDITSLOTA"), ID("ME_FLATQUAD"), ID("MA_EDITSLOTA")));
-		modelStack.pushBase(new Model(ID("MO_EDITSLOTB"), ID("ME_FLATQUAD"), ID("MA_EDITSLOTB")));
+		modelStack.pushBase(new Model(CTID("MO_EDITSLOTA"), CTID("ME_FLATQUAD"), CTID("MA_EDITSLOTA")));
+		modelStack.pushBase(new Model(CTID("MO_EDITSLOTB"), CTID("ME_FLATQUAD"), CTID("MA_EDITSLOTB")));
 
 		Font::loadFontQuadToGPU();
 		FT_Done_FreeType(fontLibrary);

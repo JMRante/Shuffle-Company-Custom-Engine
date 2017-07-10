@@ -32,6 +32,7 @@
 
 #include "sc_log.h"
 #include "sc_utility.h"
+#include "sc_id.h"
 
 namespace sc
 {
@@ -209,7 +210,7 @@ namespace sc
 		{
 			if (!baseLocked)
 			{
-				if (t->id.is(ID("ERROR")))
+				if (t->id == CTID("ERROR"))
 				{
 					LOG_E << "Tried to load broken asset";
 					return NULL;
@@ -217,9 +218,9 @@ namespace sc
 
 				for (auto ai = stack.begin(); ai != stack.end(); ai++)
 				{
-					if ((*ai)->id.is(t->id))
+					if ((*ai)->id == t->id)
 					{
-						LOG_E << "There already exists a " << t->id.get();
+						LOG_E << "Tried loading an existing asset";
 						return NULL;
 					}
 				}
@@ -234,7 +235,7 @@ namespace sc
 
 		T* pushWorld(T* t)
 		{
-			if (t->id.is(ID("ERROR")))
+			if (t->id == CTID("ERROR"))
 			{
 				LOG_E << "Tried to load broken asset";
 				return NULL;
@@ -248,9 +249,9 @@ namespace sc
 
 			for (auto ai = stack.begin(); ai != stack.end(); ai++)
 			{
-				if ((*ai)->id.is(t->id))
+				if ((*ai)->id == t->id)
 				{
-					LOG_E << "There already exists a " << t->id.get();
+					LOG_E << "Tried loading an existing asset";
 					return NULL;
 				}
 			}
@@ -283,7 +284,7 @@ namespace sc
 		{
 			for (auto ai = stack.begin(); ai != stack.end(); ai++)
 			{
-				if ((*ai)->id.is(id))
+				if ((*ai)->id == id)
 				{
 					return *ai;
 				}

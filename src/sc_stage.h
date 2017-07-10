@@ -36,6 +36,7 @@
 #include "sc_tokenizer.h"
 #include "sc_utility.h"
 #include "sc_component.h"
+#include "sc_id.h"
 
 #define STAGE_WIDTH 200
 #define STAGE_DEPTH 200

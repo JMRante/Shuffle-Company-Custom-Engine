@@ -29,6 +29,7 @@
 #include "sc_log.h"
 #include "sc_assets.h"
 #include "sc_utility.h"
+#include "sc_id.h"
 
 namespace sc
 {

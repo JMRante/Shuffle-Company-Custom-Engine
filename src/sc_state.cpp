@@ -25,7 +25,7 @@ namespace sc
 			return true;
 		}
 
-		LOG_E << "Cannot add existing entity " << id.get();
+		LOG_E << "Cannot add existing entity";
 		return false;
 	}
 
@@ -51,7 +51,7 @@ namespace sc
 			return true;
 		}
 
-		LOG_E << "Cannot remove non-existing entity " << id.get();
+		LOG_E << "Cannot remove non-existing entity";
 		return false;
 	}
 
@@ -80,22 +80,15 @@ namespace sc
 
 	bool State::entityHasTag(ID entityId, ID tagId)
 	{
-		if (tagMap.find(entityId) == tagMap.end())
-		{
-			return false;
-		}
-		else
+		if (tagMap.find(entityId) != tagMap.end())
 		{
 			std::vector<ID>* entityTags = &tagMap[entityId];
-
-			for (size_t i = 0; i < entityTags->size(); i++)
+			
+			if (find(entityTags->begin(), entityTags->end(), tagId) != entityTags->end())
 			{
-				if (entityTags->at(i).is(tagId))
-				{
-					return true;
-				}
+				return true;
 			}
-		}	
+		}
 
 		return false;	
 	}
@@ -108,13 +101,12 @@ namespace sc
 
 			if (entityTags != NULL)
 			{
-				for (auto et = entityTags->begin(); et != entityTags->end(); et++)
+				auto it = find(entityTags->begin(), entityTags->end(), tagId);
+
+				if (it != entityTags->end())
 				{
-					if ((*et).is(tagId))
-					{
-						entityTags->erase(et);
-						return;
-					}
+					entityTags->erase(it);
+					return;
 				}
 			}
 		}

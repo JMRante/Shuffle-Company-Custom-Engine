@@ -508,7 +508,7 @@ namespace sc
 
 		buildStageMesh(stageVertices, stageIndices);
 
-		stageMesh = assets.meshStack.pushWorld(new Mesh(ID("ME_STAGE"), &stageVertices, &stageIndices));
+		stageMesh = assets.meshStack.pushWorld(new Mesh(CTID("ME_STAGE"), &stageVertices, &stageIndices));
 
 		if (stageMesh != NULL)
 		{
@@ -910,13 +910,13 @@ namespace sc
 			}
 		}
 
-		assets.textureStack.pushWorld(new Texture(ID("TX_STAGE"), SIMPLE_TEXTURE_DIM, SIMPLE_TEXTURE_DIM, dataArray));
+		assets.textureStack.pushWorld(new Texture(CTID("TX_STAGE"), SIMPLE_TEXTURE_DIM, SIMPLE_TEXTURE_DIM, dataArray));
 		ilDeleteImages(MAX_SIMPLE_TEXTURES, texIds);
 
 		std::vector<ID> tempString;
-		tempString.push_back(ID("TX_STAGE"));
+		tempString.push_back(CTID("TX_STAGE"));
 		
-		return assets.materialStack.pushWorld(new Material(ID("MA_STAGE"), NULL, NULL, NULL, &tempString, ID("SH_STAGE")));
+		return assets.materialStack.pushWorld(new Material(CTID("MA_STAGE"), NULL, NULL, NULL, &tempString, CTID("SH_STAGE")));
 	}
 
 	int Stage::getTextureNum(std::string textureName)
@@ -938,7 +938,7 @@ namespace sc
 
 	bool Stage::createStageModel()
 	{
-		if (assets.modelStack.pushWorld(new Model(ID("MO_STAGE"), ID("ME_STAGE"), ID("MA_STAGE"))) != NULL)
+		if (assets.modelStack.pushWorld(new Model(CTID("MO_STAGE"), CTID("ME_STAGE"), CTID("MA_STAGE"))) != NULL)
 		{
 			return true;
 		}
@@ -979,7 +979,7 @@ namespace sc
 	void Stage::setMouseSelected(int selected)
 	{
 		mouseSelected = selected;
-		Material* mat = assets.materialStack.get(ID("MA_STAGE"));
+		Material* mat = assets.materialStack.get(CTID("MA_STAGE"));
 
 		mat->integerMaterialArguments.clear();
 		mat->integerMaterialArguments.push_back(mouseSelected);

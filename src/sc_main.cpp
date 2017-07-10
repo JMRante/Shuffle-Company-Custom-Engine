@@ -38,6 +38,7 @@
 #include "sc_game.h"
 #include "sc_renderer.h"
 #include "sc_input.h"
+#include "sc_id.h"
 
 //Function Foward Declarations
 bool initiate();
@@ -167,7 +168,7 @@ int main(int argc, char **argv)
 		sc::Renderer renderer(window);
 
 		game.start();
-		renderer.setCameraEntity(sc::ID("E_CAMERA"));
+		renderer.setCameraEntity(sc::CTID("E_CAMERA"));
 
 		while (!hasQuit)
 		{

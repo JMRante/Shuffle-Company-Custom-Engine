@@ -23,20 +23,17 @@ namespace sc
 					*/
 	Component::Component() 
 	{
-		entityId = ID("NULL");
-		addType(ID("NULL"));
+		entityId = CTID("NULL");
+		addType(CTID("NULL"));
 		state = NULL;
 		isActive = true;
 	}
 
 	bool Component::isType(ID id)
 	{
-		for (size_t i = 0; i < types.size(); i++)
+		if (find(types.begin(), types.end(), id) != types.end())
 		{
-			if (types[i].is(id))
-			{
-				return true;
-			}
+			return true;
 		}
 
 		return false;
@@ -51,17 +48,7 @@ namespace sc
 
 		for (size_t i = 0; i < types.size(); i++)
 		{
-			bool found = false;
-
-			for (size_t j = 0; j < comp->types.size(); j++)
-			{
-				if (types[i].is(comp->types[j]))
-				{
-					found = true;
-				}
-			}
-
-			if (!found)
+			if (find(comp->types.begin(), comp->types.end(), types[i]) != comp->types.end())
 			{
 				return false;
 			}
@@ -98,7 +85,7 @@ namespace sc
 					*/
 	Transform::Transform() : Component()
 	{
-		addType(ID("TRANSFORM"));
+		addType(CTID("TRANSFORM"));
 
 		this->position = glm::vec3(0.0f, 0.0f, 0.0f);
 		this->rotation = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -114,7 +101,7 @@ namespace sc
 
 	Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : Component()
 	{
-		addType(ID("TRANSFORM"));
+		addType(CTID("TRANSFORM"));
 
 		this->position = position;
 		this->rotation = rotation;
@@ -137,7 +124,7 @@ namespace sc
 	{
 		for (auto oi = state->transformPointers.begin(); oi != state->transformPointers.end(); oi++)
 		{
-			if ((*oi)->entityId.is(entityId) && (*oi)->sameTypes((Component*) this))
+			if ((*oi)->entityId == entityId && (*oi)->sameTypes((Component*) this))
 			{
 				state->transformPointers.erase(oi);
 			}
@@ -206,7 +193,7 @@ namespace sc
 		{
 			for (auto it = parent->children.begin(); it != parent->children.end(); it++) 
 			{
-				if ((*it)->entityId.is(entityId))
+				if ((*it)->entityId == entityId)
 				{
 					parent->children.erase(it);
 				}
@@ -223,7 +210,7 @@ namespace sc
 		{
 			for (auto it = parent->children.begin(); it != parent->children.end(); it++) 
 			{
-				if ((*it)->entityId.is(entityId))
+				if ((*it)->entityId == entityId)
 				{
 					parent->children.erase(it);
 				}
@@ -371,7 +358,7 @@ namespace sc
 				*/
 	Camera::Camera() : Component()
 	{
-		addType(ID("CAMERA"));
+		addType(CTID("CAMERA"));
 
 		fov = (float)config.get("FOV");
 		aspectRatio = ((float)config.get("WINDOW_WIDTH"))/((float)config.get("WINDOW_HEIGHT"));
@@ -388,7 +375,7 @@ namespace sc
 
 	Camera::Camera(float near, float far) : Component()
 	{
-		addType(ID("CAMERA"));
+		addType(CTID("CAMERA"));
 
 		fov = (float)config.get("FOV");
 		aspectRatio = ((float)config.get("WINDOW_WIDTH"))/((float)config.get("WINDOW_HEIGHT"));
@@ -442,12 +429,12 @@ namespace sc
 			}
 			else
 			{
-				LOG_E << "Transform does not exist for " << entityId.get() << ", cannot calculate view matrix";
+				LOG_E << "Transform does not exist, cannot calculate view matrix";
 			}
 		}
 		else
 		{
-			LOG_E << entityId.get() << " has not been added to a state yet, cannot calculate view matrix";
+			LOG_E << "Entity has not been added to a state yet, cannot calculate view matrix";
 		}
 	}
 
@@ -494,14 +481,14 @@ namespace sc
 					*/
 	DrawModel::DrawModel() : Draw()
 	{
-		addType(ID("DRAWMODEL"));
+		addType(CTID("DRAWMODEL"));
 
-		model = assets.modelStack.get("MO_ERROR");
+		model = assets.modelStack.get(CTID("MO_ERROR"));
 	}
 
 	DrawModel::DrawModel(ID modelId) : Draw()
 	{
-		addType(ID("DRAWMODEL"));
+		addType(CTID("DRAWMODEL"));
 
 		model = assets.modelStack.get(modelId);
 	}
@@ -575,7 +562,7 @@ namespace sc
 											 (float)((index >> 0) & 0xff)/255.0,
 											 1.0);
 
-			Shader* shad = assets.shaderStack.get(ID("SH_COLOR"));
+			Shader* shad = assets.shaderStack.get(CTID("SH_COLOR"));
 			glUseProgram(shad->GLid);
 
 			glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"flatColor"), 
@@ -599,7 +586,7 @@ namespace sc
 	{
 		if (getActive())
 		{
-			Shader* shad = assets.shaderStack.get(ID("SH_STAGESELECT"));
+			Shader* shad = assets.shaderStack.get(CTID("SH_STAGESELECT"));
 			glUseProgram(shad->GLid);
 
 			Camera* cam = state->getComponent<Camera>(cameraId);
@@ -622,7 +609,7 @@ namespace sc
 	{
 		for (auto ni = state->modelPointers.begin(); ni != state->modelPointers.end(); ni++)
 		{
-			if ((*ni)->entityId.is(entityId) && (*ni)->sameTypes((Component*) this))
+			if ((*ni)->entityId == entityId && (*ni)->sameTypes((Component*) this))
 			{
 				state->modelPointers.erase(ni);
 			}
@@ -644,7 +631,7 @@ namespace sc
 		{
 			for (auto ni = state->mouseSelectModels.begin(); ni != state->mouseSelectModels.end(); ni++)
 			{
-				if ((*ni)->entityId.is(entityId) && (*ni)->sameTypes((Component*) this))
+				if ((*ni)->entityId == entityId && (*ni)->sameTypes((Component*) this))
 				{
 					state->mouseSelectModels.erase(ni);
 				}
@@ -660,7 +647,7 @@ namespace sc
 					*/
 	DrawOrtho::DrawOrtho() : Draw()
 	{
-		addType(ID("DrawOrtho"));
+		addType(CTID("DrawOrtho"));
 		layer = 0;
 	}
 
@@ -683,7 +670,7 @@ namespace sc
 	{
 		for (auto oi = state->orthoPointers.begin(); oi != state->orthoPointers.end(); oi++)
 		{
-			if ((*oi)->entityId.is(entityId) && (*oi)->sameTypes((Component*) this))
+			if ((*oi)->entityId == entityId && (*oi)->sameTypes((Component*) this))
 			{
 				state->orthoPointers.erase(oi);
 			}
@@ -711,7 +698,7 @@ namespace sc
 		{
 			for (auto oi = state->mouseSelectOrthos.begin(); oi != state->mouseSelectOrthos.end(); oi++)
 			{
-				if ((*oi)->entityId.is(entityId) && (*oi)->sameTypes((Component*) this))
+				if ((*oi)->entityId == entityId && (*oi)->sameTypes((Component*) this))
 				{
 					state->mouseSelectOrthos.erase(oi);
 				}
@@ -726,7 +713,7 @@ namespace sc
 						*/
 	DrawRectangle::DrawRectangle() : DrawOrtho()
 	{
-		addType(ID("DRAWRECTANGLE"));
+		addType(CTID("DRAWRECTANGLE"));
 	}
 
 	void DrawRectangle::initialize(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color)
@@ -743,7 +730,7 @@ namespace sc
 		}
 		else
 		{
-			LOG_E << entityId.get() << " cannot have a DrawRectangle, it doesn't have a Transform";
+			LOG_E << "Entity cannot have a DrawRectangle, it doesn't have a Transform";
 		}
 
 		this->pivotX = pivotX;
@@ -757,8 +744,8 @@ namespace sc
 		{
 			if (getActive())
 			{
-				Mesh* mesh = assets.meshStack.get(ID("ME_QUAD"));
-				Shader* shad = assets.shaderStack.get(ID("SH_COLOR"));
+				Mesh* mesh = assets.meshStack.get(CTID("ME_QUAD"));
+				Shader* shad = assets.shaderStack.get(CTID("SH_COLOR"));
 				glUseProgram(shad->GLid);
 
 				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"flatColor"), 
@@ -778,7 +765,7 @@ namespace sc
 		}
 		else
 		{
-			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawRectangle";
+			LOG_E << "Entity has not been added to a state yet, cannot render DrawRectangle";
 		}
 	}
 
@@ -793,8 +780,8 @@ namespace sc
 												 (float)((index >> 0) & 0xff)/255.0,
 												 1.0);
 
-				Mesh* mesh = assets.meshStack.get(ID("ME_QUAD"));
-				Shader* shad = assets.shaderStack.get(ID("SH_COLOR"));
+				Mesh* mesh = assets.meshStack.get(CTID("ME_QUAD"));
+				Shader* shad = assets.shaderStack.get(CTID("SH_COLOR"));
 				glUseProgram(shad->GLid);
 
 				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"flatColor"), 
@@ -814,7 +801,7 @@ namespace sc
 		}
 		else
 		{
-			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawRectangle";
+			LOG_E << "Entity has not been added to a state yet, cannot render DrawRectangle";
 		}
 	}
 
@@ -824,7 +811,7 @@ namespace sc
 					*/
 	DrawSprite::DrawSprite() : DrawOrtho()
 	{
-		addType(ID("DRAWSPRITE"));
+		addType(CTID("DRAWSPRITE"));
 	}
 
 	void DrawSprite::initialize(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId)
@@ -842,7 +829,7 @@ namespace sc
 		}
 		else
 		{
-			LOG_E << entityId.get() << " cannot have a DrawSprite, it doesn't have a Transform";
+			LOG_E << "Entity cannot have a DrawSprite, it doesn't have a Transform";
 		}
 
 		this->pivotX = pivotX;
@@ -857,8 +844,8 @@ namespace sc
 		{
 			if (getActive())
 			{
-				Mesh* mesh = assets.meshStack.get(ID("ME_QUAD"));
-				Shader* shad = assets.shaderStack.get(ID("SH_SPRITE"));
+				Mesh* mesh = assets.meshStack.get(CTID("ME_QUAD"));
+				Shader* shad = assets.shaderStack.get(CTID("SH_SPRITE"));
 				glUseProgram(shad->GLid);
 
 				glUniform1f(glGetUniformLocation(shad->GLid, (const GLchar*)"texCoordScaleX"), sprite->texCoordX);
@@ -879,7 +866,7 @@ namespace sc
 		}
 		else
 		{
-			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawSprite";
+			LOG_E << "Entity has not been added to a state yet, cannot render DrawSprite";
 		}
 	}
 
@@ -894,8 +881,8 @@ namespace sc
 												 (float)((index >> 0) & 0xff)/255.0,
 												 1.0);
 
-				Mesh* mesh = assets.meshStack.get(ID("ME_QUAD"));
-				Shader* shad = assets.shaderStack.get(ID("SH_COLOR")); //Should really be a custom shader which culls transparent pixels of original sprite
+				Mesh* mesh = assets.meshStack.get(CTID("ME_QUAD"));
+				Shader* shad = assets.shaderStack.get(CTID("SH_COLOR")); //Should really be a custom shader which culls transparent pixels of original sprite
 				glUseProgram(shad->GLid);
 
 				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"flatColor"), 
@@ -915,7 +902,7 @@ namespace sc
 		}
 		else
 		{
-			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawSprite";
+			LOG_E << "Entity has not been added to a state yet, cannot render DrawSprite";
 		}
 	}
 
@@ -925,7 +912,7 @@ namespace sc
 				*/
 	DrawText::DrawText() : DrawOrtho()
 	{
-		addType(ID("DRAWTEXT"));
+		addType(CTID("DRAWTEXT"));
 	}
 
 	void DrawText::initialize(float x, float y, std::string text, glm::vec4 color, ID fontId)
@@ -940,7 +927,7 @@ namespace sc
 		}
 		else
 		{
-			LOG_E << entityId.get() << " cannot have a DrawText, it doesn't have a Transform";
+			LOG_E << "Entity cannot have a DrawText, it doesn't have a Transform";
 		}
 
 		this->text = text;
@@ -1101,7 +1088,7 @@ namespace sc
 			if (getActive())
 			{
 				Transform* tran = state->getComponent<Transform>(entityId);
-				Shader* shad = assets.shaderStack.get(ID("SH_FONT"));
+				Shader* shad = assets.shaderStack.get(CTID("SH_FONT"));
 				glUseProgram(shad->GLid);
 
 				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"fontColor"), 
@@ -1169,7 +1156,7 @@ namespace sc
 		}
 		else
 		{
-			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawText";
+			LOG_E << "Entity has not been added to a state yet, cannot render DrawText";
 		}
 	}
 
@@ -1185,7 +1172,7 @@ namespace sc
 												 1.0);
 
 				Transform* tran = state->getComponent<Transform>(entityId);
-				Shader* shad = assets.shaderStack.get(ID("SH_COLOR"));
+				Shader* shad = assets.shaderStack.get(CTID("SH_COLOR"));
 				glUseProgram(shad->GLid);
 
 				glUniform4f(glGetUniformLocation(shad->GLid, (const GLchar*)"flatColor"), 
@@ -1249,7 +1236,7 @@ namespace sc
 		}
 		else
 		{
-			LOG_E << entityId.get() << " has not been added to a state yet, cannot render DrawText";
+			LOG_E << "Entity has not been added to a state yet, cannot render DrawText";
 		}
 	}
 
@@ -1269,7 +1256,7 @@ namespace sc
 
 	void SetBrush::operate()
 	{
-		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
+		Stage* stage = state->getComponent<Stage>(CTID("E_STAGE"));
 		previousBrush = stage->get(position.x, position.y, position.z);
 		stage->set(position.x, position.y, position.z, newBrush);
 		stage->updateStageMesh();
@@ -1277,7 +1264,7 @@ namespace sc
 
 	void SetBrush::reverse()
 	{
-		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
+		Stage* stage = state->getComponent<Stage>(CTID("E_STAGE"));
 		stage->set(position.x, position.y, position.z, previousBrush);
 		stage->updateStageMesh();
 	}

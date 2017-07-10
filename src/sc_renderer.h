@@ -30,6 +30,7 @@
 #include "sc_component.h"
 #include "sc_assets.h"
 #include "sc_input.h"
+#include "sc_id.h"
 
 namespace sc
 {

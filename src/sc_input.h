@@ -21,6 +21,7 @@
 #include "sc_log.h"
 #include "sc_config.h"
 #include "sc_utility.h"
+#include "sc_id.h"
 
 #define TEXTINPUT_COOLDOWN 5
 

@@ -27,6 +27,7 @@
 #include "sc_events.h"
 #include "sc_config.h"
 #include "sc_color.h"
+#include "sc_id.h"
 
 namespace sc
 {

@@ -17,7 +17,7 @@ namespace sc
 {
 	Nature::Nature() : Component() 
 	{
-		addType(ID("NATURE"));
+		addType(CTID("NATURE"));
 	}
 
 	void Nature::onStateInsert()
@@ -29,7 +29,7 @@ namespace sc
 	{
 		for (auto ni = state->naturePointers.begin(); ni != state->naturePointers.end(); ni++)
 		{
-			if ((*ni)->entityId.is(entityId) && (*ni)->sameTypes((Component*) this))
+			if ((*ni)->entityId == entityId && (*ni)->sameTypes((Component*) this))
 			{
 				state->naturePointers.erase(ni);
 			}
@@ -44,12 +44,12 @@ namespace sc
 	{
 		cursorState = CursorState::point;
 
-		pointSprite = assets.spriteStack.get(ID("SP_POINTCUR"));
-		hoverSprite = assets.spriteStack.get(ID("SP_HOVERCUR"));
-		clickSprite = assets.spriteStack.get(ID("SP_CLICKCUR"));
-		dragSprite = assets.spriteStack.get(ID("SP_DRAGCUR"));
+		pointSprite = assets.spriteStack.get(CTID("SP_POINTCUR"));
+		hoverSprite = assets.spriteStack.get(CTID("SP_HOVERCUR"));
+		clickSprite = assets.spriteStack.get(CTID("SP_CLICKCUR"));
+		dragSprite = assets.spriteStack.get(CTID("SP_DRAGCUR"));
 
-		focus = ID("NULL");
+		focus = CTID("NULL");
 	}
 
 	void Cursor::create()
@@ -75,20 +75,20 @@ namespace sc
 			cursorState = CursorState::point;
 		}
 
-		if (state->entityHasTag(input.mouseSelectedEntity, ID("T_BUTTON")))
+		if (state->entityHasTag(input.mouseSelectedEntity, CTID("T_BUTTON")))
 		{
 			cursorState = CursorState::hover;
 		}
 
 		if (input.mouseButtonPressed(SDL_BUTTON_LEFT))
 		{
-			if (state->entityHasTag(input.mouseSelectedEntity, ID("T_FOCUSABLE")))
+			if (state->entityHasTag(input.mouseSelectedEntity, CTID("T_FOCUSABLE")))
 			{
 				focus = input.mouseSelectedEntity;
 			}
 			else
 			{
-				focus = ID("NULL");
+				focus = CTID("NULL");
 			}
 		}
 
@@ -197,14 +197,14 @@ namespace sc
 	{
 		tran = state->getComponent<Transform>(entityId);
 		camera = state->getComponent<Camera>(entityId);
-		stage = state->getComponent<Stage>(ID("E_STAGE"));
+		stage = state->getComponent<Stage>(CTID("E_STAGE"));
 	}
 
 	void EditorCamera::update()
 	{
 		if (editSlotTransforms.size() == 0)
 		{
-			editSlotTransforms = state->getComponentFromTagged<Transform>(ID("T_EDITSLOT"));
+			editSlotTransforms = state->getComponentFromTagged<Transform>(CTID("T_EDITSLOT"));
 		}
 
 		glm::vec3 currentPosition = tran->getPos();
@@ -330,16 +330,16 @@ namespace sc
 	void EditorSlot::create()
 	{
 		drawModel = state->getComponent<DrawModel>(entityId);
-		stage = state->getComponent<Stage>(ID("E_STAGE"));
-		ec = state->getComponent<EditorCamera>(ID("E_CAMERA"));
-		eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
+		stage = state->getComponent<Stage>(CTID("E_STAGE"));
+		ec = state->getComponent<EditorCamera>(CTID("E_CAMERA"));
+		eom = state->getComponent<EditorOperationManager>(CTID("E_EDITOR"));
 	}
 
 	void EditorSlot::update()
 	{
-		if (entityId.is(input.mouseSelectedEntity))
+		if (entityId == input.mouseSelectedEntity)
 		{
-			drawModel->model = assets.modelStack.get(ID("MO_EDITSLOTB"));
+			drawModel->model = assets.modelStack.get(CTID("MO_EDITSLOTB"));
 
 			if (input.mouseButtonHeld(SDL_BUTTON_LEFT) && !input.gettingTextInput() && stage->get(x, ec->getCameraLayer(), z) != 1)
 			{
@@ -348,7 +348,7 @@ namespace sc
 		}
 		else
 		{
-			drawModel->model = assets.modelStack.get(ID("MO_EDITSLOTA"));
+			drawModel->model = assets.modelStack.get(CTID("MO_EDITSLOTA"));
 		}
 	}
 
@@ -360,8 +360,8 @@ namespace sc
 
 	void EditorControl::create()
 	{
-		eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
-		stage = state->getComponent<Stage>(ID("E_STAGE"));
+		eom = state->getComponent<EditorOperationManager>(CTID("E_EDITOR"));
+		stage = state->getComponent<Stage>(CTID("E_STAGE"));
 	}
 
 	void EditorControl::update()
@@ -375,7 +375,7 @@ namespace sc
 			eom->undoOperation();
 		}
 
-		if (ID("STAGESELECTED").is(input.mouseSelectedEntity))
+		if (CTID("STAGESELECTED") == input.mouseSelectedEntity)
 		{
 			glm::ivec3 coord = stage->getSelectedBlock();
 
@@ -402,15 +402,15 @@ namespace sc
 	void EditorTextField::create()
 	{
 		box = state->getComponent<DrawRectangle>(entityId);
-		text = state->getComponent<DrawText>(ID(entityId.getStr() + "TX"));
-		cursor = state->getComponent<Cursor>(ID("E_CURSOR"));
-		textCursorTran = state->getComponent<Transform>(ID(entityId.getStr() + "TXCUR"));
-		textCursor = state->getComponent<DrawText>(ID(entityId.getStr() + "TXCUR"));
+		text = state->getComponent<DrawText>(RTID(iToS(entityId) + "TX"));
+		cursor = state->getComponent<Cursor>(CTID("E_CURSOR"));
+		textCursorTran = state->getComponent<Transform>(RTID(iToS(entityId) + "TXCUR"));
+		textCursor = state->getComponent<DrawText>(RTID(iToS(entityId) + "TXCUR"));
 	}
 
 	void EditorTextField::update()
 	{
-		if (cursor->getFocus().is(entityId))
+		if (cursor->getFocus() == entityId)
 		{
 			if (!focused)
 			{
@@ -533,12 +533,12 @@ namespace sc
 
 	void Button::create()
 	{
-		fore = state->getComponent<DrawRectangle>(ID(entityId.getStr() + "FORE"));
+		fore = state->getComponent<DrawRectangle>(RTID(iToS(entityId) + "FORE"));
 	}
 
 	void Button::update()
 	{
-		bool isMouseHere = entityId.is(input.mouseSelectedEntity);
+		bool isMouseHere = entityId == input.mouseSelectedEntity;
 
 		if (isMouseHere)
 		{

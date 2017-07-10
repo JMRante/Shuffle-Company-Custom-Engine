@@ -31,7 +31,7 @@ namespace sc
 
 	void SaveLevelEvent::happen()
 	{
-		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
+		Stage* stage = state->getComponent<Stage>(CTID("E_STAGE"));
 		stage->writeStageFile(levelFile);
 	}
 
@@ -46,14 +46,14 @@ namespace sc
 
 	void LoadLevelEvent::happen()
 	{
-		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
-		DrawText* dt = state->getComponent<DrawText>(ID("E_TITLEFIELDTX"));
+		Stage* stage = state->getComponent<Stage>(CTID("E_STAGE"));
+		DrawText* dt = state->getComponent<DrawText>(CTID("E_TITLEFIELDTX"));
 
 		stage->readStageFile(levelFile);
 		stage->updateStageMesh();
 		dt->setText(stage->title);
 
-		EditorOperationManager* eom = state->getComponent<EditorOperationManager>(ID("E_EDITOR"));
+		EditorOperationManager* eom = state->getComponent<EditorOperationManager>(CTID("E_EDITOR"));
 		eom->clearOperations();
 	}
 
@@ -86,8 +86,8 @@ namespace sc
 
 	void SetStageTitle::happen()
 	{
-		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
-		DrawText* dt = state->getComponent<DrawText>(ID("E_TITLEFIELDTX"));
+		Stage* stage = state->getComponent<Stage>(CTID("E_STAGE"));
+		DrawText* dt = state->getComponent<DrawText>(CTID("E_TITLEFIELDTX"));
 
 		stage->title = dt->getText();
 	}

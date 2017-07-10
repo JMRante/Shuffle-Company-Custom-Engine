@@ -20,12 +20,12 @@ namespace sc
 
 	ID PrefabFactory::createStage(std::string filepath)
 	{
-		ID id = ID("E_STAGE");
+		ID id = CTID("E_STAGE");
 
 		targetState->addEntity(id);
 		targetState->addComponent<Stage>(id, new Stage());
 		targetState->addComponent<Transform>(id, new Transform());
-		targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_STAGE")));
+		targetState->addComponent<DrawModel>(id, new DrawModel(CTID("MO_STAGE")));
 
 		return id;
 	}
@@ -118,12 +118,12 @@ namespace sc
 	ID PrefabFactory::createEditorSlot(ID id, glm::vec3 position, int x, int z)
 	{
 		targetState->addEntity(id);
-		targetState->addEntityTag(id, ID("T_EDITSLOT"));
+		targetState->addEntityTag(id, CTID("T_EDITSLOT"));
 
 		Transform* tran = targetState->addComponent<Transform>(id, new Transform());
 		tran->setPos(position);
 
-		DrawModel* dm = targetState->addComponent<DrawModel>(id, new DrawModel(ID("MO_EDITSLOTA")));
+		DrawModel* dm = targetState->addComponent<DrawModel>(id, new DrawModel(CTID("MO_EDITSLOTA")));
 		dm->addToMouseSelectable();
 
 		targetState->addComponent<EditorSlot>(id, new EditorSlot(x, z));
@@ -155,8 +155,8 @@ namespace sc
 	ID PrefabFactory::createEditorSpriteButton(ID id, glm::vec2 position, int layer, glm::vec2 size, ID spriteId, Event* event)
 	{
 		targetState->addEntity(id);
-		targetState->addEntityTag(id, ID("T_BUTTON"));
-		targetState->addEntityTag(id, ID("T_MAINEDIT"));
+		targetState->addEntityTag(id, CTID("T_BUTTON"));
+		targetState->addEntityTag(id, CTID("T_MAINEDIT"));
 
 		Transform* tran1 = targetState->addComponent<Transform>(id, new Transform());
 		DrawRectangle* dr = targetState->addComponent<DrawRectangle>(id, new DrawRectangle());
@@ -164,7 +164,7 @@ namespace sc
 		dr->setLayer(layer);
 		dr->addToMouseSelectable();
 		
-		ID foreId = ID(id.getStr() + "FORE");
+		ID foreId = RTID(iToS(id) + "FORE");
 		targetState->addEntity(foreId);
 		Transform* tran2 = targetState->addComponent<Transform>(foreId, new Transform());
 		tran2->setParent(tran1);
@@ -174,7 +174,7 @@ namespace sc
 
 		targetState->addComponent<Button>(id, new Button(event));
 
-		ID sprId = ID(id.getStr() + "SP");
+		ID sprId = RTID(iToS(id) + "SP");
 		targetState->addEntity(sprId);
 		Transform* tran3 = targetState->addComponent<Transform>(sprId, new Transform());
 		tran3->setParent(tran2);
@@ -188,9 +188,9 @@ namespace sc
 	ID PrefabFactory::createEditorTextButton(ID id, glm::vec2 position, int layer, ID fontId, std::string text, Event* event)
 	{
 		targetState->addEntity(id);
-		targetState->addEntityTag(id, ID("T_BUTTON"));
+		targetState->addEntityTag(id, CTID("T_BUTTON"));
 
-		ID textId = ID(id.getStr() + "TX");
+		ID textId = RTID(iToS(id) + "TX");
 		targetState->addEntity(textId);
 		Transform* tran3 = targetState->addComponent<Transform>(textId, new Transform());
 		DrawText* dt = targetState->addComponent<DrawText>(textId, new DrawText());
@@ -206,7 +206,7 @@ namespace sc
 		dr->addToMouseSelectable();
 		targetState->addComponent<Button>(id, new Button(event));
 
-		ID foreId = ID(id.getStr() + "FORE");
+		ID foreId = RTID(iToS(id) + "FORE");
 		targetState->addEntity(foreId);
 		Transform* tran2 = targetState->addComponent<Transform>(foreId, new Transform());
 		tran2->setParent(tran1);
@@ -221,16 +221,16 @@ namespace sc
 	ID PrefabFactory::createEditorTextField(ID id, glm::vec2 position, int layer, size_t length, ID fontId, std::string startText, Event* editEvent, Event* finishEvent)
 	{
 		targetState->addEntity(id);
-		targetState->addEntityTag(id, ID("T_FOCUSABLE"));
+		targetState->addEntityTag(id, CTID("T_FOCUSABLE"));
 
-		ID textId = ID(id.getStr() + "TX");
+		ID textId = RTID(iToS(id) + "TX");
 		targetState->addEntity(textId);
 		Transform* textTran = targetState->addComponent<Transform>(textId, new Transform());
 		DrawText* dt = targetState->addComponent<DrawText>(textId, new DrawText());
 		dt->initialize(8.0f, 8.0f, startText, COL_WHITE, fontId);
 		dt->setLayer(layer + 1);
 
-		ID textCursorId = ID(id.getStr() + "TXCUR");
+		ID textCursorId = RTID(iToS(id) + "TXCUR");
 		targetState->addEntity(textCursorId);
 		Transform* textTran2 = targetState->addComponent<Transform>(textCursorId, new Transform());
 		DrawText* dt2 = targetState->addComponent<DrawText>(textCursorId, new DrawText());
@@ -253,18 +253,18 @@ namespace sc
 
 	ID PrefabFactory::createEditorFileSelector(ID id, std::string startPath, Event* selectEvent)
 	{
-		// ID tag = ID("T_SELECTOREDIT");
+		// ID tag = CTID("T_SELECTOREDIT");
 
 		// targetState->addEntity(id);
-		// targetState->addEntityTag(id, ID("T_" + id.getStr()));
+		// targetState->addEntityTag(id, CTID("T_" + id.getStr()));
 		// targetState->addEntityTag(id, tag);
 		// targetState->addComponent<Transform>(id, new Transform());
 		// DrawRectangle* dr1 = targetState->addComponent<DrawRectangle>(id, new DrawRectangle(config.get("WINDOW_WIDTH") / 2.0f, config.get("WINDOW_HEIGHT") / 2.0f, 850.0f, 550.0f, 425.0f, 275.0f, COL_EDITOR_UI_BACKGROUND));
 		// dr1->setLayer(10);
 
-		// ID windowId = ID(id.getStr() + "WINDOW");
+		// ID windowId = CTID(id.getStr() + "WINDOW");
 		// targetState->addEntity(windowId);
-		// targetState->addEntityTag(windowId, ID("T_" + id.getStr()));
+		// targetState->addEntityTag(windowId, CTID("T_" + id.getStr()));
 		// targetState->addEntityTag(windowId, tag);
 		// targetState->addComponent<Transform>(windowId, new Transform());
 		// DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(windowId, new DrawRectangle(config.get("WINDOW_WIDTH") / 2.0f, (config.get("WINDOW_HEIGHT") / 2.0f) + 50.0f, 800.0f, 400.0f, 400.0f, 200.0f, COL_EDITOR_UI_FOREGROUND));
@@ -272,9 +272,9 @@ namespace sc
 
 		// for (int i = 0; i < 40; i++)
 		// {
-		// 	ID itemId = ID(id.getStr() + "ITEM" + iToS(i));
+		// 	ID itemId = CTID(id.getStr() + "ITEM" + iToS(i));
 		// 	targetState->addEntity(itemId);
-		// 	targetState->addEntityTag(itemId, ID("T_" + id.getStr()));
+		// 	targetState->addEntityTag(itemId, CTID("T_" + id.getStr()));
 		// 	targetState->addComponent<Transform>(itemId, new Transform());
 		// 	DrawRectangle* dr2 = targetState->addComponent<DrawRectangle>(windowId, new DrawRectangle((config.get("WINDOW_WIDTH") / 2.0f), (config.get("WINDOW_HEIGHT") / 2.0f) + 50.0f, 400.0f, 20.0f, 0.0f, 0.0f, glm::vec4(86.0f/255.0f, 86.0f/255.0f, 94.0f/255.0f, 1.0f)));
 		// 	dr2->setLayer(11);
@@ -285,14 +285,14 @@ namespace sc
 
 	ID PrefabFactory::createCursor()
 	{
-		ID id = ID("E_CURSOR");
+		ID id = CTID("E_CURSOR");
 
 		if (!targetState->entityExists(id))
 		{
 			targetState->addEntity(id);
 			targetState->addComponent<Transform>(id, new Transform());
 			DrawSprite* ds = targetState->addComponent<DrawSprite>(id, new DrawSprite());
-			ds->initialize(input.getMouseX(), input.getMouseY(), 1.0, 1.0, 0.0f, 0.0f, ID("SP_POINTCUR"));
+			ds->initialize(input.getMouseX(), input.getMouseY(), 1.0, 1.0, 0.0f, 0.0f, CTID("SP_POINTCUR"));
 			ds->pivotY = -((float)ds->sprite->height);
 			targetState->addComponent<Cursor>(id, new Cursor());
 		}

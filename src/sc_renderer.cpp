@@ -67,7 +67,7 @@ namespace sc
 	ID Renderer::renderForMouseSelect(State* state)
 	{
         glViewport(0, 0, 1, 1);
-		Stage* stage = state->getComponent<Stage>(ID("E_STAGE"));
+		Stage* stage = state->getComponent<Stage>(CTID("E_STAGE"));
 		unsigned int stageSelectCount = 0;
 
 		if (stage != NULL)
@@ -84,7 +84,7 @@ namespace sc
 		//Render stage with selection spots
 		if (stage != NULL)
 		{
-			state->getComponent<DrawModel>(ID("E_STAGE"))->stageMouseRender(renderCameraEntityId);
+			state->getComponent<DrawModel>(CTID("E_STAGE"))->stageMouseRender(renderCameraEntityId);
 		}
 
 		//Render each opaque model
@@ -141,7 +141,7 @@ namespace sc
 					stage->setMouseSelected(indexGet);
 				}
 
-				return ID("STAGESELECTED");
+				return CTID("STAGESELECTED");
 			}			
 		}
 
@@ -150,7 +150,7 @@ namespace sc
 			stage->setMouseSelected(-1);
 		}
 
-		return ID("NULL");
+		return CTID("NULL");
 	}
 
 	void Renderer::setCameraEntity(ID cameraEntityId)

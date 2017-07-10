@@ -23,6 +23,7 @@
 #include "sc_nature.h"
 #include "sc_utility.h"
 #include "sc_stage.h"
+#include "sc_id.h"
 
 namespace sc
 {
@@ -58,7 +59,7 @@ namespace sc
 		{
 			if (getComponent<T>(entityId) != NULL)
 			{
-				LOG_E << "Cannot add " << typeid(T).name() << ", entity " << entityId.get() << " already has one";
+				LOG_E << "Cannot add " << typeid(T).name() << ", entity already has one";
 				return NULL;
 			}
 
@@ -113,7 +114,7 @@ namespace sc
 				}	
 			}
 
-			LOG_E << "Cannot remove " << typeid(T).name() << ", entity " << entityId.get() << " doesn't have one";
+			LOG_E << "Cannot remove " << typeid(T).name() << ", entity doesn't have one";
 			return false;
 		}
 
