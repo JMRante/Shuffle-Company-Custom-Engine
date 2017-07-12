@@ -78,7 +78,7 @@ namespace sc
 			}
 		}
 
-		for (auto it = state->transformPointers.begin(); it != state->transformPointers.end(); it++) 
+		for (auto it = state->dirtyTransforms.begin(); it != state->dirtyTransforms.end(); it++) 
 		{
 			(*it)->calculate();
 		}

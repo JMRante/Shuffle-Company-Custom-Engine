@@ -5,7 +5,9 @@
     sc_component.cpp
     ------------------------------------
 
-
+	Contains the base component class, as well as basic components used throughout the engine.
+	Each entity has components. Components give an entity functionality. The components
+	defined here are used by the engine in special ways, and thus have side effects.
 
 */
 
@@ -24,42 +26,8 @@ namespace sc
 	Component::Component() 
 	{
 		entityId = CTID("NULL");
-		addType(CTID("NULL"));
 		state = NULL;
 		isActive = true;
-	}
-
-	bool Component::isType(ID id)
-	{
-		if (find(types.begin(), types.end(), id) != types.end())
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-	bool Component::sameTypes(Component* comp)
-	{
-		if (types.size() != comp->types.size())
-		{
-			return false;
-		}
-
-		for (size_t i = 0; i < types.size(); i++)
-		{
-			if (find(comp->types.begin(), comp->types.end(), types[i]) != comp->types.end())
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	void Component::addType(ID id)
-	{
-		types.push_back(id);
 	}
 
 	bool Component::getActive()
@@ -85,50 +53,25 @@ namespace sc
 					*/
 	Transform::Transform() : Component()
 	{
-		addType(CTID("TRANSFORM"));
-
 		this->position = glm::vec3(0.0f, 0.0f, 0.0f);
 		this->rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 		this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
 		parent = NULL;
-		dirty = true;
 
-		useParentTransform = true;
-		useParentScale = true;
-		useParentRotation = true;
-	}
-
-	Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : Component()
-	{
-		addType(CTID("TRANSFORM"));
-
-		this->position = position;
-		this->rotation = rotation;
-		this->scale = scale;
-
-		parent = NULL;
-		dirty = true;
-
-		useParentTransform = true;
-		useParentScale = true;
-		useParentRotation = true;
+		useGlobalTransform = false;
+		useGlobalScale = false;
+		useGlobalRotation = false;
 	}
 
 	void Transform::onStateInsert() 
 	{
-		state->transformPointers.push_back(this);
+		addToDirtyList();
 	}
 
 	void Transform::onStateRemove()
 	{
-		for (auto oi = state->transformPointers.begin(); oi != state->transformPointers.end(); oi++)
-		{
-			if ((*oi)->entityId == entityId && (*oi)->sameTypes((Component*) this))
-			{
-				state->transformPointers.erase(oi);
-			}
-		}
+		removeFromDirtyList();
 	}
 
 	bool Transform::getActive()
@@ -148,38 +91,60 @@ namespace sc
 
 	glm::mat4 Transform::calculate()
 	{
-		if (dirty)
+		if (parent == NULL)
 		{
-			if (parent == NULL)
+			matrix = glm::translate(glm::mat4(1.0f), position) * glm::eulerAngleYXZ(rotation[1], rotation[0], rotation[2]) * glm::scale(glm::mat4(1.0f), scale);
+		}
+		else
+		{
+			matrix = glm::translate(glm::mat4(1.0f), position) * glm::eulerAngleYXZ(rotation[1], rotation[0], rotation[2]) * glm::scale(glm::mat4(1.0f), scale);
+
+			if (useGlobalTransform || useGlobalRotation || useGlobalScale)
 			{
-				matrix = glm::translate(glm::mat4(1.0f), position) * glm::eulerAngleYXZ(rotation[1], rotation[0], rotation[2]) * glm::scale(glm::mat4(1.0f), scale);
+				if (!useGlobalScale)
+				{
+					matrix = parent->calculateScale() * matrix;
+				}
+
+				if (!useGlobalRotation)
+				{
+					matrix = parent->calculateRotation() * matrix;
+				}
+
+				if (!useGlobalTransform)
+				{
+					matrix = parent->calculateTransform() * matrix;
+				}
 			}
 			else
 			{
-				matrix = parent->calculate();
-
-				if (!useParentTransform)
-				{
-					matrix *= glm::translate(glm::mat4(1.0f), glm::vec3(-parent->getPosX(), -parent->getPosY(), -parent->getPosZ()));
-				}
-
-				if (!useParentRotation)
-				{
-					matrix *= glm::eulerAngleYXZ(-parent->getRotY(), -parent->getRotX(), -parent->getRotZ());
-				}
-
-				if (!useParentScale)
-				{
-					matrix *= glm::scale(glm::mat4(1.0f), glm::vec3(1.0f/parent->getScaX(), 1.0f/parent->getScaY(), 1.0f/parent->getScaZ()));				
-				}
-
-				matrix *= glm::translate(glm::mat4(1.0f), position) * glm::eulerAngleYXZ(rotation[1], rotation[0], rotation[2]) * glm::scale(glm::mat4(1.0f), scale);
+				matrix = parent->matrix * matrix;
 			}
-
-			dirty = false;
 		}
 
+		for (auto it = children.begin(); it != children.end(); it++)
+		{
+			(*it)->calculate();
+		}
+
+		removeFromDirtyList();
+
 		return matrix;
+	}
+
+	glm::mat4 Transform::calculateTransform()
+	{
+		return glm::translate(glm::mat4(1.0f), position);
+	}
+
+	glm::mat4 Transform::calculateRotation()
+	{
+		return glm::eulerAngleYXZ(rotation[1], rotation[0], rotation[2]);
+	}
+
+	glm::mat4 Transform::calculateScale()
+	{
+		return glm::scale(glm::mat4(1.0f), scale);
 	}
 
 	glm::mat4 Transform::getMatrix()
@@ -189,16 +154,7 @@ namespace sc
 
 	void Transform::setParent(Transform* newParent)
 	{	
-		if (parent != NULL)
-		{
-			for (auto it = parent->children.begin(); it != parent->children.end(); it++) 
-			{
-				if ((*it)->entityId == entityId)
-				{
-					parent->children.erase(it);
-				}
-			}
-		}
+		removeParent();
 
 		parent = newParent;
 		parent->children.push_back(this);
@@ -208,16 +164,30 @@ namespace sc
 	{
 		if (parent != NULL)
 		{
-			for (auto it = parent->children.begin(); it != parent->children.end(); it++) 
+			auto it = find(parent->children.begin(), parent->children.end(), entityId);
+
+			if (it != parent->children.end())
 			{
-				if ((*it)->entityId == entityId)
-				{
-					parent->children.erase(it);
-				}
+				parent->children.erase(it);
 			}
 		}
 
 		parent = NULL;
+	}
+
+	void Transform::addToDirtyList()
+	{
+		state->dirtyTransforms.push_back(this);
+	}
+
+	void Transform::removeFromDirtyList()
+	{
+		auto it = find(state->dirtyTransforms.begin(), state->dirtyTransforms.end(), entityId);
+
+		if (it != state->dirtyTransforms->end())
+		{
+			state->dirtyTransforms.erase(it);
+		}
 	}
 
 	glm::vec3 Transform::getPos() 
@@ -243,25 +213,25 @@ namespace sc
 	void Transform::setPos(glm::vec3 pos) 
 	{
 		position = pos;
-		dirty = true;
+		addToDirtyList();
 	}
 
 	void Transform::setPosX(float x) 
 	{
 		position.x = x;
-		dirty = true;
+		addToDirtyList();
 	}
 
 	void Transform::setPosY(float y) 
 	{
 		position.y = y;
-		dirty = true;
+		addToDirtyList();
 	}
 
 	void Transform::setPosZ(float z) 
 	{
 		position.z = z;
-		dirty = true;
+		addToDirtyList();
 	}
 
 	glm::vec3 Transform::getRot() 
@@ -287,25 +257,25 @@ namespace sc
 	void Transform::setRot(glm::vec3 rot) 
 	{
 		rotation = rot;
-		dirty = true;
+		addToDirtyList();
 	}
 
 	void Transform::setRotX(float x) 
 	{
 		rotation.x = x;
-		dirty = true;
+		addToDirtyList();
 	}
 
 	void Transform::setRotY(float y) 
 	{
 		rotation.y = y;
-		dirty = true;
+		addToDirtyList();
 	}
 
 	void Transform::setRotZ(float z) 
 	{
 		rotation.z = z;
-		dirty = true;
+		addToDirtyList();
 	}
 
 	glm::vec3 Transform::getSca() 
@@ -331,25 +301,25 @@ namespace sc
 	void Transform::setSca(glm::vec3 sca) 
 	{
 		scale = sca;
-		dirty = true;
+		addToDirtyList();
 	}
 
 	void Transform::setScaX(float x) 
 	{
 		scale.x = x;
-		dirty = true;
+		addToDirtyList();
 	}
 
 	void Transform::setScaY(float y) 
 	{
 		scale.y = y;
-		dirty = true;
+		addToDirtyList();
 	}
 
 	void Transform::setScaZ(float z) 
 	{
 		scale.z = z;
-		dirty = true;
+		addToDirtyList();
 	}
 
 
@@ -358,8 +328,6 @@ namespace sc
 				*/
 	Camera::Camera() : Component()
 	{
-		addType(CTID("CAMERA"));
-
 		fov = (float)config.get("FOV");
 		aspectRatio = ((float)config.get("WINDOW_WIDTH"))/((float)config.get("WINDOW_HEIGHT"));
 		this->near = 0.1f;
@@ -375,8 +343,6 @@ namespace sc
 
 	Camera::Camera(float near, float far) : Component()
 	{
-		addType(CTID("CAMERA"));
-
 		fov = (float)config.get("FOV");
 		aspectRatio = ((float)config.get("WINDOW_WIDTH"))/((float)config.get("WINDOW_HEIGHT"));
 		this->near = near;
@@ -481,15 +447,11 @@ namespace sc
 					*/
 	DrawModel::DrawModel() : Draw()
 	{
-		addType(CTID("DRAWMODEL"));
-
 		model = assets.modelStack.get(CTID("MO_ERROR"));
 	}
 
 	DrawModel::DrawModel(ID modelId) : Draw()
 	{
-		addType(CTID("DRAWMODEL"));
-
 		model = assets.modelStack.get(modelId);
 	}
 
@@ -647,7 +609,6 @@ namespace sc
 					*/
 	DrawOrtho::DrawOrtho() : Draw()
 	{
-		addType(CTID("DrawOrtho"));
 		layer = 0;
 	}
 
@@ -711,10 +672,7 @@ namespace sc
 	/*
 		DrawRectangle
 						*/
-	DrawRectangle::DrawRectangle() : DrawOrtho()
-	{
-		addType(CTID("DRAWRECTANGLE"));
-	}
+	DrawRectangle::DrawRectangle() : DrawOrtho() {}
 
 	void DrawRectangle::initialize(float x, float y, float width, float height, float pivotX, float pivotY, glm::vec4 color)
 	{
@@ -809,10 +767,7 @@ namespace sc
 	/*
 		DrawSprite
 					*/
-	DrawSprite::DrawSprite() : DrawOrtho()
-	{
-		addType(CTID("DRAWSPRITE"));
-	}
+	DrawSprite::DrawSprite() : DrawOrtho() {}
 
 	void DrawSprite::initialize(float x, float y, float scaleX, float scaleY, float pivotX, float pivotY, ID spriteId)
 	{
@@ -910,10 +865,7 @@ namespace sc
 	/*
 		DrawText
 				*/
-	DrawText::DrawText() : DrawOrtho()
-	{
-		addType(CTID("DRAWTEXT"));
-	}
+	DrawText::DrawText() : DrawOrtho() {}
 
 	void DrawText::initialize(float x, float y, std::string text, glm::vec4 color, ID fontId)
 	{

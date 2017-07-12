@@ -21,6 +21,7 @@ namespace sc
 		{
 			std::vector<Component*> components;
 			componentMap.insert(std::pair<ID, std::vector<Component*>>(id, components));
+			addComponent<Transform>(id, new Transform());
 
 			return true;
 		}
@@ -45,6 +46,16 @@ namespace sc
 
 		if (it != componentMap.end())
 		{
+			Transform* tran = getComponent<Transform>(id);
+			
+			if (tran->children.size() != 0)
+			{
+				for (auto et = tran->children.begin(); et != tran->children.end(); et++)
+				{
+					removeEntity((*et)->entityId);
+				}
+			}
+
 			removeAllComponents(id);
 			componentMap.erase(it);
 
@@ -120,9 +131,12 @@ namespace sc
 		{
 			for (auto ci = coms->begin(); ci != coms->end(); ci++)
 			{
-				(*ci)->onStateRemove();
-				delete *ci;
-				coms->erase(ci);
+				if (typeid(**ci) != typeid(Transform))
+				{
+					(*ci)->onStateRemove();
+					delete *ci;
+					coms->erase(ci);
+				}
 			}
 		}
 	}

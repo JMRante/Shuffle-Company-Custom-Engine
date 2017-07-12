@@ -38,7 +38,7 @@ namespace sc
 		std::vector<DrawModel*> modelPointers;
 		std::vector<DrawModel*> transparentModelPointers;
 		std::vector<DrawOrtho*> orthoPointers;
-		std::vector<Transform*> transformPointers;
+		std::vector<Transform*> dirtyTransforms;
 
 		std::vector<DrawModel*> mouseSelectModels;
 		std::vector<DrawOrtho*> mouseSelectOrthos;
@@ -65,8 +65,6 @@ namespace sc
 
 			component->entityId = entityId;
 			component->state = this;
-
-			component->create();
 			component->onStateInsert();
 			
 			componentMap[entityId].push_back((Component*) component);
@@ -96,6 +94,12 @@ namespace sc
 		template <class T>
 		bool removeComponent(ID entityId)
 		{
+			if (typeid(T) == typeid(Transform))
+			{
+				LOG_E << "Transforms cannot be removed";				
+				return false;
+			}
+
 			std::vector<Component*>* coms = &componentMap[entityId];
 
 			if (coms != NULL)
@@ -105,7 +109,6 @@ namespace sc
 					if (typeid(T) == typeid(**ci))
 					{
 						(*ci)->onStateRemove();
-						(*ci)->destroy();
 						delete *ci;
 						coms->erase(ci);
 
@@ -153,6 +156,12 @@ namespace sc
 		template <class T>
 		bool removeComponentFromTagged(ID tagId)
 		{
+			if (typeid(T) == typeid(Transform))
+			{
+				LOG_E << "Transforms cannot be removed";				
+				return false;
+			}
+
 			bool success = true;
 
 			for (auto ei = tagMap.begin(); ei != tagMap.end(); ei++)

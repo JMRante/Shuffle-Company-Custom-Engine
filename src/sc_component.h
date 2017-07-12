@@ -5,7 +5,9 @@
     sc_component.h
     ------------------------------------
 
-
+	Contains the base component class, as well as basic components used throughout the engine.
+	Each entity has components. Components give an entity functionality. The components
+	defined here are used by the engine in special ways, and thus have side effects.
 
 */
 
@@ -15,6 +17,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <typeinfo>
 
 #include <GL/glew.h>
 #include <SDL_opengl.h>
@@ -50,13 +53,6 @@ namespace sc
 		Component();
 		virtual ~Component() {}
 
-		virtual void create() {}
-		virtual void destroy() {}
-
-		bool isType(ID id);
-		bool sameTypes(Component* comp);
-		void addType(ID id);
-
 		virtual void onStateInsert() {};
 		virtual void onStateRemove() {};
 
@@ -69,7 +65,6 @@ namespace sc
 	private:
 		Transform* parent;
 		std::vector<Transform*> children;
-		bool dirty;
 
 		glm::vec3 position;
 		glm::vec3 rotation;
@@ -78,12 +73,11 @@ namespace sc
 		glm::mat4 matrix;
 
 	public:
-		bool useParentTransform;
-		bool useParentScale;
-		bool useParentRotation;
+		bool useGlobalTransform;
+		bool useGlobalScale;
+		bool useGlobalRotation;
 
 		Transform();
-		Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
 
 		void onStateInsert();
 		void onStateRemove();
@@ -92,9 +86,15 @@ namespace sc
 		void setActive(bool set);
 
 		glm::mat4 calculate();
+		glm::mat4 calculateTransform();
+		glm::mat4 calculateRotation();
+		glm::mat4 calculateScale();
 		glm::mat4 getMatrix();
 		void setParent(Transform* newParent);
 		void removeParent();
+
+		void addToDirtyList();
+		void removeFromDirtyList();
 
 		glm::vec3 getPos();
 		float getPosX();
