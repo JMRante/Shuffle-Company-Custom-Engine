@@ -49,8 +49,6 @@ namespace sc
 		glm::vec3 normal;
 		glm::vec2 textureCoord;
 		float textureNum;
-		int id;
-		glm::vec3 idColor;
 	};
 
 	class Mesh
@@ -161,25 +159,6 @@ namespace sc
 		Material(ID id, std::vector<int> *ima, std::vector<float> *fma, std::vector<glm::vec4> *vma, std::vector<ID> *tma, ID shaderId);
 		~Material();
 	};
-
-	class Model
-	{
-	public:
-		ID id;
-
-		Mesh* mesh;
-		Material* material;
-		std::vector<Model*> subModels;
-
-		glm::vec3 relativePosition;
-		glm::vec3 relativeRotation;
-		glm::vec3 relativeScale;
-
-		Model(ID id, ID meshId, ID materialId);
-		~Model();
-		Model* addSubModel(Model* model);
-		Model* getSubModel(ID id);
-	}; 
 
 	template <class T>
 	class AssetStack
@@ -314,7 +293,6 @@ namespace sc
 		AssetStack<Font> fontStack;
 		AssetStack<Shader> shaderStack;
 		AssetStack<Material> materialStack;
-		AssetStack<Model> modelStack;
 
 		FT_Library fontLibrary;
 

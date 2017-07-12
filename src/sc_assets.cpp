@@ -222,14 +222,6 @@ namespace sc
 			glEnableVertexAttribArray(3);
 			glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(StageVertex), (GLvoid*)(8 * sizeof(GLfloat)));
 
-			//ID
-			glEnableVertexAttribArray(4);
-			glVertexAttribIPointer(4, 1, GL_INT, sizeof(StageVertex), (GLvoid*)(9 * sizeof(GLfloat)));
-
-			//IDColor
-			glEnableVertexAttribArray(5);
-			glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(StageVertex), (GLvoid*)((9 * sizeof(GLfloat)) + sizeof(GLint)));
-
 		glBindVertexArray(0);
 
 		indexCount = indices->size();
@@ -796,58 +788,6 @@ namespace sc
 
 
 	/*
-		Model
-				*/
-	Model::Model(ID id, ID meshId, ID materialId)
-	{
-		this->id = id;
-
-		mesh = assets.meshStack.get(meshId);
-		material = assets.materialStack.get(materialId);
-
-		relativePosition = glm::vec3(0.0f, 0.0f, 0.0f);
-		relativeRotation = glm::vec3(0.0f, 0.0f, 0.0f);
-		relativeScale = glm::vec3(1.0f, 1.0f, 1.0f);
-	}
-
-	Model::~Model()
-	{
-		if (subModels.size() == 0)
-		{
-			return;
-		}
-		else
-		{
-			while (!subModels.empty())
-			{
-				delete subModels.back();
-				subModels.pop_back();
-			}
-		}
-	}
-
-	Model* Model::addSubModel(Model* model)
-	{
-		subModels.push_back(model);
-		return subModels.back();
-	}
-
-	Model* Model::getSubModel(ID id)
-	{
-		for (size_t i = 0; i < subModels.size(); i++)
-		{
-			if (subModels[i]->id == id)
-			{
-				return subModels[i];
-			}
-		}
-
-		//Eventually should return a default mesh object preloaded.
-		return NULL;		
-	}
-
-
-	/*
 		Assets
 				*/
 	Assets::Assets()
@@ -974,12 +914,6 @@ namespace sc
 		tempTex.push_back(CTID("TX_EDITSLOTB"));
 		materialStack.pushBase(new Material(CTID("MA_EDITSLOTB"), NULL, NULL, NULL, &tempTex, CTID("SH_TEX")));
 		tempTex.clear();
-
-		modelStack.pushBase(new Model(CTID("MO_TESTA"), CTID("ME_QUAD"), CTID("MA_RED")));
-		modelStack.pushBase(new Model(CTID("MO_TESTB"), CTID("ME_SPHERE"), CTID("MA_BLUE")));
-
-		modelStack.pushBase(new Model(CTID("MO_EDITSLOTA"), CTID("ME_FLATQUAD"), CTID("MA_EDITSLOTA")));
-		modelStack.pushBase(new Model(CTID("MO_EDITSLOTB"), CTID("ME_FLATQUAD"), CTID("MA_EDITSLOTB")));
 
 		Font::loadFontQuadToGPU();
 		FT_Done_FreeType(fontLibrary);

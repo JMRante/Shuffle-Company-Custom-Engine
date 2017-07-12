@@ -73,12 +73,8 @@ namespace sc
 		int depth;
 		int height;
 		Mesh* stageMesh;
-		int mouseSelectCount;
-		int mouseSelectLayer;
-		int mouseSelected;
 
 	public:
-		bool faceSelectMode;
 		std::string title;
 
 		Stage();
@@ -96,10 +92,8 @@ namespace sc
 		void updateStageMesh();
 
 		bool getDefaultStageTextures();
-		bool loadStageTextures();
+		bool loadStageMaterial();
 		int getTextureNum(std::string textureName);
-
-		bool createStageModel();
 
 		int getWidth();
 		int getDepth();
@@ -107,11 +101,6 @@ namespace sc
 
 		int get(int x, int y, int z);
 		void set(int x, int y, int z, int brush);
-
-		int getMouseSelectCount();
-		void setMouseSelected(int selected);
-		void setMouseSelectLayer(int layer);
-		glm::ivec3 getSelectedBlock();
 	};
 }
 

@@ -49,8 +49,8 @@ namespace sc
 				*/
 	Stage::Stage() : Component() 
 	{
-		width = 50;
-		depth = 50;
+		width = 200;
+		depth = 200;
 		height = 10;
 		stageMesh = NULL;
 		faceSelectMode = false;
@@ -64,14 +64,7 @@ namespace sc
 			{
 				if (createStageMesh())
 				{
-					if (createStageModel())
-					{
-						brushes.push_back(new Brush(1));
-					}
-					else
-					{
-						LOG_E << "Error: Could not create stage model";
-					}
+					brushes.push_back(new Brush(1));
 				}
 				else
 				{
@@ -520,9 +513,9 @@ namespace sc
 
 	void Stage::buildStageMesh(std::vector<StageVertex> &stageVertices, std::vector<int> &stageIndices)
 	{
-		int vertCount = 0;
-		int faceCount = 0;
-		int cubeCount = 0;
+		// int vertCount = 0;
+		// int faceCount = 0;
+		// int cubeCount = 0;
 		StageVertex tempVert;
 
 		for (int i = 0; i < STAGE_WIDTH; i++)
@@ -535,13 +528,13 @@ namespace sc
 					{
 						Brush* brush = brushes[get(i, j, k) - 1];
 						
-						tempVert.id = 0;
+						// tempVert.id = 0;
 
-						if (mouseSelectLayer == j && !faceSelectMode)
-						{
-							cubeCount++;
-							tempVert.id = cubeCount;
-						}
+						// if (mouseSelectLayer == j && !faceSelectMode)
+						// {
+						// 	cubeCount++;
+						// 	tempVert.id = cubeCount;
+						// }
 
 						//E
 						if (i + 1 >= STAGE_WIDTH || get(i + 1, j, k) == 0)
@@ -551,29 +544,29 @@ namespace sc
 							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
 							tempVert.textureNum   = (float)brush->tex_E;
 							
-							if (mouseSelectLayer == j)
-							{
-								if (faceSelectMode)
-								{
-									faceCount++;
-									tempVert.id = faceCount;
-									tempVert.idColor = glm::vec4((float)((faceCount >> 16) & 0xff)/255.0,
-																 (float)((faceCount >> 8) & 0xff)/255.0,
-																 (float)((faceCount >> 0) & 0xff)/255.0,
-																 1.0);
-								}
-								else
-								{
-									tempVert.idColor = glm::vec4((float)((cubeCount >> 16) & 0xff)/255.0,
-																 (float)((cubeCount >> 8) & 0xff)/255.0,
-																 (float)((cubeCount >> 0) & 0xff)/255.0,
-																 1.0);
-								}
-							}
-							else
-							{
-								tempVert.idColor = glm::vec4(0.0, 0.0, 0.0, 1.0);
-							}
+							// if (mouseSelectLayer == j)
+							// {
+							// 	if (faceSelectMode)
+							// 	{
+							// 		faceCount++;
+							// 		tempVert.id = faceCount;
+							// 		tempVert.idColor = glm::vec4((float)((faceCount >> 16) & 0xff)/255.0,
+							// 									 (float)((faceCount >> 8) & 0xff)/255.0,
+							// 									 (float)((faceCount >> 0) & 0xff)/255.0,
+							// 									 1.0);
+							// 	}
+							// 	else
+							// 	{
+							// 		tempVert.idColor = glm::vec4((float)((cubeCount >> 16) & 0xff)/255.0,
+							// 									 (float)((cubeCount >> 8) & 0xff)/255.0,
+							// 									 (float)((cubeCount >> 0) & 0xff)/255.0,
+							// 									 1.0);
+							// 	}
+							// }
+							// else
+							// {
+							// 	tempVert.idColor = glm::vec4(0.0, 0.0, 0.0, 1.0);
+							// }
 
 							stageVertices.push_back(tempVert);
 
@@ -597,7 +590,7 @@ namespace sc
 							stageIndices.push_back(vertCount + 3);
 							stageIndices.push_back(vertCount + 1);
 
-							vertCount += 4;
+							// vertCount += 4;
 						}
 
 						//W
@@ -608,29 +601,29 @@ namespace sc
 							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
 							tempVert.textureNum   = (float)brush->tex_W;
 
-							if (mouseSelectLayer == j)
-							{
-								if (faceSelectMode)
-								{
-									faceCount++;
-									tempVert.id = faceCount;
-									tempVert.idColor = glm::vec4((float)((faceCount >> 16) & 0xff)/255.0,
-																 (float)((faceCount >> 8) & 0xff)/255.0,
-																 (float)((faceCount >> 0) & 0xff)/255.0,
-																 1.0);
-								}
-								else
-								{
-									tempVert.idColor = glm::vec4((float)((cubeCount >> 16) & 0xff)/255.0,
-																 (float)((cubeCount >> 8) & 0xff)/255.0,
-																 (float)((cubeCount >> 0) & 0xff)/255.0,
-																 1.0);
-								}
-							}
-							else
-							{
-								tempVert.idColor = glm::vec4(0.0, 0.0, 0.0, 1.0);
-							}
+							// if (mouseSelectLayer == j)
+							// {
+							// 	if (faceSelectMode)
+							// 	{
+							// 		faceCount++;
+							// 		tempVert.id = faceCount;
+							// 		tempVert.idColor = glm::vec4((float)((faceCount >> 16) & 0xff)/255.0,
+							// 									 (float)((faceCount >> 8) & 0xff)/255.0,
+							// 									 (float)((faceCount >> 0) & 0xff)/255.0,
+							// 									 1.0);
+							// 	}
+							// 	else
+							// 	{
+							// 		tempVert.idColor = glm::vec4((float)((cubeCount >> 16) & 0xff)/255.0,
+							// 									 (float)((cubeCount >> 8) & 0xff)/255.0,
+							// 									 (float)((cubeCount >> 0) & 0xff)/255.0,
+							// 									 1.0);
+							// 	}
+							// }
+							// else
+							// {
+							// 	tempVert.idColor = glm::vec4(0.0, 0.0, 0.0, 1.0);
+							// }
 
 							stageVertices.push_back(tempVert);
 
@@ -654,7 +647,7 @@ namespace sc
 							stageIndices.push_back(vertCount + 3);
 							stageIndices.push_back(vertCount + 1);
 
-							vertCount += 4;
+							// vertCount += 4;
 						}
 
 						//T
@@ -665,29 +658,29 @@ namespace sc
 							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
 							tempVert.textureNum   = (float)brush->tex_S;
 
-							if (mouseSelectLayer == j)
-							{
-								if (faceSelectMode)
-								{
-									faceCount++;
-									tempVert.id = faceCount;
-									tempVert.idColor = glm::vec4((float)((faceCount >> 16) & 0xff)/255.0,
-																 (float)((faceCount >> 8) & 0xff)/255.0,
-																 (float)((faceCount >> 0) & 0xff)/255.0,
-																 1.0);
-								}
-								else
-								{
-									tempVert.idColor = glm::vec4((float)((cubeCount >> 16) & 0xff)/255.0,
-																 (float)((cubeCount >> 8) & 0xff)/255.0,
-																 (float)((cubeCount >> 0) & 0xff)/255.0,
-																 1.0);
-								}
-							}
-							else
-							{
-								tempVert.idColor = glm::vec4(0.0, 0.0, 0.0, 1.0);
-							}
+							// if (mouseSelectLayer == j)
+							// {
+							// 	if (faceSelectMode)
+							// 	{
+							// 		faceCount++;
+							// 		tempVert.id = faceCount;
+							// 		tempVert.idColor = glm::vec4((float)((faceCount >> 16) & 0xff)/255.0,
+							// 									 (float)((faceCount >> 8) & 0xff)/255.0,
+							// 									 (float)((faceCount >> 0) & 0xff)/255.0,
+							// 									 1.0);
+							// 	}
+							// 	else
+							// 	{
+							// 		tempVert.idColor = glm::vec4((float)((cubeCount >> 16) & 0xff)/255.0,
+							// 									 (float)((cubeCount >> 8) & 0xff)/255.0,
+							// 									 (float)((cubeCount >> 0) & 0xff)/255.0,
+							// 									 1.0);
+							// 	}
+							// }
+							// else
+							// {
+							// 	tempVert.idColor = glm::vec4(0.0, 0.0, 0.0, 1.0);
+							// }
 
 							stageVertices.push_back(tempVert);
 
@@ -711,7 +704,7 @@ namespace sc
 							stageIndices.push_back(vertCount + 3);
 							stageIndices.push_back(vertCount + 1);
 
-							vertCount += 4;
+							// vertCount += 4;
 						}
 
 						//B
@@ -754,29 +747,29 @@ namespace sc
 							tempVert.textureCoord = glm::vec2(1.0f, 1.0f);
 							tempVert.textureNum   = (float)brush->tex_T;
 
-							if (mouseSelectLayer == j)
-							{
-								if (faceSelectMode)
-								{
-									faceCount++;
-									tempVert.id = faceCount;
-									tempVert.idColor = glm::vec4((float)((faceCount >> 16) & 0xff)/255.0,
-																 (float)((faceCount >> 8) & 0xff)/255.0,
-																 (float)((faceCount >> 0) & 0xff)/255.0,
-																 1.0);
-								}
-								else
-								{
-									tempVert.idColor = glm::vec4((float)((cubeCount >> 16) & 0xff)/255.0,
-																 (float)((cubeCount >> 8) & 0xff)/255.0,
-																 (float)((cubeCount >> 0) & 0xff)/255.0,
-																 1.0);
-								}
-							}
-							else
-							{
-								tempVert.idColor = glm::vec4(0.0, 0.0, 0.0, 1.0);
-							}
+							// if (mouseSelectLayer == j)
+							// {
+							// 	if (faceSelectMode)
+							// 	{
+							// 		faceCount++;
+							// 		tempVert.id = faceCount;
+							// 		tempVert.idColor = glm::vec4((float)((faceCount >> 16) & 0xff)/255.0,
+							// 									 (float)((faceCount >> 8) & 0xff)/255.0,
+							// 									 (float)((faceCount >> 0) & 0xff)/255.0,
+							// 									 1.0);
+							// 	}
+							// 	else
+							// 	{
+							// 		tempVert.idColor = glm::vec4((float)((cubeCount >> 16) & 0xff)/255.0,
+							// 									 (float)((cubeCount >> 8) & 0xff)/255.0,
+							// 									 (float)((cubeCount >> 0) & 0xff)/255.0,
+							// 									 1.0);
+							// 	}
+							// }
+							// else
+							// {
+							// 	tempVert.idColor = glm::vec4(0.0, 0.0, 0.0, 1.0);
+							// }
 
 							stageVertices.push_back(tempVert);
 
@@ -800,7 +793,7 @@ namespace sc
 							stageIndices.push_back(vertCount + 3);
 							stageIndices.push_back(vertCount + 1);
 
-							vertCount += 4;
+							// vertCount += 4;
 						}
 
 						//N
@@ -839,14 +832,14 @@ namespace sc
 			}
 		}
 
-		if (faceSelectMode)
-		{
-			mouseSelectCount = faceCount;
-		}
-		else
-		{
-			mouseSelectCount = cubeCount;
-		}
+		// if (faceSelectMode)
+		// {
+		// 	mouseSelectCount = faceCount;
+		// }
+		// else
+		// {
+		// 	mouseSelectCount = cubeCount;
+		// }
 	}
 
 	void Stage::updateStageMesh()
@@ -866,7 +859,7 @@ namespace sc
 		return true;
 	}
 
-	bool Stage::loadStageTextures()
+	bool Stage::loadStageMaterial()
 	{
 		std::vector<GLuint*> dataArray;
 
@@ -936,16 +929,6 @@ namespace sc
 		return 255;
 	}
 
-	bool Stage::createStageModel()
-	{
-		if (assets.modelStack.pushWorld(new Model(CTID("MO_STAGE"), CTID("ME_STAGE"), CTID("MA_STAGE"))) != NULL)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
 	int Stage::getWidth()
 	{
 		return width;
@@ -969,53 +952,5 @@ namespace sc
 	void Stage::set(int x, int y, int z, int brush)
 	{
 		stage[x + (y * STAGE_WIDTH) + (z * STAGE_WIDTH * STAGE_HEIGHT)] = brush;
-	}
-
-	int Stage::getMouseSelectCount()
-	{
-		return mouseSelectCount;
-	}
-
-	void Stage::setMouseSelected(int selected)
-	{
-		mouseSelected = selected;
-		Material* mat = assets.materialStack.get(CTID("MA_STAGE"));
-
-		mat->integerMaterialArguments.clear();
-		mat->integerMaterialArguments.push_back(mouseSelected);
-	}
-
-	void Stage::setMouseSelectLayer(int layer)
-	{
-		mouseSelectLayer = layer;
-	}
-
-	glm::ivec3 Stage::getSelectedBlock()
-	{
-		if (!faceSelectMode && mouseSelected != -1)
-		{
-			int cubeCount = 0;
-
-			for (int i = 0; i < STAGE_WIDTH; i++)
-			{
-				for (int j = 0; j < STAGE_HEIGHT; j++)
-				{
-					for (int k = 0; k < STAGE_DEPTH; k++)
-					{
-						if (get(i, j, k) != 0 && mouseSelectLayer == j)
-						{
-							cubeCount++;
-
-							if (mouseSelected == cubeCount)
-							{
-								return glm::ivec3(i, j, k);
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		return glm::ivec3(-1, -1, -1);
 	}
 }
